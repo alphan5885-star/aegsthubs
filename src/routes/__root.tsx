@@ -46,6 +46,8 @@ export const Route = createRootRoute({
       { name: "twitter:description", content: "aeigsthub — yeraltı pazarı operasyon paneli" },
       { name: "twitter:card", content: "summary" },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/58d0c336-3cf2-4ab6-8f60-81dea3809546/id-preview-be0c3082--23f3e47d-ec59-41ea-9cee-92e52c817735.lovable.app-1777477506432.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/58d0c336-3cf2-4ab6-8f60-81dea3809546/id-preview-be0c3082--23f3e47d-ec59-41ea-9cee-92e52c817735.lovable.app-1777477506432.png" },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),
