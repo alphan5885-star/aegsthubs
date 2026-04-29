@@ -1,58 +1,62 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Outlet, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider, useAuth } from "@/lib/authContext";
+import { BackgroundProvider } from "@/lib/backgroundContext";
+import { CustomizationProvider } from "@/lib/customizationContext";
+import { I18nProvider } from "@/lib/i18n";
+import { SessionTimerProvider } from "@/lib/sessionTimerContext";
+import { SecurityProvider } from "@/lib/securityContext";
+import { StealthProvider } from "@/lib/stealthContext";
+import BackgroundMusic from "@/components/BackgroundMusic";
+import SecurityHud from "@/components/SecurityHud";
+import TorWarningBanner from "@/components/TorWarningBanner";
 
-function NotFoundComponent() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-}
+import NotFound from "@/pages/NotFound";
+
+const lightDev = import.meta.env.DEV && import.meta.env.VITE_LIGHT_DEV === "true";
 
 export const Route = createRootRoute({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-    ],
-    links: [
+      { title: "aeigsthub" },
+      { name: "description", content: "aeigsthub — yeraltı pazarı operasyon paneli" },
+      { name: "robots", content: "noindex, nofollow, noarchive, nosnippet" },
+      { name: "referrer", content: "no-referrer" },
       {
-        rel: "stylesheet",
-        href: appCss,
+        httpEquiv: "Content-Security-Policy",
+        content:
+          "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://ai.gateway.lovable.dev; frame-src https://www.youtube.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests",
       },
+      { httpEquiv: "X-Frame-Options", content: "DENY" },
+      { httpEquiv: "X-Content-Type-Options", content: "nosniff" },
+      {
+        httpEquiv: "Permissions-Policy",
+        content: "geolocation=(), camera=(), microphone=(), interest-cohort=()",
+      },
+      { property: "og:title", content: "aeigsthub" },
+      { name: "twitter:title", content: "aeigsthub" },
+      { property: "og:description", content: "aeigsthub — yeraltı pazarı operasyon paneli" },
+      { name: "twitter:description", content: "aeigsthub — yeraltı pazarı operasyon paneli" },
+      { name: "twitter:card", content: "summary" },
+      { property: "og:type", content: "website" },
     ],
+    links: [{ rel: "stylesheet", href: appCss }],
   }),
   shellComponent: RootShell,
   component: RootComponent,
-  notFoundComponent: NotFoundComponent,
+  notFoundComponent: NotFound,
 });
 
-function RootShell({ children }: { children: React.ReactNode }) {
+function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="tr" className="dark bg-background">
       <head>
         <HeadContent />
       </head>
@@ -64,6 +68,60 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+function AuthGuard({ children }: { children: ReactNode }) {
+  const { user, role, logout } = useAuth();
+  if (user && !role) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="glass-card neon-border rounded-lg p-6 w-full max-w-md text-center space-y-4">
+          <div>
+            <h1 className="text-2xl font-mono font-bold text-primary neon-text">aeigsthub</h1>
+            <p className="text-xs font-mono text-muted-foreground mt-2">
+              Hesap yetkisi yüklenemedi.
+            </p>
+          </div>
+          <button
+            onClick={() => void logout()}
+            className="w-full bg-primary text-primary-foreground py-3 rounded font-mono text-sm font-bold hover:opacity-90 transition-all"
+          >
+            Çıkış yap
+          </button>
+        </div>
+      </div>
+    );
+  }
+  return <>{children}</>;
+}
+
 function RootComponent() {
-  return <Outlet />;
+  const [queryClient] = useState(() => new QueryClient());
+  const app = (
+    <SessionTimerProvider>
+      <I18nProvider>
+        <CustomizationProvider>
+          <BackgroundProvider>
+            <StealthProvider>
+              {!lightDev && <TorWarningBanner />}
+              <AuthGuard>
+                <Outlet />
+              </AuthGuard>
+              {!lightDev && <SecurityHud />}
+              {!lightDev && <BackgroundMusic />}
+            </StealthProvider>
+          </BackgroundProvider>
+        </CustomizationProvider>
+      </I18nProvider>
+    </SessionTimerProvider>
+  );
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Sonner />
+        <AuthProvider>
+          {lightDev ? app : <SecurityProvider>{app}</SecurityProvider>}
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
 }
