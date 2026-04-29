@@ -17,27 +17,57 @@ export type Database = {
       admin_auto_withdraw: {
         Row: {
           admin_id: string
+          available: number | null
           cold_wallet: string | null
           created_at: string
           enabled: boolean | null
+          frequency: string | null
           id: string
+          min_amount: number | null
           threshold: number | null
         }
         Insert: {
           admin_id: string
+          available?: number | null
           cold_wallet?: string | null
           created_at?: string
           enabled?: boolean | null
+          frequency?: string | null
           id?: string
+          min_amount?: number | null
           threshold?: number | null
         }
         Update: {
           admin_id?: string
+          available?: number | null
           cold_wallet?: string | null
           created_at?: string
           enabled?: boolean | null
+          frequency?: string | null
           id?: string
+          min_amount?: number | null
           threshold?: number | null
+        }
+        Relationships: []
+      }
+      anti_phishing_codes: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -83,23 +113,29 @@ export type Database = {
         Row: {
           created_at: string
           dispute_id: string
+          from_user_id: string | null
           id: string
           message: string
           sender_id: string
+          text: string | null
         }
         Insert: {
           created_at?: string
           dispute_id: string
+          from_user_id?: string | null
           id?: string
           message: string
           sender_id: string
+          text?: string | null
         }
         Update: {
           created_at?: string
           dispute_id?: string
+          from_user_id?: string | null
           id?: string
           message?: string
           sender_id?: string
+          text?: string | null
         }
         Relationships: [
           {
@@ -220,6 +256,38 @@ export type Database = {
           },
         ]
       }
+      forum_comments: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          id: string
+          post_id: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          id?: string
+          post_id: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "forum_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       forum_posts: {
         Row: {
           author_id: string
@@ -250,6 +318,39 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          link: string | null
+          read: boolean | null
+          title: string
+          type: string | null
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read?: boolean | null
+          title: string
+          type?: string | null
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read?: boolean | null
+          title?: string
+          type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           amount: number
@@ -258,9 +359,13 @@ export type Database = {
           delivery_method: string | null
           id: string
           notes: string | null
+          payment_status: string | null
           product_id: string | null
+          product_name: string | null
+          service_fee: number | null
           shipping_address: string | null
           status: string | null
+          txid: string | null
           updated_at: string
           vendor_id: string
         }
@@ -271,9 +376,13 @@ export type Database = {
           delivery_method?: string | null
           id?: string
           notes?: string | null
+          payment_status?: string | null
           product_id?: string | null
+          product_name?: string | null
+          service_fee?: number | null
           shipping_address?: string | null
           status?: string | null
+          txid?: string | null
           updated_at?: string
           vendor_id: string
         }
@@ -284,9 +393,13 @@ export type Database = {
           delivery_method?: string | null
           id?: string
           notes?: string | null
+          payment_status?: string | null
           product_id?: string | null
+          product_name?: string | null
+          service_fee?: number | null
           shipping_address?: string | null
           status?: string | null
+          txid?: string | null
           updated_at?: string
           vendor_id?: string
         }
@@ -303,42 +416,96 @@ export type Database = {
       products: {
         Row: {
           category: string | null
+          commission_rate: number | null
           created_at: string
+          delivery_data: string | null
           description: string | null
           id: string
+          image_emoji: string | null
           image_url: string | null
           is_active: boolean | null
+          name: string | null
           price: number
           stock: number | null
           title: string
+          tracking_number: string | null
+          type: string | null
           updated_at: string
           vendor_id: string
         }
         Insert: {
           category?: string | null
+          commission_rate?: number | null
           created_at?: string
+          delivery_data?: string | null
           description?: string | null
           id?: string
+          image_emoji?: string | null
           image_url?: string | null
           is_active?: boolean | null
+          name?: string | null
           price?: number
           stock?: number | null
           title: string
+          tracking_number?: string | null
+          type?: string | null
           updated_at?: string
           vendor_id: string
         }
         Update: {
           category?: string | null
+          commission_rate?: number | null
           created_at?: string
+          delivery_data?: string | null
           description?: string | null
           id?: string
+          image_emoji?: string | null
           image_url?: string | null
           is_active?: boolean | null
+          name?: string | null
           price?: number
           stock?: number | null
           title?: string
+          tracking_number?: string | null
+          type?: string | null
           updated_at?: string
           vendor_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          pgp_key: string | null
+          updated_at: string
+          user_id: string
+          withdraw_pin_hash: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          pgp_key?: string | null
+          updated_at?: string
+          user_id: string
+          withdraw_pin_hash?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          pgp_key?: string | null
+          updated_at?: string
+          user_id?: string
+          withdraw_pin_hash?: string | null
         }
         Relationships: []
       }
@@ -350,6 +517,7 @@ export type Database = {
           ip: string | null
           success: boolean | null
           user_email: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -358,6 +526,7 @@ export type Database = {
           ip?: string | null
           success?: boolean | null
           user_email?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -366,6 +535,7 @@ export type Database = {
           ip?: string | null
           success?: boolean | null
           user_email?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -400,6 +570,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "shipping_tracking_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          amount: number | null
+          created_at: string
+          description: string | null
+          id: string
+          order_id: string | null
+          status: string | null
+          type: string | null
+          user_id: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          status?: string | null
+          type?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          status?: string | null
+          type?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
@@ -490,19 +701,81 @@ export type Database = {
           },
         ]
       }
+      vendor_wallets: {
+        Row: {
+          available: number | null
+          balance: number | null
+          btc_address: string | null
+          commission: number | null
+          created_at: string
+          id: string
+          pending: number | null
+          total: number | null
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          available?: number | null
+          balance?: number | null
+          btc_address?: string | null
+          commission?: number | null
+          created_at?: string
+          id?: string
+          pending?: number | null
+          total?: number | null
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          available?: number | null
+          balance?: number | null
+          btc_address?: string | null
+          commission?: number | null
+          created_at?: string
+          id?: string
+          pending?: number | null
+          total?: number | null
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       assign_role_on_signup: { Args: { _role: string }; Returns: undefined }
+      confirm_delivery: { Args: { _order_id: string }; Returns: undefined }
+      generate_payment_address: { Args: { _order_id: string }; Returns: string }
       get_user_role: { Args: { _user_id: string }; Returns: string }
+      get_vendor_rating: {
+        Args: { _vendor_id: string }
+        Returns: {
+          avg_rating: number
+          total_ratings: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      is_account_locked: { Args: { _email: string }; Returns: boolean }
+      panic_destroy: { Args: never; Returns: Json }
+      process_order_payment: {
+        Args: { _ltc_address?: string; _order_id: string; _tx_hash?: string }
+        Returns: undefined
+      }
+      record_login_attempt: {
+        Args: { _email: string; _ip?: string; _success: boolean }
+        Returns: undefined
+      }
+      release_escrow: {
+        Args: { _escrow_id?: string; _order_id?: string }
+        Returns: Json
       }
     }
     Enums: {
