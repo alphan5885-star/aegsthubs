@@ -71,6 +71,41 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_room_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_system: boolean
+          room_id: string
+          sender_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_system?: boolean
+          room_id: string
+          sender_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_system?: boolean
+          room_id?: string
+          sender_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_room_messages_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "order_chat_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dead_drop_locations: {
         Row: {
           created_at: string
@@ -351,14 +386,46 @@ export type Database = {
         }
         Relationships: []
       }
+      order_chat_rooms: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          destroyed_at: string | null
+          id: string
+          order_id: string
+          status: string
+          vendor_id: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          destroyed_at?: string | null
+          id?: string
+          order_id: string
+          status?: string
+          vendor_id: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          destroyed_at?: string | null
+          id?: string
+          order_id?: string
+          status?: string
+          vendor_id?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           amount: number
           buyer_id: string
+          confirmations: number | null
           created_at: string
           delivery_method: string | null
           id: string
           notes: string | null
+          payment_address: string | null
           payment_status: string | null
           product_id: string | null
           product_name: string | null
@@ -372,10 +439,12 @@ export type Database = {
         Insert: {
           amount?: number
           buyer_id: string
+          confirmations?: number | null
           created_at?: string
           delivery_method?: string | null
           id?: string
           notes?: string | null
+          payment_address?: string | null
           payment_status?: string | null
           product_id?: string | null
           product_name?: string | null
@@ -389,10 +458,12 @@ export type Database = {
         Update: {
           amount?: number
           buyer_id?: string
+          confirmations?: number | null
           created_at?: string
           delivery_method?: string | null
           id?: string
           notes?: string | null
+          payment_address?: string | null
           payment_status?: string | null
           product_id?: string | null
           product_name?: string | null
@@ -420,11 +491,14 @@ export type Database = {
           created_at: string
           delivery_data: string | null
           description: string | null
+          destination: string | null
           id: string
           image_emoji: string | null
           image_url: string | null
           is_active: boolean | null
+          is_admin_product: boolean | null
           name: string | null
+          origin: string | null
           price: number
           stock: number | null
           title: string
@@ -439,11 +513,14 @@ export type Database = {
           created_at?: string
           delivery_data?: string | null
           description?: string | null
+          destination?: string | null
           id?: string
           image_emoji?: string | null
           image_url?: string | null
           is_active?: boolean | null
+          is_admin_product?: boolean | null
           name?: string | null
+          origin?: string | null
           price?: number
           stock?: number | null
           title: string
@@ -458,11 +535,14 @@ export type Database = {
           created_at?: string
           delivery_data?: string | null
           description?: string | null
+          destination?: string | null
           id?: string
           image_emoji?: string | null
           image_url?: string | null
           is_active?: boolean | null
+          is_admin_product?: boolean | null
           name?: string | null
+          origin?: string | null
           price?: number
           stock?: number | null
           title?: string
@@ -506,6 +586,33 @@ export type Database = {
           updated_at?: string
           user_id?: string
           withdraw_pin_hash?: string | null
+        }
+        Relationships: []
+      }
+      rate_limits: {
+        Row: {
+          action: string
+          count: number | null
+          created_at: string
+          id: string
+          identifier: string
+          locked_until: string | null
+        }
+        Insert: {
+          action: string
+          count?: number | null
+          created_at?: string
+          id?: string
+          identifier: string
+          locked_until?: string | null
+        }
+        Update: {
+          action?: string
+          count?: number | null
+          created_at?: string
+          id?: string
+          identifier?: string
+          locked_until?: string | null
         }
         Relationships: []
       }
@@ -577,6 +684,30 @@ export type Database = {
           },
         ]
       }
+      system_announcements: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          priority: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          priority?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          priority?: string | null
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount: number | null
@@ -617,6 +748,72 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_balances: {
+        Row: {
+          available: number
+          created_at: string
+          id: string
+          pending: number
+          total: number
+          updated_at: string
+          user_id: string
+          withdrawn: number
+        }
+        Insert: {
+          available?: number
+          created_at?: string
+          id?: string
+          pending?: number
+          total?: number
+          updated_at?: string
+          user_id: string
+          withdrawn?: number
+        }
+        Update: {
+          available?: number
+          created_at?: string
+          id?: string
+          pending?: number
+          total?: number
+          updated_at?: string
+          user_id?: string
+          withdrawn?: number
+        }
+        Relationships: []
+      }
+      user_pgp_keys: {
+        Row: {
+          created_at: string
+          fingerprint: string
+          id: string
+          key_id: string | null
+          public_key: string
+          updated_at: string
+          user_id: string
+          verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          fingerprint: string
+          id?: string
+          key_id?: string | null
+          public_key: string
+          updated_at?: string
+          user_id: string
+          verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          fingerprint?: string
+          id?: string
+          key_id?: string | null
+          public_key?: string
+          updated_at?: string
+          user_id?: string
+          verified?: boolean
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -739,6 +936,35 @@ export type Database = {
           vendor_id?: string
         }
         Relationships: []
+      }
+      watchlist: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "watchlist_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
