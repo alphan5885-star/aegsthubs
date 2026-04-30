@@ -47,6 +47,7 @@ const groupedLinks = {
   community: [
     { to: "/forum", labelKey: "forum", icon: MessageSquare },
     { to: "/pgp-tool", labelKey: "pgpTool", icon: Shield },
+    { to: "/mirrors", labelKey: "mirrors", icon: Globe },
   ],
   account: [
     { to: "/profile", labelKey: "profile", icon: User },
