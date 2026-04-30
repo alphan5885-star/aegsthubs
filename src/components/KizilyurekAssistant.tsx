@@ -229,6 +229,15 @@ export default function KizilyurekAssistant({
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-2 text-sm">
             {messages.length === 0 && (
               <div className="space-y-2">
+                <div className="flex items-start gap-2 px-2 py-2 rounded border border-yellow-500/60 bg-yellow-500/10 text-yellow-500 text-[11px] font-mono leading-snug">
+                  <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                  <span>
+                    <strong>UYARI:</strong> Bu asistan dış AI servisine bağlanır. Yazdığın her şey
+                    clearnet üzerinden işlenir ve loglanabilir. <strong>Asla</strong> isim,
+                    adres, telefon, ürün adı, miktar, cüzdan adresi veya operasyonel bilgi yazma.
+                    Sadece genel rehberlik soruları için kullan.
+                  </span>
+                </div>
                 <p className="text-xs font-mono text-muted-foreground">
                   Hoş geldin Operatör. Bir konu seç ya da yaz:
                 </p>
