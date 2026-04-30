@@ -141,6 +141,7 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           order_id: string
+          pgp_encrypted_data: string | null
           status: string | null
         }
         Insert: {
@@ -150,6 +151,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           order_id: string
+          pgp_encrypted_data?: string | null
           status?: string | null
         }
         Update: {
@@ -159,6 +161,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           order_id?: string
+          pgp_encrypted_data?: string | null
           status?: string | null
         }
         Relationships: [
@@ -377,6 +380,36 @@ export type Database = {
           id?: string
           pinned?: boolean | null
           title?: string
+        }
+        Relationships: []
+      }
+      mirrors: {
+        Row: {
+          created_at: string
+          id: string
+          is_canary: boolean
+          label: string | null
+          last_checked_at: string | null
+          signature: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_canary?: boolean
+          label?: string | null
+          last_checked_at?: string | null
+          signature?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_canary?: boolean
+          label?: string | null
+          last_checked_at?: string | null
+          signature?: string | null
+          url?: string
         }
         Relationships: []
       }
@@ -995,11 +1028,31 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      vendor_reputation: {
+        Row: {
+          avg_rating: number | null
+          completed_orders: number | null
+          display_name: string | null
+          total_ratings: number | null
+          vendor_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       assign_role_on_signup: { Args: { _role: string }; Returns: undefined }
       bootstrap_first_admin: { Args: never; Returns: Json }
+      check_rate_limit: {
+        Args: {
+          _action: string
+          _identifier: string
+          _lock_minutes?: number
+          _max_attempts?: number
+          _window_minutes?: number
+        }
+        Returns: Json
+      }
+      cleanup_old_messages: { Args: { _days?: number }; Returns: Json }
       confirm_delivery: { Args: { _order_id: string }; Returns: undefined }
       generate_payment_address: { Args: { _order_id: string }; Returns: string }
       get_user_role: { Args: { _user_id: string }; Returns: string }

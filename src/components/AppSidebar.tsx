@@ -30,6 +30,7 @@ import {
   EyeOff,
   ShieldAlert,
   ChevronDown,
+  Globe,
 } from "lucide-react";
 
 type LinkDef = { to: string; labelKey: string; icon: any };
@@ -47,6 +48,7 @@ const groupedLinks = {
   community: [
     { to: "/forum", labelKey: "forum", icon: MessageSquare },
     { to: "/pgp-tool", labelKey: "pgpTool", icon: Shield },
+    { to: "/mirrors", labelKey: "mirrors", icon: Globe },
   ],
   account: [
     { to: "/profile", labelKey: "profile", icon: User },
