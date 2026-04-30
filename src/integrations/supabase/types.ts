@@ -50,6 +50,33 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_invite_codes: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          id: string
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: []
+      }
       anti_phishing_codes: {
         Row: {
           code: string
@@ -972,6 +999,7 @@ export type Database = {
     }
     Functions: {
       assign_role_on_signup: { Args: { _role: string }; Returns: undefined }
+      bootstrap_first_admin: { Args: never; Returns: Json }
       confirm_delivery: { Args: { _order_id: string }; Returns: undefined }
       generate_payment_address: { Args: { _order_id: string }; Returns: string }
       get_user_role: { Args: { _user_id: string }; Returns: string }
@@ -999,6 +1027,7 @@ export type Database = {
         Args: { _email: string; _ip?: string; _success: boolean }
         Returns: undefined
       }
+      redeem_admin_invite: { Args: { _code: string }; Returns: Json }
       release_escrow: {
         Args: { _escrow_id?: string; _order_id?: string }
         Returns: Json
