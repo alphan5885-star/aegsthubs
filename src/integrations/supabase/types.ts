@@ -141,6 +141,7 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           order_id: string
+          pgp_encrypted_data: string | null
           status: string | null
         }
         Insert: {
@@ -150,6 +151,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           order_id: string
+          pgp_encrypted_data?: string | null
           status?: string | null
         }
         Update: {
@@ -159,6 +161,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           order_id?: string
+          pgp_encrypted_data?: string | null
           status?: string | null
         }
         Relationships: [
@@ -1039,6 +1042,16 @@ export type Database = {
     Functions: {
       assign_role_on_signup: { Args: { _role: string }; Returns: undefined }
       bootstrap_first_admin: { Args: never; Returns: Json }
+      check_rate_limit: {
+        Args: {
+          _action: string
+          _identifier: string
+          _lock_minutes?: number
+          _max_attempts?: number
+          _window_minutes?: number
+        }
+        Returns: Json
+      }
       cleanup_old_messages: { Args: { _days?: number }; Returns: Json }
       confirm_delivery: { Args: { _order_id: string }; Returns: undefined }
       generate_payment_address: { Args: { _order_id: string }; Returns: string }
