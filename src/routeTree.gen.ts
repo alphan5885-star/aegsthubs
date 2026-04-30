@@ -17,6 +17,7 @@ import { Route as SecurityRouteImport } from './routes/security'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PgpToolRouteImport } from './routes/pgp-tool'
 import { Route as OrdersRouteImport } from './routes/orders'
+import { Route as MirrorsRouteImport } from './routes/mirrors'
 import { Route as MarketRouteImport } from './routes/market'
 import { Route as ForumRouteImport } from './routes/forum'
 import { Route as CustomizationRouteImport } from './routes/customization'
@@ -68,6 +69,11 @@ const PgpToolRoute = PgpToolRouteImport.update({
 const OrdersRoute = OrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MirrorsRoute = MirrorsRouteImport.update({
+  id: '/mirrors',
+  path: '/mirrors',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketRoute = MarketRouteImport.update({
@@ -137,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/customization': typeof CustomizationRoute
   '/forum': typeof ForumRoute
   '/market': typeof MarketRoute
+  '/mirrors': typeof MirrorsRoute
   '/orders': typeof OrdersRoute
   '/pgp-tool': typeof PgpToolRoute
   '/profile': typeof ProfileRoute
@@ -159,6 +166,7 @@ export interface FileRoutesByTo {
   '/customization': typeof CustomizationRoute
   '/forum': typeof ForumRoute
   '/market': typeof MarketRoute
+  '/mirrors': typeof MirrorsRoute
   '/orders': typeof OrdersRoute
   '/pgp-tool': typeof PgpToolRoute
   '/profile': typeof ProfileRoute
@@ -182,6 +190,7 @@ export interface FileRoutesById {
   '/customization': typeof CustomizationRoute
   '/forum': typeof ForumRoute
   '/market': typeof MarketRoute
+  '/mirrors': typeof MirrorsRoute
   '/orders': typeof OrdersRoute
   '/pgp-tool': typeof PgpToolRoute
   '/profile': typeof ProfileRoute
@@ -206,6 +215,7 @@ export interface FileRouteTypes {
     | '/customization'
     | '/forum'
     | '/market'
+    | '/mirrors'
     | '/orders'
     | '/pgp-tool'
     | '/profile'
@@ -228,6 +238,7 @@ export interface FileRouteTypes {
     | '/customization'
     | '/forum'
     | '/market'
+    | '/mirrors'
     | '/orders'
     | '/pgp-tool'
     | '/profile'
@@ -250,6 +261,7 @@ export interface FileRouteTypes {
     | '/customization'
     | '/forum'
     | '/market'
+    | '/mirrors'
     | '/orders'
     | '/pgp-tool'
     | '/profile'
@@ -273,6 +285,7 @@ export interface RootRouteChildren {
   CustomizationRoute: typeof CustomizationRoute
   ForumRoute: typeof ForumRoute
   MarketRoute: typeof MarketRoute
+  MirrorsRoute: typeof MirrorsRoute
   OrdersRoute: typeof OrdersRoute
   PgpToolRoute: typeof PgpToolRoute
   ProfileRoute: typeof ProfileRoute
@@ -340,6 +353,13 @@ declare module '@tanstack/react-router' {
       path: '/orders'
       fullPath: '/orders'
       preLoaderRoute: typeof OrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mirrors': {
+      id: '/mirrors'
+      path: '/mirrors'
+      fullPath: '/mirrors'
+      preLoaderRoute: typeof MirrorsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/market': {
@@ -464,6 +484,7 @@ const rootRouteChildren: RootRouteChildren = {
   CustomizationRoute: CustomizationRoute,
   ForumRoute: ForumRoute,
   MarketRoute: MarketRoute,
+  MirrorsRoute: MirrorsRoute,
   OrdersRoute: OrdersRoute,
   PgpToolRoute: PgpToolRoute,
   ProfileRoute: ProfileRoute,
