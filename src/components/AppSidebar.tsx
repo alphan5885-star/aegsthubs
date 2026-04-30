@@ -30,6 +30,7 @@ import {
   EyeOff,
   ShieldAlert,
   ChevronDown,
+  Globe,
 } from "lucide-react";
 
 type LinkDef = { to: string; labelKey: string; icon: any };
