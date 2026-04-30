@@ -380,6 +380,36 @@ export type Database = {
         }
         Relationships: []
       }
+      mirrors: {
+        Row: {
+          created_at: string
+          id: string
+          is_canary: boolean
+          label: string | null
+          last_checked_at: string | null
+          signature: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_canary?: boolean
+          label?: string | null
+          last_checked_at?: string | null
+          signature?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_canary?: boolean
+          label?: string | null
+          last_checked_at?: string | null
+          signature?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
@@ -995,11 +1025,21 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      vendor_reputation: {
+        Row: {
+          avg_rating: number | null
+          completed_orders: number | null
+          display_name: string | null
+          total_ratings: number | null
+          vendor_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       assign_role_on_signup: { Args: { _role: string }; Returns: undefined }
       bootstrap_first_admin: { Args: never; Returns: Json }
+      cleanup_old_messages: { Args: { _days?: number }; Returns: Json }
       confirm_delivery: { Args: { _order_id: string }; Returns: undefined }
       generate_payment_address: { Args: { _order_id: string }; Returns: string }
       get_user_role: { Args: { _user_id: string }; Returns: string }
