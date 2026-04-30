@@ -33,6 +33,36 @@ const toAuthEmail = (name: string) => {
   return `${username || "user"}@local.aeigsthub`;
 };
 
+function ParticleField() {
+  const [particles, setParticles] = useState<
+    { x: number; y1: number; y2: number; dur: number }[]
+  >([]);
+  useEffect(() => {
+    setParticles(
+      Array.from({ length: 8 }, () => ({
+        x: Math.random() * 1200,
+        y1: Math.random() * 900,
+        y2: Math.random() * 900,
+        dur: 5 + Math.random() * 5,
+      })),
+    );
+  }, []);
+  if (particles.length === 0) return null;
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {particles.map((p, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 rounded-full bg-primary/20"
+          initial={{ x: p.x, y: p.y1, opacity: 0 }}
+          animate={{ y: [p.y1, p.y2], opacity: [0, 0.5, 0] }}
+          transition={{ duration: p.dur, repeat: Infinity, delay: i * 0.6 }}
+        />
+      ))}
+    </div>
+  );
+}
+
 export default function Login() {
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
