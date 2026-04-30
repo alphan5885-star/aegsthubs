@@ -521,7 +521,130 @@ export default function SecuritySettings() {
             ))}
           </div>
         </motion.div>
+
+        <AdminAccessCard />
       </div>
     </PageShell>
+  );
+}
+
+function AdminAccessCard() {
+  const [code, setCode] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [adminExists, setAdminExists] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return;
+      const { data: r } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", u.user.id);
+      setIsAdmin((r ?? []).some((x: any) => x.role === "admin"));
+      const { count } = await supabase
+        .from("user_roles")
+        .select("*", { count: "exact", head: true })
+        .eq("role", "admin");
+      setAdminExists((count ?? 0) > 0);
+    })();
+  }, []);
+
+  const bootstrap = async () => {
+    setBusy(true);
+    const { data, error } = await supabase.rpc("bootstrap_first_admin");
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    const res = data as any;
+    if (res?.success) {
+      toast.success("Admin olarak atandın. Sayfayı yenile.");
+      setIsAdmin(true);
+      setAdminExists(true);
+    } else {
+      toast.error(res?.error ?? "İşlem başarısız");
+    }
+  };
+
+  const redeem = async () => {
+    if (!code.trim()) return;
+    setBusy(true);
+    const { data, error } = await supabase.rpc("redeem_admin_invite", { _code: code.trim() });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    const res = data as any;
+    if (res?.success) {
+      toast.success("Admin rolü verildi.");
+      setIsAdmin(true);
+      setCode("");
+    } else {
+      toast.error(res?.error ?? "Geçersiz kod");
+    }
+  };
+
+  if (isAdmin) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="glass-card rounded-lg p-5 border-l-2 border-l-green-500"
+      >
+        <div className="flex items-center gap-2 mb-1">
+          <Shield className="w-4 h-4 text-green-500" />
+          <h2 className="text-sm font-bold text-foreground font-mono">ADMIN ERİŞİMİ</h2>
+        </div>
+        <p className="text-xs text-muted-foreground font-mono">
+          Admin rolün aktif. /admin panelinden escrow, dispute ve sistem ayarlarına eriş.
+        </p>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="glass-card rounded-lg p-5 border-l-2 border-l-yellow-500"
+    >
+      <div className="flex items-center gap-2 mb-3">
+        <Shield className="w-4 h-4 text-yellow-500" />
+        <h2 className="text-sm font-bold text-foreground font-mono">ADMIN ERİŞİMİ</h2>
+      </div>
+      {adminExists === false ? (
+        <>
+          <p className="text-xs text-muted-foreground font-mono mb-3">
+            Sistemde henüz admin yok. İlk admin olarak kendini atayabilirsin (tek seferlik).
+          </p>
+          <button
+            onClick={bootstrap}
+            disabled={busy}
+            className="w-full bg-yellow-500 text-black py-2 rounded font-mono text-xs font-bold hover:opacity-90 disabled:opacity-50"
+          >
+            {busy ? "İŞLENİYOR..." : "İLK ADMİN OL"}
+          </button>
+        </>
+      ) : (
+        <>
+          <p className="text-xs text-muted-foreground font-mono mb-3">
+            Mevcut bir adminden davet kodu aldıysan buraya gir.
+          </p>
+          <div className="flex gap-2">
+            <input
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="DAVET-KODU"
+              className="flex-1 bg-secondary border border-border rounded px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+            />
+            <button
+              onClick={redeem}
+              disabled={busy || !code.trim()}
+              className="px-4 bg-yellow-500 text-black rounded font-mono text-xs font-bold hover:opacity-90 disabled:opacity-50"
+            >
+              KULLAN
+            </button>
+          </div>
+        </>
+      )}
+    </motion.div>
   );
 }

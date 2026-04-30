@@ -33,6 +33,36 @@ const toAuthEmail = (name: string) => {
   return `${username || "user"}@local.aeigsthub`;
 };
 
+function ParticleField() {
+  const [particles, setParticles] = useState<
+    { x: number; y1: number; y2: number; dur: number }[]
+  >([]);
+  useEffect(() => {
+    setParticles(
+      Array.from({ length: 8 }, () => ({
+        x: Math.random() * 1200,
+        y1: Math.random() * 900,
+        y2: Math.random() * 900,
+        dur: 5 + Math.random() * 5,
+      })),
+    );
+  }, []);
+  if (particles.length === 0) return null;
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {particles.map((p, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 rounded-full bg-primary/20"
+          initial={{ x: p.x, y: p.y1, opacity: 0 }}
+          animate={{ y: [p.y1, p.y2], opacity: [0, 0.5, 0] }}
+          transition={{ duration: p.dur, repeat: Infinity, delay: i * 0.6 }}
+        />
+      ))}
+    </div>
+  );
+}
+
 export default function Login() {
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
@@ -219,18 +249,8 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(8)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 rounded-full bg-primary/20"
-            initial={{ x: Math.random() * 1200, y: Math.random() * 900, opacity: 0 }}
-            animate={{ y: [Math.random() * 900, Math.random() * 900], opacity: [0, 0.5, 0] }}
-            transition={{ duration: 5 + Math.random() * 5, repeat: Infinity, delay: i * 0.6 }}
-          />
-        ))}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,0,51,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,0,51,0.03)_1px,transparent_1px)] bg-[size:60px_60px]" />
-      </div>
+      <ParticleField />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,0,51,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,0,51,0.03)_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
