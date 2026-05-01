@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import PendingShipmentsPanel from "@/components/PendingShipmentsPanel";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -343,6 +344,10 @@ export default function VendorDashboard() {
             </div>
           </motion.div>
         ))}
+      </div>
+
+      <div className="mb-6">
+        <PendingShipmentsPanel />
       </div>
 
       {/* Sales Chart */}
