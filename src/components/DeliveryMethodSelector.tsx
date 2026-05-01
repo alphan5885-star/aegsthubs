@@ -1,4 +1,5 @@
 import { Truck, MapPin, Mail } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 type DeliveryMethod = "cargo" | "dead_drop" | "mailbox";
 
@@ -8,28 +9,19 @@ interface Props {
   productType: string;
 }
 
-const methods = [
-  { id: "cargo" as const, label: "Kargo", desc: "Standart kargo takipli gönderim", icon: Truck },
-  {
-    id: "dead_drop" as const,
-    label: "Dead-Drop",
-    desc: "GPS koordinatlı elden bırakma",
-    icon: MapPin,
-  },
-  {
-    id: "mailbox" as const,
-    label: "Anonim Posta",
-    desc: "Anonim posta kutusu teslimatı",
-    icon: Mail,
-  },
-];
-
 export default function DeliveryMethodSelector({ value, onChange, productType }: Props) {
+  const { t } = useI18n();
   if (productType === "digital") return null;
+
+  const methods = [
+    { id: "cargo" as const, label: t("delivery.cargo"), desc: t("carrier.stealthMail"), icon: Truck },
+    { id: "dead_drop" as const, label: t("delivery.deadDrop"), desc: t("orders.deadDropInfo"), icon: MapPin },
+    { id: "mailbox" as const, label: t("delivery.mailbox"), desc: t("carrier.poBox"), icon: Mail },
+  ];
 
   return (
     <div className="space-y-2">
-      <label className="text-xs font-mono text-muted-foreground">Teslimat Yöntemi</label>
+      <label className="text-xs font-mono text-muted-foreground">{t("product.deliveryMethod")}</label>
       <div className="grid grid-cols-3 gap-2">
         {methods.map((m) => (
           <button

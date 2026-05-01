@@ -69,6 +69,7 @@ const groupedLinks = {
 };
 
 import NotificationBell from "@/components/NotificationBell";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import TorBadge from "@/components/TorBadge";
 
 function getLaunchCountdown() {
@@ -249,6 +250,7 @@ export default function AppSidebar() {
             <EyeOff className="w-4 h-4" />
           </button>
           <NotificationBell />
+          <LanguageSwitcher />
           {!collapsed && <span className="text-[8px] font-mono text-muted-foreground">v3.0</span>}
         </div>
       </div>

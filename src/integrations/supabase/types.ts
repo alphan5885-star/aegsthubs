@@ -709,29 +709,53 @@ export type Database = {
       shipping_tracking: {
         Row: {
           carrier: string | null
+          country_from: string | null
+          country_to: string | null
+          cover_sender_name: string | null
           created_at: string
           estimated_delivery: string | null
           id: string
+          is_anonymous: boolean | null
+          notes: string | null
           order_id: string
+          pgp_encrypted_tracking: string | null
+          shipped_at: string | null
           status: string | null
+          stealth_method: string | null
           tracking_number: string | null
         }
         Insert: {
           carrier?: string | null
+          country_from?: string | null
+          country_to?: string | null
+          cover_sender_name?: string | null
           created_at?: string
           estimated_delivery?: string | null
           id?: string
+          is_anonymous?: boolean | null
+          notes?: string | null
           order_id: string
+          pgp_encrypted_tracking?: string | null
+          shipped_at?: string | null
           status?: string | null
+          stealth_method?: string | null
           tracking_number?: string | null
         }
         Update: {
           carrier?: string | null
+          country_from?: string | null
+          country_to?: string | null
+          cover_sender_name?: string | null
           created_at?: string
           estimated_delivery?: string | null
           id?: string
+          is_anonymous?: boolean | null
+          notes?: string | null
           order_id?: string
+          pgp_encrypted_tracking?: string | null
+          shipped_at?: string | null
           status?: string | null
+          stealth_method?: string | null
           tracking_number?: string | null
         }
         Relationships: [
@@ -1041,7 +1065,9 @@ export type Database = {
     }
     Functions: {
       assign_role_on_signup: { Args: { _role: string }; Returns: undefined }
+      auto_release_pending_escrow: { Args: never; Returns: Json }
       bootstrap_first_admin: { Args: never; Returns: Json }
+      cancel_order: { Args: { _order_id: string }; Returns: Json }
       check_rate_limit: {
         Args: {
           _action: string
@@ -1071,6 +1097,7 @@ export type Database = {
         Returns: boolean
       }
       is_account_locked: { Args: { _email: string }; Returns: boolean }
+      mark_order_shipped: { Args: { _order_id: string }; Returns: Json }
       panic_destroy: { Args: never; Returns: Json }
       process_order_payment: {
         Args: { _ltc_address?: string; _order_id: string; _tx_hash?: string }
