@@ -2,22 +2,15 @@ import { useState, useEffect, useRef } from "react";
 import PageShell from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
-import {
-  Shield,
-  Lock,
-  AlertTriangle,
-  Wallet,
-  Clock,
-  DollarSign,
-  Settings,
-  Trash2,
-} from "lucide-react";
+import { useI18n } from "@/lib/i18n";
+import { Shield, Lock, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 
 export default function VendorBond() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const [bond, setBond] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [depositAddress] = useState(() => {
@@ -41,7 +34,6 @@ export default function VendorBond() {
           .single();
         if (!isMounted.current) return;
         if (error && error.code !== "PGRST116") {
-          // Ignore "not found" error for .single()
           if (import.meta.env.DEV) console.error("Error fetching vendor bond:", error);
         }
         if (data) setBond(data);
@@ -76,24 +68,24 @@ export default function VendorBond() {
         return;
       }
       setBond(data);
-      toast.success("Depozito talebi oluşturuldu!");
+      toast.success(t("bond.createdSuccess"));
     } catch (err: any) {
       if (import.meta.env.DEV) console.error("Error creating bond:", err);
-      if (isMounted.current) toast.error("Hata: " + err.message);
+      if (isMounted.current) toast.error(t("bond.error") + err.message);
     }
   };
 
   if (loading)
     return (
       <PageShell>
-        <div className="text-muted-foreground font-mono animate-pulse">Yükleniyor...</div>
+        <div className="text-muted-foreground font-mono animate-pulse">{t("loading")}</div>
       </PageShell>
     );
 
   return (
     <PageShell>
       <div className="max-w-xl mx-auto space-y-6">
-        <h1 className="text-xl font-mono font-bold text-primary neon-text">Güven Depozitosu</h1>
+        <h1 className="text-xl font-mono font-bold text-primary neon-text">{t("bond.title")}</h1>
 
         {!bond ? (
           <motion.div
@@ -103,25 +95,23 @@ export default function VendorBond() {
           >
             <Shield className="w-12 h-12 text-primary mx-auto mb-4 opacity-60" />
             <h2 className="text-sm font-mono font-bold text-foreground mb-2">
-              Satıcı Depozitosu Gerekli
+              {t("bond.required")}
             </h2>
             <p className="text-xs text-muted-foreground font-mono mb-4">
-              Ürün listeleyebilmek için <span className="text-primary">0.5 LTC</span> güven
-              depozitosu yatırmanız gerekmektedir. Bu miktar hesabınızda kilitli tutulur ve
-              güvenilirliğinizi garanti eder.
+              {t("bond.desc")}
             </p>
             <button
               onClick={createBond}
               className="px-6 py-2.5 bg-primary text-primary-foreground font-mono text-sm rounded neon-glow-btn"
             >
-              Depozito Yatır
+              {t("bond.deposit")}
             </button>
           </motion.div>
         ) : (
           <>
             <div className="glass-card rounded-lg p-6">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-mono text-muted-foreground">Depozito Durumu</span>
+                <span className="text-xs font-mono text-muted-foreground">{t("bond.statusLabel")}</span>
                 <span
                   className={`text-[10px] font-mono px-2 py-1 rounded ${
                     bond.status === "active"
@@ -132,22 +122,22 @@ export default function VendorBond() {
                   }`}
                 >
                   {bond.status === "active"
-                    ? "AKTİF"
+                    ? t("bond.active")
                     : bond.status === "pending"
-                      ? "BEKLENİYOR"
-                      : "İPTAL"}
+                      ? t("bond.pendingStatus")
+                      : t("bond.cancelledStatus")}
                 </span>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-secondary rounded-lg p-4">
-                  <div className="text-xs text-muted-foreground font-mono mb-1">Yatırılan</div>
+                  <div className="text-xs text-muted-foreground font-mono mb-1">{t("bond.deposited")}</div>
                   <div className="text-xl font-mono font-bold text-foreground">
                     {bond.amount} LTC
                   </div>
                 </div>
                 <div className="bg-secondary rounded-lg p-4">
-                  <div className="text-xs text-muted-foreground font-mono mb-1">Gerekli</div>
+                  <div className="text-xs text-muted-foreground font-mono mb-1">{t("bond.requiredAmount")}</div>
                   <div className="text-xl font-mono font-bold text-primary">
                     {bond.required_amount} LTC
                   </div>
@@ -158,8 +148,7 @@ export default function VendorBond() {
             {bond.status === "pending" && (
               <div className="glass-card rounded-lg p-6 neon-border text-center">
                 <p className="text-xs text-muted-foreground font-mono mb-3">
-                  Aşağıdaki adrese <span className="text-primary">{bond.required_amount} LTC</span>{" "}
-                  gönderin:
+                  {t("bond.sendTo")} <span className="text-primary">{bond.required_amount} LTC</span>
                 </p>
                 <div className="inline-block p-3 bg-secondary rounded-lg mb-3">
                   <QRCodeSVG
@@ -174,7 +163,7 @@ export default function VendorBond() {
                   {depositAddress}
                 </div>
                 <div className="flex items-center justify-center gap-1 mt-3 text-xs text-yellow-500 font-mono">
-                  <Clock className="w-3 h-3" /> Ödeme onayı bekleniyor...
+                  <Clock className="w-3 h-3" /> {t("bond.waiting")}
                 </div>
               </div>
             )}
@@ -182,12 +171,12 @@ export default function VendorBond() {
         )}
 
         <div className="glass-card rounded-lg p-4">
-          <h3 className="text-xs font-mono font-bold text-foreground mb-2">Depozito Kuralları</h3>
+          <h3 className="text-xs font-mono font-bold text-foreground mb-2">{t("bond.rulesTitle")}</h3>
           <ul className="space-y-1.5 text-[10px] text-muted-foreground font-mono">
-            <li>• Depozito, satıcı hesabında kilitli tutulur</li>
-            <li>• Kural ihlali durumunda depozito el konulabilir</li>
-            <li>• Aktif ürünler varken depozito çekilemez</li>
-            <li>• Minimum depozito: 0.5 LTC</li>
+            <li>• {t("bond.rule1")}</li>
+            <li>• {t("bond.rule2")}</li>
+            <li>• {t("bond.rule3")}</li>
+            <li>• {t("bond.rule4")}</li>
           </ul>
         </div>
       </div>

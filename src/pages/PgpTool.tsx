@@ -1,14 +1,15 @@
 import { useState } from "react";
 import PageShell from "@/components/PageShell";
-import { Shield, CheckCircle, XCircle, Key, Lock, Unlock, Copy, Trash2 } from "lucide-react";
+import { Shield, CheckCircle, XCircle, Key, Lock, Copy, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { verifySignature, encryptForRecipient } from "@/lib/pgp";
 import { motion } from "framer-motion";
+import { useI18n } from "@/lib/i18n";
 
 export default function PgpTool() {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<"verify" | "encrypt">("verify");
 
-  // Verify state
   const [signedMsg, setSignedMsg] = useState("");
   const [pubKey, setPubKey] = useState("");
   const [verificationResult, setVerificationResult] = useState<{
@@ -17,7 +18,6 @@ export default function PgpTool() {
   } | null>(null);
   const [verifying, setVerifying] = useState(false);
 
-  // Encrypt state
   const [plaintext, setPlaintext] = useState("");
   const [encryptPubKey, setEncryptPubKey] = useState("");
   const [encryptedMsg, setEncryptedMsg] = useState("");
@@ -25,17 +25,17 @@ export default function PgpTool() {
 
   const handleVerify = async () => {
     if (!signedMsg || !pubKey) {
-      toast.error("İmzalı mesaj ve kamu anahtarı gereklidir.");
+      toast.error(t("pgp.signedMsgKeyRequired"));
       return;
     }
     setVerifying(true);
     try {
       const result = await verifySignature(signedMsg, pubKey);
       setVerificationResult(result);
-      if (result.verified) toast.success("İmza doğrulandı!");
-      else toast.error("İmza doğrulanmadı!");
+      if (result.verified) toast.success(t("pgp.signatureVerified"));
+      else toast.error(t("pgp.signatureInvalid"));
     } catch (e: any) {
-      toast.error("Hata: " + e.message);
+      toast.error(t("pgp.encryptError") + e.message);
     } finally {
       setVerifying(false);
     }
@@ -43,16 +43,16 @@ export default function PgpTool() {
 
   const handleEncrypt = async () => {
     if (!plaintext || !encryptPubKey) {
-      toast.error("Mesaj ve kamu anahtarı gereklidir.");
+      toast.error(t("pgp.msgAndKeyRequired"));
       return;
     }
     setEncrypting(true);
     try {
       const encrypted = await encryptForRecipient(plaintext, encryptPubKey);
       setEncryptedMsg(encrypted);
-      toast.success("Mesaj şifrelendi.");
+      toast.success(t("pgp.encrypted"));
     } catch (e: any) {
-      toast.error("Şifreleme hatası: " + e.message);
+      toast.error(t("pgp.encryptError") + e.message);
     } finally {
       setEncrypting(false);
     }
@@ -60,7 +60,7 @@ export default function PgpTool() {
 
   const copy = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success("Kopyalandı.");
+    toast.success(t("pgp.copied"));
   };
 
   return (
@@ -72,7 +72,7 @@ export default function PgpTool() {
             <div>
               <h1 className="text-2xl font-mono font-bold text-foreground">PGP Toolkit</h1>
               <p className="text-xs text-muted-foreground font-mono">
-                Yerel tarayıcı tabanlı PGP araçları
+                {t("pgp.subtitle")}
               </p>
             </div>
           </div>
@@ -81,13 +81,13 @@ export default function PgpTool() {
               onClick={() => setActiveTab("verify")}
               className={`px-4 py-1.5 text-xs font-mono rounded transition-all ${activeTab === "verify" ? "bg-primary text-primary-foreground shadow-lg" : "text-muted-foreground hover:text-foreground"}`}
             >
-              Doğrula
+              {t("pgp.verifyTab")}
             </button>
             <button
               onClick={() => setActiveTab("encrypt")}
               className={`px-4 py-1.5 text-xs font-mono rounded transition-all ${activeTab === "encrypt" ? "bg-primary text-primary-foreground shadow-lg" : "text-muted-foreground hover:text-foreground"}`}
             >
-              Şifrele
+              {t("pgp.encryptTab")}
             </button>
           </div>
         </div>
@@ -102,7 +102,7 @@ export default function PgpTool() {
               <div className="glass-card p-6 border border-border rounded-lg space-y-4">
                 <div className="flex items-center gap-2 text-sm font-mono text-primary">
                   <CheckCircle className="w-4 h-4" />
-                  <span>İmza Doğrulama</span>
+                  <span>{t("pgp.verifyTitle")}</span>
                 </div>
 
                 <div className="space-y-2">
@@ -119,7 +119,7 @@ export default function PgpTool() {
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-mono text-muted-foreground uppercase">
-                    Gönderen Kamu Anahtarı (Public Key)
+                    {t("pgp.senderKey")}
                   </label>
                   <textarea
                     value={pubKey}
@@ -134,7 +134,7 @@ export default function PgpTool() {
                   disabled={verifying}
                   className="w-full py-3 bg-primary text-primary-foreground font-mono text-sm rounded neon-glow-btn flex items-center justify-center gap-2"
                 >
-                  {verifying ? "İşleniyor..." : "İmzayı Doğrula"}
+                  {verifying ? t("pgp.processing") : t("pgp.verifyBtn")}
                 </button>
               </div>
             </div>
@@ -144,7 +144,7 @@ export default function PgpTool() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2 text-sm font-mono text-muted-foreground">
                     <Shield className="w-4 h-4" />
-                    <span>Doğrulama Sonucu</span>
+                    <span>{t("pgp.resultTitle")}</span>
                   </div>
                   {verificationResult && (
                     <button
@@ -168,7 +168,7 @@ export default function PgpTool() {
                       )}
                       <div>
                         <div className="font-mono font-bold text-sm">
-                          {verificationResult.verified ? "GEÇERLİ İMZA" : "GEÇERSİZ İMZA"}
+                          {verificationResult.verified ? t("pgp.validSignature") : t("pgp.invalidSignature")}
                         </div>
                         <div className="text-[10px] opacity-80 uppercase tracking-tighter">
                           İmza{" "}
@@ -181,7 +181,7 @@ export default function PgpTool() {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <label className="text-[10px] font-mono text-muted-foreground uppercase">
-                          Orijinal Veri
+                          {t("pgp.originalData")}
                         </label>
                         <button
                           onClick={() => copy(verificationResult.data)}
@@ -199,8 +199,7 @@ export default function PgpTool() {
                   <div className="flex-1 flex flex-col items-center justify-center text-center p-10 space-y-4">
                     <Shield className="w-12 h-12 text-muted-foreground/20" />
                     <p className="text-xs font-mono text-muted-foreground">
-                      Henüz bir doğrulama yapılmadı. Sol tarafa imzalı mesajı ve anahtarı
-                      yapıştırın.
+                      {t("pgp.noVerification")}
                     </p>
                   </div>
                 )}
@@ -217,24 +216,24 @@ export default function PgpTool() {
               <div className="glass-card p-6 border border-border rounded-lg space-y-4">
                 <div className="flex items-center gap-2 text-sm font-mono text-primary">
                   <Lock className="w-4 h-4" />
-                  <span>Mesaj Şifreleme</span>
+                  <span>{t("pgp.encryptTitle")}</span>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-mono text-muted-foreground uppercase">
-                    Düz Metin (Plaintext)
+                    {t("pgp.plaintextLabel")}
                   </label>
                   <textarea
                     value={plaintext}
                     onChange={(e) => setPlaintext(e.target.value)}
                     className="w-full h-40 bg-background/50 border border-border rounded p-3 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-primary/50"
-                    placeholder="Şifrelenecek mesaj..."
+                    placeholder={t("pgp.messagePlaceholder")}
                   />
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-mono text-muted-foreground uppercase">
-                    Alıcı Kamu Anahtarı (Public Key)
+                    {t("pgp.receiverKey")}
                   </label>
                   <textarea
                     value={encryptPubKey}
@@ -249,7 +248,7 @@ export default function PgpTool() {
                   disabled={encrypting}
                   className="w-full py-3 bg-primary text-primary-foreground font-mono text-sm rounded neon-glow-btn flex items-center justify-center gap-2"
                 >
-                  {encrypting ? "Şifreleniyor..." : "Mesajı Şifrele"}
+                  {encrypting ? t("pgp.encryptingBtn") : t("pgp.encryptBtn")}
                 </button>
               </div>
             </div>
@@ -259,7 +258,7 @@ export default function PgpTool() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2 text-sm font-mono text-muted-foreground">
                     <Shield className="w-4 h-4" />
-                    <span>Şifrelenmiş Çıktı</span>
+                    <span>{t("pgp.encryptedOutput")}</span>
                   </div>
                   {encryptedMsg && (
                     <div className="flex gap-2">
@@ -294,7 +293,7 @@ export default function PgpTool() {
                   <div className="flex-1 flex flex-col items-center justify-center text-center p-10 space-y-4">
                     <Lock className="w-12 h-12 text-muted-foreground/20" />
                     <p className="text-xs font-mono text-muted-foreground">
-                      Şifrelenmiş mesaj burada görünecek. Sol taraftaki alanları doldurun.
+                      {t("pgp.noEncryption")}
                     </p>
                   </div>
                 )}

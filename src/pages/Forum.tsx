@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import PageShell from "@/components/PageShell";
 import { useAuth } from "@/lib/authContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useI18n } from "@/lib/i18n";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MessageSquare,
@@ -71,6 +72,7 @@ const forumStorage = {
 
 export default function Forum() {
   const { user, role } = useAuth();
+  const { t } = useI18n();
   const isMounted = useRef(true);
   const [threads, setThreads] = useState<ForumThread[]>([]);
   const [selectedThread, setSelectedThread] = useState<ForumThread | null>(null);
@@ -110,7 +112,7 @@ export default function Forum() {
       if (data?.display_name) {
         setDisplayName(data.display_name);
       } else {
-        setDisplayName(user.email?.split("@")[0] || "Anonim");
+        setDisplayName(user.email?.split("@")[0] || t("forum.anonymous"));
       }
     } catch (e) {
       if (import.meta.env.DEV) console.error("Catch error in loadUserProfile:", e);

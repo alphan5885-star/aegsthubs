@@ -22,9 +22,11 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { devError } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
 
 export default function SecuritySettings() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const [antiPhishingCode, setAntiPhishingCode] = useState("");
   const [savedCode, setSavedCode] = useState<string | null>(null);
   const [showCode, setShowCode] = useState(false);
@@ -106,10 +108,10 @@ export default function SecuritySettings() {
       if (!isMounted.current) return;
       setSavedCode(code);
       setAntiPhishingCode("");
-      toast.success("Anti-phishing kodunuz kaydedildi!");
+      toast.success(t("security.phishingCodeSaved"));
     } catch (error: any) {
       devError("Error saving anti-phishing code:", error);
-      toast.error("Kod kaydedilirken hata oluştu");
+      toast.error(t("security.phishingCodeError"));
     }
   };
 
@@ -154,11 +156,11 @@ export default function SecuritySettings() {
       });
       if (!isMounted.current) return;
       if (verifyErr) {
-        toast.error("Kod yanlış. Tekrar deneyin.");
+        toast.error(t("security.wrongCode"));
         setVerifying(false);
         return;
       }
-      toast.success("2FA başarıyla etkinleştirildi! 🔒");
+      toast.success(t("security.2faEnabled"));
       setEnrollData(null);
       setVerifyCode("");
       setVerifying(false);
@@ -178,7 +180,7 @@ export default function SecuritySettings() {
         devError("Error unenrolling factor:", error);
         toast.error(error.message);
       } else {
-        toast.success("2FA devre dışı bırakıldı.");
+        toast.success(t("security.2faDisabled"));
       }
       setUnenrolling(false);
       await loadMfaFactors();
@@ -195,7 +197,7 @@ export default function SecuritySettings() {
     const next = !deadManEnabled;
     setDeadManEnabled(next);
     localStorage.setItem("dead-man-mode", next ? "armed" : "off");
-    toast.success(next ? "Dead-Man Mode hazırlandı" : "Dead-Man Mode kapatıldı");
+    toast.success(next ? t("security.deadManArmed") : t("security.deadManOff"));
   };
 
   const emergencyWipe = async () => {
@@ -204,7 +206,7 @@ export default function SecuritySettings() {
       localStorage.removeItem("dead-man-mode");
       setDeadManEnabled(false);
       await supabase.auth.signOut();
-      toast.success("Hassas oturum verileri temizlendi");
+      toast.success(t("security.dataWiped"));
     } catch (e) {
       devError("Catch in emergencyWipe:", e);
     }
@@ -213,7 +215,7 @@ export default function SecuritySettings() {
   return (
     <PageShell>
       <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-xl font-mono font-bold text-primary neon-text">Güvenlik Ayarları</h1>
+        <h1 className="text-xl font-mono font-bold text-primary neon-text">{t("security.settingsTitle")}</h1>
 
         {/* Anti-Phishing Code */}
         <motion.div
@@ -223,17 +225,16 @@ export default function SecuritySettings() {
         >
           <div className="flex items-center gap-2 mb-4">
             <Fingerprint className="w-5 h-5 text-primary" />
-            <h2 className="text-sm font-mono font-bold text-foreground">Anti-Phishing Kodu</h2>
+            <h2 className="text-sm font-mono font-bold text-foreground">{t("security.phishingTitle")}</h2>
           </div>
           <p className="text-xs text-muted-foreground font-mono mb-4">
-            Giriş sayfasında size özel bir kelime gösterilir. Bu kelimeyi görmezseniz, sahte sitede
-            olabilirsiniz.
+            {t("security.phishingDesc")}
           </p>
           {savedCode && (
             <div className="bg-secondary rounded-lg p-3 mb-4 flex items-center justify-between">
               <div>
                 <div className="text-[10px] text-muted-foreground font-mono mb-1">
-                  Mevcut Kodunuz:
+                  {t("security.currentCode")}
                 </div>
                 <div className="text-sm font-mono font-bold text-primary">
                   {showCode ? savedCode : "••••••••"}
@@ -251,7 +252,7 @@ export default function SecuritySettings() {
             <input
               value={antiPhishingCode}
               onChange={(e) => setAntiPhishingCode(e.target.value)}
-              placeholder="Gizli kelime belirle (ör: MorKedi42)"
+              placeholder={t("security.phishingPlaceholder")}
               className="flex-1 bg-secondary border border-border rounded px-3 py-2 text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               maxLength={30}
             />
@@ -259,7 +260,7 @@ export default function SecuritySettings() {
               onClick={saveAntiPhishing}
               className="px-4 py-2 bg-primary text-primary-foreground text-xs font-mono rounded neon-glow-btn flex items-center gap-1"
             >
-              <Save className="w-3 h-3" /> Kaydet
+              <Save className="w-3 h-3" /> {t("save")}
             </button>
           </div>
         </motion.div>
@@ -274,7 +275,7 @@ export default function SecuritySettings() {
           <div className="flex items-center gap-2 mb-4">
             <Shield className="w-5 h-5 text-primary" />
             <h2 className="text-sm font-mono font-bold text-foreground">
-              İki Faktörlü Doğrulama (2FA)
+              {t("security.2faTitle")}
             </h2>
           </div>
 
@@ -283,9 +284,9 @@ export default function SecuritySettings() {
               <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 flex items-center gap-3">
                 <Check className="w-5 h-5 text-green-500" />
                 <div>
-                  <div className="text-sm font-mono text-green-400 font-bold">2FA Aktif</div>
+                  <div className="text-sm font-mono text-green-400 font-bold">{t("security.2faActive")}</div>
                   <div className="text-[10px] text-muted-foreground font-mono">
-                    Google Authenticator ile korunuyor
+                    {t("security.2faProtected")}
                   </div>
                 </div>
               </div>
@@ -310,7 +311,7 @@ export default function SecuritySettings() {
                     ) : (
                       <X className="w-3 h-3" />
                     )}{" "}
-                    Kaldır
+                    {t("security.remove")}
                   </button>
                 </div>
               ))}
@@ -334,7 +335,7 @@ export default function SecuritySettings() {
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(enrollData.secret);
-                      toast.success("Kopyalandı!");
+                      toast.success(t("security.copySuccess"));
                     }}
                     className="text-muted-foreground hover:text-foreground"
                   >
@@ -344,7 +345,7 @@ export default function SecuritySettings() {
               </div>
               <div>
                 <label className="text-xs text-muted-foreground font-mono mb-1 block">
-                  DOĞRULAMA KODU (6 HANE)
+                  {t("login.verifyCode")}
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -364,7 +365,7 @@ export default function SecuritySettings() {
                     ) : (
                       <Check className="w-3 h-3" />
                     )}{" "}
-                    Doğrula
+                    {t("login.verify")}
                   </button>
                 </div>
               </div>
@@ -375,7 +376,7 @@ export default function SecuritySettings() {
                 }}
                 className="text-xs text-muted-foreground font-mono hover:text-foreground"
               >
-                İptal
+                {t("cancel")}
               </button>
             </div>
           ) : (
@@ -383,9 +384,9 @@ export default function SecuritySettings() {
               <div className="bg-secondary rounded-lg p-4 flex items-center gap-3">
                 <Lock className="w-6 h-6 text-yellow-500" />
                 <div>
-                  <div className="text-sm font-mono text-foreground">2FA Devre Dışı</div>
+                  <div className="text-sm font-mono text-foreground">{t("security.2faDisabledLabel")}</div>
                   <div className="text-[10px] text-muted-foreground font-mono mt-1">
-                    Google Authenticator ile hesabınızı koruyun
+                    {t("security.2faProtected")}
                   </div>
                 </div>
               </div>
@@ -399,7 +400,7 @@ export default function SecuritySettings() {
                 ) : (
                   <Smartphone className="w-4 h-4" />
                 )}
-                2FA Etkinleştir
+                {t("security.enable2fa")}
               </button>
             </div>
           )}
@@ -418,7 +419,7 @@ export default function SecuritySettings() {
 
           <div className="flex items-center gap-2 mb-4">
             <Skull className="w-5 h-5 text-destructive" />
-            <h2 className="text-sm font-mono font-bold text-foreground">Dead-Man / Panic Mode</h2>
+            <h2 className="text-sm font-mono font-bold text-foreground">{t("security.deadManTitle")}</h2>
           </div>
 
           <div className="space-y-4 relative z-10">
@@ -502,7 +503,7 @@ export default function SecuritySettings() {
         >
           <div className="flex items-center gap-2 mb-3">
             <Lock className="w-5 h-5 text-primary" />
-            <h2 className="text-sm font-mono font-bold text-foreground">Veri Şifreleme</h2>
+            <h2 className="text-sm font-mono font-bold text-foreground">{t("security.encryptionTitle")}</h2>
           </div>
           <div className="grid grid-cols-2 gap-3">
             {[
@@ -529,6 +530,7 @@ export default function SecuritySettings() {
 }
 
 function AdminAccessCard() {
+  const { t } = useI18n();
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
@@ -558,11 +560,11 @@ function AdminAccessCard() {
     if (error) return toast.error(error.message);
     const res = data as any;
     if (res?.success) {
-      toast.success("Admin olarak atandın. Sayfayı yenile.");
+      toast.success(t("security.adminAssigned"));
       setIsAdmin(true);
       setAdminExists(true);
     } else {
-      toast.error(res?.error ?? "İşlem başarısız");
+      toast.error(res?.error ?? t("err.generic"));
     }
   };
 
@@ -574,11 +576,11 @@ function AdminAccessCard() {
     if (error) return toast.error(error.message);
     const res = data as any;
     if (res?.success) {
-      toast.success("Admin rolü verildi.");
+      toast.success(t("security.adminRoleGranted"));
       setIsAdmin(true);
       setCode("");
     } else {
-      toast.error(res?.error ?? "Geçersiz kod");
+      toast.error(res?.error ?? t("security.invalidCode"));
     }
   };
 
@@ -591,10 +593,10 @@ function AdminAccessCard() {
       >
         <div className="flex items-center gap-2 mb-1">
           <Shield className="w-4 h-4 text-green-500" />
-          <h2 className="text-sm font-bold text-foreground font-mono">ADMIN ERİŞİMİ</h2>
+          <h2 className="text-sm font-bold text-foreground font-mono">{t("security.adminTitle")}</h2>
         </div>
         <p className="text-xs text-muted-foreground font-mono">
-          Admin rolün aktif. /admin panelinden escrow, dispute ve sistem ayarlarına eriş.
+          {t("security.adminActive")}
         </p>
       </motion.div>
     );
@@ -608,31 +610,31 @@ function AdminAccessCard() {
     >
       <div className="flex items-center gap-2 mb-3">
         <Shield className="w-4 h-4 text-yellow-500" />
-        <h2 className="text-sm font-bold text-foreground font-mono">ADMIN ERİŞİMİ</h2>
+        <h2 className="text-sm font-bold text-foreground font-mono">{t("security.adminTitle")}</h2>
       </div>
       {adminExists === false ? (
         <>
           <p className="text-xs text-muted-foreground font-mono mb-3">
-            Sistemde henüz admin yok. İlk admin olarak kendini atayabilirsin (tek seferlik).
+            {t("security.firstAdmin")}
           </p>
           <button
             onClick={bootstrap}
             disabled={busy}
             className="w-full bg-yellow-500 text-black py-2 rounded font-mono text-xs font-bold hover:opacity-90 disabled:opacity-50"
           >
-            {busy ? "İŞLENİYOR..." : "İLK ADMİN OL"}
+            {busy ? t("security.processing") : t("security.becomeAdmin")}
           </button>
         </>
       ) : (
         <>
           <p className="text-xs text-muted-foreground font-mono mb-3">
-            Mevcut bir adminden davet kodu aldıysan buraya gir.
+            {t("security.inviteCodeDesc")}
           </p>
           <div className="flex gap-2">
             <input
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              placeholder="DAVET-KODU"
+              placeholder={t("security.inviteCode")}
               className="flex-1 bg-secondary border border-border rounded px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
             />
             <button
@@ -640,7 +642,7 @@ function AdminAccessCard() {
               disabled={busy || !code.trim()}
               className="px-4 bg-yellow-500 text-black rounded font-mono text-xs font-bold hover:opacity-90 disabled:opacity-50"
             >
-              KULLAN
+              {t("security.redeem")}
             </button>
           </div>
         </>

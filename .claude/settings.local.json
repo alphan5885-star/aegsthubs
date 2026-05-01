@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(echo \"Dev server starting with PID $!\")",
+      "Bash(netstat -ano)",
+      "Bash(awk '{print $5}')",
+      "Bash(xargs -I{} taskkill /PID {} /F)",
+      "Bash(cmd.exe /c \"for /f \\\\\"tokens=5\\\\\" %a in \\('netstat -aon ^| findstr :8081'\\) do taskkill /PID %a /F\")",
+      "Bash(cmd.exe /c \"for /f \\\\\"tokens=5\\\\\" %a in \\('netstat -aon ^| findstr :8080'\\) do taskkill /PID %a /F\")",
+      "Bash(npx kill-port *)",
+      "Bash(grep -oE '\\\\bt\\\\\\([\"`'\\\\'']\\([^\"`'\\\\'']*\\)')",
+      "Bash(sed -E 's/t\\\\\\([\"'\"'\"'`]//')",
+      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
+      "Bash(sed 's/\"//g')",
+      "Bash(sed 's/[^a-z_]//g')",
+      "Bash(awk '/Tables:/,/Views:/')"
+    ]
+  }
+}

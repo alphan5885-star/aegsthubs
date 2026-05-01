@@ -11,6 +11,7 @@ import PgpBadge from "@/components/PgpBadge";
 import DeliveryMethodSelector from "@/components/DeliveryMethodSelector";
 import MathCaptcha from "@/components/MathCaptcha";
 import { encryptForRecipient } from "@/lib/pgp";
+import { useI18n } from "@/lib/i18n";
 
 const SERVICE_FEE_RATE = 0;
 type DeliveryMethod = "cargo" | "dead_drop" | "mailbox";
@@ -34,6 +35,7 @@ export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useI18n();
   const [product, setProduct] = useState<ProductRow | null>(null);
   const [vendorName, setVendorName] = useState<string>("");
   const [vendorPgp, setVendorPgp] = useState<string | null>(null);
@@ -84,7 +86,7 @@ export default function ProductDetail() {
           if (profileError) {
             if (import.meta.env.DEV) console.error("Error fetching vendor profile:", profileError);
           } else if (profile) {
-            setVendorName(profile.display_name || "Anonim Satıcı");
+            setVendorName(profile.display_name || t("product.anonymousVendor"));
           }
 
           const { data: pgp, error: pgpError } = await (supabase as any)
@@ -116,16 +118,15 @@ export default function ProductDetail() {
   const startPayment = async () => {
     if (!product || !user) return;
     if (!captchaOk) {
-      toast.error("Önce bot doğrulamasını tamamla");
+      toast.error(t("product.captchaRequired"));
       return;
     }
     if (product.type === "physical" && !shippingAddress.trim()) {
-      toast.error("Teslimat bilgisi gerekli");
+      toast.error(t("product.deliveryRequired"));
       return;
     }
     setCreating(true);
 
-    // Auto-encrypt sensitive data with vendor's PGP key
     let finalAddress: string | null = shippingAddress.trim() || null;
     let finalNotes: string | null = orderNotes.trim() || null;
     let encrypted = false;
@@ -140,7 +141,7 @@ export default function ProductDetail() {
       } catch (e) {
         if (import.meta.env.DEV) console.error("PGP encryption failed:", e);
         if (isMounted.current) {
-          toast.error("PGP şifreleme başarısız, sipariş iptal");
+          toast.error(t("product.pgpFailed"));
           setCreating(false);
         }
         return;
@@ -163,19 +164,19 @@ export default function ProductDetail() {
         if (import.meta.env.DEV) console.error("Error creating order:", error);
         toast.error(
           (orderResult as { error?: string } | null)?.error === "insufficient_balance"
-            ? "Yetersiz bakiye. Once wallet'a LTC yukle."
-            : "Sipariş oluşturulamadı",
+            ? t("product.insufficientBalance")
+            : t("err.generic"),
         );
         setCreating(false);
         return;
       }
 
-      if (encrypted) toast.success("🔐 Adres satıcının PGP anahtarıyla şifrelendi");
-      toast.success("Odeme escrow'a alindi. Urun teslim onayina kadar kilitli kalir.");
+      if (encrypted) toast.success(t("product.pgpEncrypted"));
+      toast.success(t("product.escrowHeld"));
       setOrderId(createdOrderId);
     } catch (e) {
       if (import.meta.env.DEV) console.error("Catch error in ProductDetail startPayment:", e);
-      if (isMounted.current) toast.error("Sipariş oluşturulurken beklenmedik hata");
+      if (isMounted.current) toast.error(t("product.unexpectedError"));
     } finally {
       if (isMounted.current) setCreating(false);
     }
@@ -184,13 +185,13 @@ export default function ProductDetail() {
   if (loading)
     return (
       <PageShell>
-        <div className="text-muted-foreground font-mono animate-pulse">Yükleniyor...</div>
+        <div className="text-muted-foreground font-mono animate-pulse">{t("loading")}</div>
       </PageShell>
     );
   if (!product)
     return (
       <PageShell>
-        <div className="text-muted-foreground font-mono">Ürün bulunamadı.</div>
+        <div className="text-muted-foreground font-mono">{t("product.notFound")}</div>
       </PageShell>
     );
 
@@ -251,7 +252,7 @@ export default function ProductDetail() {
               </button>
               <VendorRating vendorId={product.vendor_id} size="md" />
               <PgpBadge userId={product.vendor_id} size="sm" />
-              <div className="text-xs text-muted-foreground font-mono">Stok: {product.stock}</div>
+              <div className="text-xs text-muted-foreground font-mono">{t("product.stockLabel")}: {product.stock}</div>
               {product.category && (
                 <div className="text-[10px] font-mono px-2 py-0.5 bg-secondary rounded text-muted-foreground">
                   {product.category}
@@ -264,7 +265,7 @@ export default function ProductDetail() {
         <div className="glass-card rounded-lg p-3 mb-4 flex items-center gap-3 border border-primary/20">
           <Shield className="w-5 h-5 text-primary flex-shrink-0" />
           <div>
-            <div className="text-[11px] font-mono font-bold text-primary">Bakiye Bazli Escrow</div>
+            <div className="text-[11px] font-mono font-bold text-primary">{t("product.escrowTitle")}</div>
             <div className="text-[9px] font-mono text-muted-foreground">
               Once wallet'a LTC yukle • Satin alimda escrow hold • Teslimde %90/%10 dagitim
             </div>
@@ -288,15 +289,15 @@ export default function ProductDetail() {
                       className={`w-4 h-4 ${vendorPgp ? "text-green-400" : "text-muted-foreground"}`}
                     />
                     <span className="text-xs font-mono font-bold text-foreground">
-                      Teslimat Bilgileri
+                      {t("product.deliveryInfo")}
                     </span>
                     {vendorPgp ? (
                       <span className="ml-auto text-[10px] font-mono text-green-400 px-2 py-0.5 rounded bg-green-500/10 border border-green-500/30">
-                        🔐 PGP otomatik şifrelenecek
+                        {t("product.pgpAutoEncrypt")}
                       </span>
                     ) : (
                       <span className="ml-auto text-[10px] font-mono text-yellow-500">
-                        ⚠ Satıcının PGP key'i yok — düz metin
+                        {t("product.noPgpWarning")}
                       </span>
                     )}
                   </div>
@@ -304,14 +305,14 @@ export default function ProductDetail() {
                     value={shippingAddress}
                     onChange={(e) => setShippingAddress(e.target.value)}
                     rows={3}
-                    placeholder="Teslimat adresi / dead-drop koordinatları / posta kutusu..."
+                    placeholder={t("product.deliveryPlaceholder")}
                     className="w-full bg-background border border-border rounded px-2 py-2 text-xs font-mono focus:outline-none focus:border-primary resize-none"
                   />
                   <textarea
                     value={orderNotes}
                     onChange={(e) => setOrderNotes(e.target.value)}
                     rows={2}
-                    placeholder="Notlar (isteğe bağlı)"
+                    placeholder={t("product.notesPlaceholder")}
                     className="w-full bg-background border border-border rounded px-2 py-2 text-xs font-mono focus:outline-none focus:border-primary resize-none"
                   />
                   {vendorPgp && (
@@ -326,12 +327,12 @@ export default function ProductDetail() {
 
             {user?.id === product.vendor_id ? (
               <div className="glass-card rounded-lg p-4 text-center text-xs font-mono text-muted-foreground border border-yellow-500/30">
-                ⚠️ Bu sizin kendi ürününüz — satın alamazsınız.
+                {t("product.ownProduct")}
               </div>
             ) : (
               <>
                 <div className="glass-card rounded-lg p-4 mb-3">
-                  <MathCaptcha onValidChange={setCaptchaOk} label="Satın al güvenlik doğrulaması" />
+                  <MathCaptcha onValidChange={setCaptchaOk} label={t("product.securityCheck")} />
                 </div>
                 <motion.button
                   onClick={startPayment}
@@ -341,8 +342,8 @@ export default function ProductDetail() {
                 >
                   <ShoppingCart className="w-4 h-4" />{" "}
                   {creating
-                    ? "Hazırlanıyor..."
-                    : `SATIN AL — ${totalPrice.toFixed(4)} LTC / ${(totalPrice * 0.62).toFixed(4)} XMR`}
+                    ? t("product.preparing")
+                    : `${t("product.buyBtn")} — ${totalPrice.toFixed(4)} LTC / ${(totalPrice * 0.62).toFixed(4)} XMR`}
                 </motion.button>
               </>
             )}
@@ -353,14 +354,13 @@ export default function ProductDetail() {
           <div className="glass-card rounded-lg p-4 border border-primary/30 bg-primary/5">
             <div className="flex items-center gap-2 mb-2">
               <Hash className="w-4 h-4 text-primary" />
-              <span className="text-xs font-mono text-muted-foreground">Sipariş:</span>
+              <span className="text-xs font-mono text-muted-foreground">{t("product.orderLabel")}</span>
               <span className="text-xs font-mono text-foreground font-bold">
                 {orderId.slice(0, 8).toUpperCase()}
               </span>
             </div>
             <p className="text-xs font-mono text-muted-foreground">
-              Bakiye escrow'a alindi. Satici teslim ettiginde, sen sipariş ekranindan onayladiginda
-              fonlar otomatik dagitilir.
+              {t("product.orderDesc")}
             </p>
           </div>
         )}

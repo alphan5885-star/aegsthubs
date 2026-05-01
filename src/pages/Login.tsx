@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MathCaptcha from "@/components/MathCaptcha";
+import { useI18n } from "@/lib/i18n";
 
 type Mode = "login" | "signup";
 type Role = "vendor" | "buyer";
@@ -86,6 +87,7 @@ export default function Login() {
   });
   const { login, signup, mfaChallenge, verifyMfa } = useAuth();
   const { startSession } = useSessionTimer();
+  const { t } = useI18n();
 
   const passwordRules = {
     length: password.length >= 8,
@@ -101,8 +103,8 @@ export default function Login() {
       setAntiPhishingCode(null);
       return;
     }
-    const t = setTimeout(() => setAntiPhishingCode(null), 500);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setAntiPhishingCode(null), 500);
+    return () => clearTimeout(timer);
   }, [email, mode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -110,7 +112,7 @@ export default function Login() {
     setError("");
     setSuccess("");
     if (!captchaOk) {
-      setError("Önce bot doğrulamasını tamamla.");
+      setError(t("login.captchaRequired"));
       return;
     }
     setSubmitting(true);
@@ -129,22 +131,17 @@ export default function Login() {
       }
     } else {
       if (displayName.trim().length < 3) {
-        setError("Kullanici adi en az 3 karakter olmali.");
+        setError(t("login.usernameMin"));
         setSubmitting(false);
         return;
       }
       if (!passwordReady) {
-        setError("Sifre asamalarini tamamla.");
-        setSubmitting(false);
-        return;
-      }
-      if (false && !passwordReady) {
-        setError("Şifre en az 6 karakter olmalı.");
+        setError(t("login.passwordSteps"));
         setSubmitting(false);
         return;
       }
       if (withdrawPin && !/^\d{6}$/.test(withdrawPin)) {
-        setError("Para Çekme PIN'i 6 haneli sayı olmalı.");
+        setError(t("login.pinFormat"));
         setSubmitting(false);
         return;
       }
@@ -160,7 +157,7 @@ export default function Login() {
         setError(err);
         setSubmitting(false);
       } else {
-        setSuccess("Kayıt başarılı! Giriş yapabilirsiniz.");
+        setSuccess(t("login.registerSuccess"));
         setMode("login");
         setEmail(displayName.trim());
         setPassword("");
@@ -197,15 +194,15 @@ export default function Login() {
         >
           <div className="text-center mb-8">
             <Lock className="w-14 h-14 text-primary mx-auto mb-3 animate-pulse" />
-            <h1 className="text-2xl font-mono font-bold text-primary neon-text">2FA Doğrulama</h1>
+            <h1 className="text-2xl font-mono font-bold text-primary neon-text">{t("login.twoFaTitle")}</h1>
             <p className="text-xs text-muted-foreground mt-1 font-mono">
-              Google Authenticator kodunuzu girin
+              {t("login.twoFaSubtitle")}
             </p>
           </div>
           <div className="glass-card rounded-lg p-6 space-y-4 neon-border">
             <div>
               <label className="text-xs text-muted-foreground font-mono mb-2 block">
-                DOĞRULAMA KODU
+                {t("login.verifyCode")}
               </label>
               <input
                 value={mfaCode}
@@ -239,7 +236,7 @@ export default function Login() {
               ) : (
                 <Shield className="w-4 h-4" />
               )}
-              DOĞRULA
+              {t("login.verify")}
             </button>
           </div>
         </motion.div>
@@ -282,7 +279,7 @@ export default function Login() {
           >
             <Fingerprint className="w-4 h-4 text-green-500" />
             <div>
-              <div className="text-[10px] text-green-500 font-mono">Anti-Phishing Doğrulama:</div>
+              <div className="text-[10px] text-green-500 font-mono">Anti-Phishing {t("confirm")}:</div>
               <div className="text-sm font-mono font-bold text-green-400">{antiPhishingCode}</div>
             </div>
           </motion.div>
@@ -302,17 +299,16 @@ export default function Login() {
               }}
               className={`flex-1 py-2 text-xs font-mono rounded-md transition-all relative z-10 ${mode === m ? "bg-primary text-primary-foreground neon-glow-btn font-bold" : "text-muted-foreground hover:text-foreground"}`}
             >
-              {m === "login" ? "GİRİŞ" : "KAYIT OL"}
+              {m === "login" ? t("login.loginTab") : t("login.signupTab")}
             </button>
           ))}
         </div>
 
-        {/* Session timer selector */}
         <div className="mb-4 glass-card rounded-lg p-3 neon-border/50">
           <div className="flex items-center gap-2 mb-2">
             <Clock className="w-3.5 h-3.5 text-primary" />
             <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
-              Oturum Süresi
+              {t("login.sessionDuration")}
             </span>
           </div>
           <div className="flex gap-1">
@@ -346,7 +342,7 @@ export default function Login() {
               >
                 <div>
                   <label className="text-xs text-muted-foreground font-mono mb-1 block">
-                    GÖRÜNTÜLEME ADI
+                    {t("login.displayNameLabel")}
                   </label>
                   <input
                     value={displayName}
@@ -355,7 +351,7 @@ export default function Login() {
                     required={mode === "signup"}
                     minLength={3}
                     autoComplete="username"
-                    placeholder="Kullanıcı adınız"
+                    placeholder={t("login.usernamePlaceholder")}
                   />
                 </div>
                 <div className="flex gap-1 p-1 bg-secondary rounded-lg">
@@ -366,7 +362,7 @@ export default function Login() {
                       onClick={() => setRole(r)}
                       className={`flex-1 py-2 text-xs font-mono rounded-md transition-all ${role === r ? "bg-primary text-primary-foreground neon-glow-btn font-bold" : "text-muted-foreground hover:text-foreground"}`}
                     >
-                      {r === "buyer" ? "🛒 ALICI" : "🏪 SATICI"}
+                      {r === "buyer" ? t("login.buyerRole") : t("login.vendorRole")}
                     </button>
                   ))}
                 </div>
@@ -377,13 +373,13 @@ export default function Login() {
           {mode === "login" && (
             <div>
               <label className="text-xs text-muted-foreground font-mono mb-1 block">
-                KULLANICI ADI
+                {t("login.usernameLabel")}
               </label>
               <input
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-secondary border border-border rounded px-3 py-2.5 text-sm text-foreground font-mono focus:outline-none focus:ring-2 focus:ring-primary/50"
-                placeholder="kullanici-adiniz"
+                placeholder={t("login.usernamePlaceholder2")}
                 required
                 autoComplete="username"
               />
@@ -391,7 +387,7 @@ export default function Login() {
           )}
 
           <div>
-            <label className="text-xs text-muted-foreground font-mono mb-1 block">ŞİFRE</label>
+            <label className="text-xs text-muted-foreground font-mono mb-1 block">{t("login.passwordLabel")}</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -416,7 +412,7 @@ export default function Login() {
             <div className="space-y-3 rounded border border-border bg-secondary/30 p-3">
               <div>
                 <label className="text-xs text-muted-foreground font-mono mb-1 block">
-                  SIFRE TEKRAR
+                  {t("login.passwordRepeat")}
                 </label>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -430,16 +426,16 @@ export default function Login() {
               </div>
               <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
                 <span className={passwordRules.length ? "text-green-500" : "text-muted-foreground"}>
-                  1. En az 8 karakter
+                  1. {t("login.passRule1")}
                 </span>
                 <span className={passwordRules.letter ? "text-green-500" : "text-muted-foreground"}>
-                  2. Harf icersin
+                  2. {t("login.passRule2")}
                 </span>
                 <span className={passwordRules.number ? "text-green-500" : "text-muted-foreground"}>
-                  3. Rakam icersin
+                  3. {t("login.passRule3")}
                 </span>
                 <span className={passwordRules.match ? "text-green-500" : "text-muted-foreground"}>
-                  4. Sifreler eslessin
+                  4. {t("login.passRule4")}
                 </span>
               </div>
             </div>
@@ -457,7 +453,7 @@ export default function Login() {
               >
                 <div>
                   <label className="text-xs text-muted-foreground font-mono mb-1 block">
-                    PARA ÇEKME PIN'İ (6 hane)
+                    {t("login.withdrawPinLabel")}
                   </label>
                   <input
                     inputMode="numeric"
@@ -473,7 +469,7 @@ export default function Login() {
                 </div>
                 <div>
                   <label className="text-xs text-muted-foreground font-mono mb-1 block">
-                    PGP PUBLIC KEY (opsiyonel)
+                    {t("login.pgpLabel")}
                   </label>
                   <textarea
                     value={pgpKey}
@@ -520,12 +516,12 @@ export default function Login() {
           >
             {submitting ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" /> İŞLENİYOR...
+                <Loader2 className="w-4 h-4 animate-spin" /> {t("login.processing")}
               </>
             ) : mode === "login" ? (
-              "GİRİŞ YAP"
+              t("login.loginBtn")
             ) : (
-              "KAYIT OL"
+              t("login.registerBtn")
             )}
           </motion.button>
         </form>
@@ -533,11 +529,11 @@ export default function Login() {
         <div className="mt-6 glass-card rounded-lg p-4">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <div className="text-[10px] font-mono text-muted-foreground mb-1">Sifreleme</div>
+              <div className="text-[10px] font-mono text-muted-foreground mb-1">{t("login.encryption")}</div>
               <div className="text-xs font-mono text-foreground">AES-256</div>
             </div>
             <div>
-              <div className="text-[10px] font-mono text-muted-foreground mb-1">Odeme</div>
+              <div className="text-[10px] font-mono text-muted-foreground mb-1">{t("login.payment")}</div>
               <div className="text-xs font-mono">
                 <span className="text-orange-400">XMR</span>
                 <span className="text-muted-foreground mx-1">/</span>
@@ -545,8 +541,8 @@ export default function Login() {
               </div>
             </div>
             <div>
-              <div className="text-[10px] font-mono text-muted-foreground mb-1">Escrow</div>
-              <div className="text-xs font-mono text-green-500">Aktif</div>
+              <div className="text-[10px] font-mono text-muted-foreground mb-1">{t("login.escrow")}</div>
+              <div className="text-xs font-mono text-green-500">{t("login.active")}</div>
             </div>
           </div>
         </div>

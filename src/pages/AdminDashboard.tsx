@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { useI18n } from "@/lib/i18n";
 
 interface Stats {
   totalVolume: number;
@@ -42,6 +43,7 @@ interface AuditRow {
 
 export default function AdminDashboard() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const isMounted = useRef(true);
   const [stats, setStats] = useState<Stats>({
     totalVolume: 0,
@@ -175,7 +177,6 @@ export default function AdminDashboard() {
 
         if (!isMounted.current) return;
 
-        // Check for errors in critical queries
         if (import.meta.env.DEV) {
           if (ordersRes.error) console.error("Error loading orders:", ordersRes.error);
           if (disputesRes.error) console.error("Error loading disputes:", disputesRes.error);
@@ -223,7 +224,7 @@ export default function AdminDashboard() {
     };
 
     loadData();
-    const interval = setInterval(loadData, 30000); // live refresh every 30s
+    const interval = setInterval(loadData, 30000);
     return () => {
       isMounted.current = false;
       clearInterval(interval);
@@ -233,20 +234,20 @@ export default function AdminDashboard() {
   const releaseEscrow = async (escrowId: string) => {
     const { data } = await supabase.rpc("release_escrow" as any, { _escrow_id: escrowId });
     if (data && (data as any).success) {
-      toast.success("Escrow serbest bırakıldı!");
+      toast.success(t("admin.escrowReleased"));
       setEscrows((prev) => prev.filter((e) => e.id !== escrowId));
     } else {
-      toast.error((data as any)?.error || "Hata");
+      toast.error((data as any)?.error || t("err.generic"));
     }
   };
 
   const executePanic = async () => {
     const { data } = await supabase.rpc("panic_destroy" as any);
     if (data && (data as any).success) {
-      toast.success("🔥 Tüm hassas veriler imha edildi!");
+      toast.success(t("admin.destroySuccess"));
       setPanicConfirm(false);
     } else {
-      toast.error((data as any)?.error || "Hata");
+      toast.error((data as any)?.error || t("err.generic"));
     }
   };
 
@@ -269,13 +270,13 @@ export default function AdminDashboard() {
         enabled: true,
       });
     }
-    toast.success("Otomatik çekim yapılandırıldı!");
+    toast.success(t("admin.autoWithdrawSaved"));
   };
 
   const executeWithdraw = async () => {
     const amt = parseFloat(withdrawAmount);
     if (!amt || amt <= 0) {
-      toast.error("Geçerli bir miktar gir");
+      toast.error(t("admin.validAmount"));
       return;
     }
     setWithdrawing(true);
@@ -289,53 +290,23 @@ export default function AdminDashboard() {
     }
     const res = data as { success: boolean; error?: string; cold_wallet?: string };
     if (!res?.success) {
-      toast.error(res?.error || "Hata");
+      toast.error(res?.error || t("err.generic"));
       return;
     }
-    toast.success(`${amt} LTC → ${res.cold_wallet} için çekim işaretlendi`);
+    toast.success(`${amt} LTC → ${res.cold_wallet}`);
     setWithdrawAmount("");
     loadAll();
   };
 
   const statCards = [
-    { label: "24s Hacim", value: `${stats.volume24h} LTC`, icon: Activity, color: "text-primary" },
-    {
-      label: "Komisyon Bakiyem",
-      value: `${stats.adminBalance} LTC`,
-      icon: Wallet,
-      color: "text-green-500",
-    },
-    {
-      label: "Bekleyen Ödeme",
-      value: stats.pendingPayments,
-      icon: Clock,
-      color: "text-yellow-500",
-    },
-    {
-      label: "Toplam Hacim",
-      value: `${stats.totalVolume} LTC`,
-      icon: TrendingUp,
-      color: "text-foreground",
-    },
-    {
-      label: "Escrow Havuzu",
-      value: `${stats.heldEscrow} LTC`,
-      icon: Shield,
-      color: "text-yellow-500",
-    },
-    {
-      label: "Aktif Dispute",
-      value: stats.activeDisputes,
-      icon: AlertTriangle,
-      color: "text-primary",
-    },
-    { label: "Satıcı Sayısı", value: stats.totalVendors, icon: Users, color: "text-foreground" },
-    {
-      label: "Toplam Sipariş",
-      value: stats.totalOrders,
-      icon: ShoppingCart,
-      color: "text-foreground",
-    },
+    { label: t("admin.stats24h"), value: `${stats.volume24h} LTC`, icon: Activity, color: "text-primary" },
+    { label: t("admin.statsCommission"), value: `${stats.adminBalance} LTC`, icon: Wallet, color: "text-green-500" },
+    { label: t("admin.statsPending"), value: stats.pendingPayments, icon: Clock, color: "text-yellow-500" },
+    { label: t("admin.statsTotalVol"), value: `${stats.totalVolume} LTC`, icon: TrendingUp, color: "text-foreground" },
+    { label: t("admin.statsEscrow"), value: `${stats.heldEscrow} LTC`, icon: Shield, color: "text-yellow-500" },
+    { label: t("admin.statsDisputes"), value: stats.activeDisputes, icon: AlertTriangle, color: "text-primary" },
+    { label: t("admin.vendorCount"), value: stats.totalVendors, icon: Users, color: "text-foreground" },
+    { label: t("admin.statsTotalOrders"), value: stats.totalOrders, icon: ShoppingCart, color: "text-foreground" },
   ];
 
   return (
@@ -365,7 +336,7 @@ export default function AdminDashboard() {
 
       {/* Chart */}
       <div className="glass-card rounded-lg p-4 mb-6">
-        <h2 className="text-sm font-mono text-muted-foreground mb-4">Haftalık İşlem Hacmi (LTC)</h2>
+        <h2 className="text-sm font-mono text-muted-foreground mb-4">{t("admin.weeklyVolume")}</h2>
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={weekData}>
             <XAxis dataKey="name" tick={{ fill: "#888", fontSize: 10 }} />
@@ -387,10 +358,10 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-2 gap-4 mb-6">
         {/* Escrow Management */}
         <div className="glass-card rounded-lg p-4">
-          <h2 className="text-sm font-mono font-bold text-foreground mb-3">Escrow Havuzu</h2>
+          <h2 className="text-sm font-mono font-bold text-foreground mb-3">{t("admin.escrowPool")}</h2>
           {escrows.length === 0 ? (
             <div className="text-xs text-muted-foreground font-mono text-center py-4">
-              Bekleyen escrow yok.
+              {t("admin.noEscrow")}
             </div>
           ) : (
             <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -404,14 +375,14 @@ export default function AdminDashboard() {
                       {Number(e.amount).toFixed(2)} LTC
                     </div>
                     <div className="text-[10px] text-muted-foreground font-mono">
-                      Komisyon: {Number(e.commission).toFixed(2)}
+                      {t("admin.commissionLabel")} {Number(e.commission).toFixed(2)}
                     </div>
                   </div>
                   <button
                     onClick={() => releaseEscrow(e.id)}
                     className="px-2 py-1 bg-green-600/20 text-green-500 text-[10px] font-mono rounded hover:bg-green-600/30"
                   >
-                    Serbest Bırak
+                    {t("admin.release")}
                   </button>
                 </div>
               ))}
@@ -422,20 +393,20 @@ export default function AdminDashboard() {
         {/* Auto-Withdraw */}
         <div className="glass-card rounded-lg p-4">
           <h2 className="text-sm font-mono font-bold text-foreground mb-3">
-            Otomatik Çekim (Cold Wallet)
+            {t("admin.autoWithdraw")}
           </h2>
           <div className="space-y-2">
             <input
               value={coldWallet}
               onChange={(e) => setColdWallet(e.target.value)}
-              placeholder="Soğuk cüzdan adresi (Exodus)"
+              placeholder={t("admin.coldWalletPlaceholder")}
               className="w-full bg-secondary border border-border rounded px-3 py-2 text-xs font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             />
             <div className="flex gap-2">
               <input
                 value={minAmount}
                 onChange={(e) => setMinAmount(e.target.value)}
-                placeholder="Min miktar"
+                placeholder={t("admin.minAmountPlaceholder")}
                 type="number"
                 step="0.1"
                 className="flex-1 bg-secondary border border-border rounded px-3 py-2 text-xs font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
@@ -444,7 +415,7 @@ export default function AdminDashboard() {
                 onClick={saveAutoWithdraw}
                 className="px-3 py-2 bg-primary text-primary-foreground text-[10px] font-mono rounded neon-glow-btn"
               >
-                Kaydet
+                {t("save")}
               </button>
             </div>
             <div className="text-[10px] text-muted-foreground font-mono">
@@ -458,13 +429,13 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="glass-card rounded-lg p-4">
           <h2 className="text-sm font-mono font-bold text-foreground mb-2 flex items-center gap-2">
-            <Send className="w-4 h-4 text-green-500" /> Komisyon Çekim
+            <Send className="w-4 h-4 text-green-500" /> {t("admin.commissionWithdraw")}
           </h2>
           <div className="text-[10px] text-muted-foreground font-mono mb-3 break-all">
             Hedef: <span className="text-primary">LiTaNf78XeFcLiZ1HJ9HWtsUFBajnb99YT</span>
           </div>
           <div className="text-[10px] text-muted-foreground font-mono mb-2">
-            Çekilebilir: <span className="text-green-500 font-bold">{stats.adminBalance} LTC</span>
+            {t("admin.withdrawable")} <span className="text-green-500 font-bold">{stats.adminBalance} LTC</span>
           </div>
           <div className="flex gap-2">
             <input
@@ -480,7 +451,7 @@ export default function AdminDashboard() {
               disabled={withdrawing}
               className="px-3 py-2 bg-green-600/20 text-green-500 text-[10px] font-mono rounded hover:bg-green-600/30 disabled:opacity-50"
             >
-              {withdrawing ? "…" : "Çek"}
+              {withdrawing ? "…" : t("admin.withdraw")}
             </button>
           </div>
           <div className="text-[9px] text-muted-foreground font-mono mt-2">
@@ -490,11 +461,11 @@ export default function AdminDashboard() {
 
         <div className="glass-card rounded-lg p-4">
           <h2 className="text-sm font-mono font-bold text-foreground mb-3 flex items-center gap-2">
-            <FileText className="w-4 h-4 text-primary" /> Son Denetim Olayları
+            <FileText className="w-4 h-4 text-primary" /> {t("admin.auditLog")}
           </h2>
           {auditLogs.length === 0 ? (
             <div className="text-xs text-muted-foreground font-mono text-center py-4">
-              Kayıt yok.
+              {t("admin.noRecords")}
             </div>
           ) : (
             <div className="space-y-1 max-h-48 overflow-y-auto">
@@ -523,10 +494,10 @@ export default function AdminDashboard() {
             <Skull className="w-6 h-6 text-destructive" />
             <div>
               <div className="text-sm font-mono font-bold text-destructive">
-                PANIC BUTTON — Self Destruct
+                {t("admin.paniTitle")}
               </div>
               <div className="text-[10px] text-muted-foreground font-mono">
-                Tüm logları, IP kayıtlarını, mesajları ve hassas verileri kalıcı olarak sil
+                {t("admin.panicDesc")}
               </div>
             </div>
           </div>
@@ -535,24 +506,24 @@ export default function AdminDashboard() {
               onClick={() => setPanicConfirm(true)}
               className="px-4 py-2 bg-destructive/20 text-destructive text-xs font-mono rounded hover:bg-destructive/30 transition-colors"
             >
-              <Zap className="w-3 h-3 inline mr-1" /> AKTİFLEŞTİR
+              <Zap className="w-3 h-3 inline mr-1" /> {t("admin.activate")}
             </button>
           ) : (
             <div className="flex items-center gap-2">
               <span className="text-[10px] text-destructive font-mono animate-pulse">
-                EMİN MİSİN?
+                {t("admin.areSure")}
               </span>
               <button
                 onClick={executePanic}
                 className="px-3 py-1.5 bg-destructive text-destructive-foreground text-xs font-mono rounded font-bold animate-pulse"
               >
-                🔥 İMHA ET
+                {t("admin.destroy")}
               </button>
               <button
                 onClick={() => setPanicConfirm(false)}
                 className="px-3 py-1.5 bg-secondary text-muted-foreground text-xs font-mono rounded"
               >
-                İptal
+                {t("cancel")}
               </button>
             </div>
           )}

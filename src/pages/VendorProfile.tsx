@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import PageShell from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useParams } from "@/lib/router-shim";
+import { useI18n } from "@/lib/i18n";
 import { Star, User, Package, Shield, Clock, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import VendorRating from "@/components/VendorRating";
@@ -35,6 +36,7 @@ interface ProductRow {
 export default function VendorProfile() {
   const { vendorId } = useParams<{ vendorId: string }>();
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [profile, setProfile] = useState<VendorProfileData | null>(null);
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [products, setProducts] = useState<ProductRow[]>([]);
@@ -141,7 +143,7 @@ export default function VendorProfile() {
     return (
       <PageShell>
         <div className="flex items-center justify-center h-64 text-muted-foreground font-mono text-sm">
-          Yükleniyor...
+          {t("loading")}
         </div>
       </PageShell>
     );
@@ -181,12 +183,12 @@ export default function VendorProfile() {
             </div>
             <div className="flex-1">
               <h1 className="text-lg font-mono font-bold text-foreground">
-                {profile.display_name || "Anonim Satıcı"}
+                {profile.display_name || t("vendorProfile.anonymousVendor")}
               </h1>
               <div className="flex items-center gap-3 mt-1 flex-wrap">
                 <VendorRating vendorId={vendorId} size="md" />
                 <span className="text-[10px] font-mono text-muted-foreground px-2 py-0.5 rounded bg-primary/10 text-primary">
-                  SATICI
+                  {t("vendorProfile.vendorBadge")}
                 </span>
                 <PgpBadge userId={vendorId} size="md" showFingerprint />
               </div>
@@ -201,21 +203,21 @@ export default function VendorProfile() {
             <div className="text-center p-3 bg-secondary rounded-lg">
               <Package className="w-4 h-4 text-primary mx-auto mb-1" />
               <div className="text-lg font-mono font-bold text-foreground">{stats.totalOrders}</div>
-              <div className="text-[10px] font-mono text-muted-foreground">Toplam Sipariş</div>
+              <div className="text-[10px] font-mono text-muted-foreground">{t("vendorProfile.totalOrders")}</div>
             </div>
             <div className="text-center p-3 bg-secondary rounded-lg">
               <Shield className="w-4 h-4 text-green-500 mx-auto mb-1" />
               <div className="text-lg font-mono font-bold text-foreground">
                 {stats.completedOrders}
               </div>
-              <div className="text-[10px] font-mono text-muted-foreground">Tamamlanan</div>
+              <div className="text-[10px] font-mono text-muted-foreground">{t("vendorProfile.completedOrders")}</div>
             </div>
             <div className="text-center p-3 bg-secondary rounded-lg">
               <Clock className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
               <div className="text-sm font-mono font-bold text-foreground">
                 {stats.memberSince || "—"}
               </div>
-              <div className="text-[10px] font-mono text-muted-foreground">Üyelik</div>
+              <div className="text-[10px] font-mono text-muted-foreground">{t("vendorProfile.memberSince")}</div>
             </div>
           </div>
         </motion.div>
@@ -230,7 +232,7 @@ export default function VendorProfile() {
                 : "bg-secondary text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Star className="w-3.5 h-3.5" /> Yorumlar ({reviews.length})
+            <Star className="w-3.5 h-3.5" /> {t("vendorProfile.reviews")} ({reviews.length})
           </button>
           <button
             onClick={() => setTab("products")}
@@ -240,7 +242,7 @@ export default function VendorProfile() {
                 : "bg-secondary text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Package className="w-3.5 h-3.5" /> Ürünler ({products.length})
+            <Package className="w-3.5 h-3.5" /> {t("vendorProfile.products")} ({products.length})
           </button>
         </div>
 
@@ -250,7 +252,7 @@ export default function VendorProfile() {
             {reviews.length === 0 ? (
               <div className="glass-card rounded-lg p-8 text-center">
                 <MessageSquare className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm font-mono text-muted-foreground">Henüz yorum yok.</p>
+                <p className="text-sm font-mono text-muted-foreground">{t("vendorProfile.noReviews")}</p>
               </div>
             ) : (
               <>
@@ -268,7 +270,7 @@ export default function VendorProfile() {
                         ))}
                       </div>
                       <div className="text-[10px] font-mono text-muted-foreground mt-1">
-                        {reviews.length} yorum
+                        {reviews.length} {t("vendorProfile.reviewCount")}
                       </div>
                     </div>
                     <div className="flex-1 space-y-1">
@@ -311,7 +313,7 @@ export default function VendorProfile() {
                           A
                         </div>
                         <span className="text-xs font-mono text-foreground">
-                          {r.buyer_display_name}
+                          {r.buyer_display_name || t("vendorProfile.anonBuyer")}
                         </span>
                       </div>
                       <span className="text-[10px] font-mono text-muted-foreground">
@@ -342,7 +344,7 @@ export default function VendorProfile() {
             {products.length === 0 ? (
               <div className="col-span-2 glass-card rounded-lg p-8 text-center">
                 <Package className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm font-mono text-muted-foreground">Ürün bulunamadı.</p>
+                <p className="text-sm font-mono text-muted-foreground">{t("vendorProfile.noProducts")}</p>
               </div>
             ) : (
               products.map((p, i) => (
@@ -359,7 +361,7 @@ export default function VendorProfile() {
                   <div className="flex items-center justify-between mt-2">
                     <span className="text-sm font-mono font-bold text-primary">{p.price} LTC</span>
                     <span className="text-[10px] font-mono text-muted-foreground">
-                      Stok: {p.stock}
+                      {t("vendorProfile.stockLabel")} {p.stock}
                     </span>
                   </div>
                   {p.category && (

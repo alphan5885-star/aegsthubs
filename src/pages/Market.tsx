@@ -17,13 +17,13 @@ import {
   ArrowDown,
   Sparkles,
   Clock,
-  Filter,
   ShoppingCart,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import VendorRating from "@/components/VendorRating";
 import QuickViewModal from "@/components/QuickViewModal";
 import WatchlistButton from "@/components/WatchlistButton";
+import { useI18n } from "@/lib/i18n";
 
 const SERVICE_FEE_RATE = 0.05;
 const FIXED_CATEGORIES = ["Dijital Veriler", "Lojistik Rotaları", "VIP Erişim"];
@@ -46,6 +46,7 @@ interface ProductRow {
 
 export default function Market() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const isMounted = useRef(true);
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [vendorNames, setVendorNames] = useState<Record<string, string>>({});
@@ -61,7 +62,7 @@ export default function Market() {
     totalProducts: 0,
     activeVendors: 0,
     volume24h: 0,
-    ltcUsd: 84.22, // Fallback
+    ltcUsd: 84.22,
   });
 
   const [liveActivity, setLiveActivity] = useState<any[]>([]);
@@ -87,7 +88,6 @@ export default function Market() {
 
         if (data) {
           setProducts(data as ProductRow[]);
-          // Fetch vendor display names
           const vendorIds = Array.from(new Set(data.map((p: any) => p.vendor_id)));
           const categoryCounts = new Map<string, number>();
           for (const p of data as any[]) {
@@ -112,7 +112,7 @@ export default function Market() {
               .slice(0, 2)
               .map((p) => ({
                 user: `vend***${String(p.vendor_id).substring(0, 3)}`,
-                action: "Yeni Ürün",
+                action: t("market.newProduct"),
                 item: p.name,
                 time: formatRelativeTime(p.created_at),
               }))
@@ -138,7 +138,7 @@ export default function Market() {
             if (profiles) {
               const map: Record<string, string> = {};
               profiles.forEach((p: any) => {
-                map[p.user_id] = p.display_name || "Anonim";
+                map[p.user_id] = p.display_name || t("market.anonymous");
               });
               setVendorNames(map);
             }
@@ -157,11 +157,11 @@ export default function Market() {
   const formatRelativeTime = (dateStr: string) => {
     const diff = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return "Az önce";
-    if (mins < 60) return `${mins}dk önce`;
+    if (mins < 1) return t("market.justNow");
+    if (mins < 60) return `${mins}${t("market.minsAgo")}`;
     const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours}sa önce`;
-    return `${Math.floor(hours / 24)}g önce`;
+    if (hours < 24) return `${hours}${t("market.hoursAgo")}`;
+    return `${Math.floor(hours / 24)}${t("market.daysAgo")}`;
   };
 
   const categories = FIXED_CATEGORIES;
@@ -174,14 +174,13 @@ export default function Market() {
   });
 
   const stats = [
-    { icon: Package, label: "Ürün", value: products.length },
-    { icon: Users, label: "Kullanıcı", value: marketStats.online },
-    { icon: TrendingUp, label: "24h İşlem", value: marketStats.orders24h },
+    { icon: Package, label: t("market.statProduct"), value: products.length },
+    { icon: Users, label: t("market.statUsers"), value: marketStats.online },
+    { icon: TrendingUp, label: t("market.stat24h"), value: marketStats.orders24h },
   ];
 
   return (
     <PageShell>
-      {/* Status Bar */}
       <div className="glass-card rounded-lg p-3 mb-6 border-l-2 border-l-primary">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -189,7 +188,7 @@ export default function Market() {
             <span className="font-mono text-sm font-bold text-foreground">aeigsthub</span>
             <div className="flex items-center gap-1.5 bg-green-500/10 px-2 py-0.5 rounded">
               <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-              <span className="text-[10px] font-mono text-green-500">AKTIF</span>
+              <span className="text-[10px] font-mono text-green-500">{t("market.active")}</span>
             </div>
           </div>
           <div className="flex items-center gap-6">
@@ -211,7 +210,6 @@ export default function Market() {
 
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
         <div className="xl:col-span-3">
-          {/* Trends Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             {[
               {
@@ -222,16 +220,16 @@ export default function Market() {
                 icon: TrendingUp,
               },
               {
-                label: "En Popüler",
+                label: t("market.mostPopular"),
                 value: marketStats.topCategory,
-                trend: "Yüksek",
+                trend: t("market.high"),
                 up: true,
                 icon: Sparkles,
               },
-              { label: "Güvenlik", value: "Maksimum", trend: "Stabil", up: true, icon: Shield },
-            ].map((t, i) => (
+              { label: t("market.security"), value: t("market.maximum"), trend: t("market.stable"), up: true, icon: Shield },
+            ].map((item, i) => (
               <motion.div
-                key={t.label}
+                key={item.label}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.1 }}
@@ -239,20 +237,20 @@ export default function Market() {
               >
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-background border border-white/5 group-hover:border-primary/20 transition-all">
-                    <t.icon className="w-4 h-4 text-primary" />
+                    <item.icon className="w-4 h-4 text-primary" />
                   </div>
                   <div>
                     <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
-                      {t.label}
+                      {item.label}
                     </div>
-                    <div className="text-sm font-mono font-bold text-foreground">{t.value}</div>
+                    <div className="text-sm font-mono font-bold text-foreground">{item.value}</div>
                   </div>
                 </div>
                 <div
-                  className={`flex items-center gap-1 text-[10px] font-mono font-bold ${t.up ? "text-green-500" : "text-destructive"}`}
+                  className={`flex items-center gap-1 text-[10px] font-mono font-bold ${item.up ? "text-green-500" : "text-destructive"}`}
                 >
-                  {t.up ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
-                  {t.trend}
+                  {item.up ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
+                  {item.trend}
                 </div>
               </motion.div>
             ))}
@@ -261,10 +259,10 @@ export default function Market() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Activity className="w-4 h-4 text-primary" />
-              <h1 className="text-lg font-mono font-bold text-foreground">Aktif Listeler</h1>
+              <h1 className="text-lg font-mono font-bold text-foreground">{t("market.activeListing")}</h1>
             </div>
             <span className="text-[10px] font-mono text-muted-foreground bg-secondary px-2 py-1 rounded">
-              {filtered.length} sonuç
+              {filtered.length} {t("market.results")}
             </span>
           </div>
 
@@ -274,7 +272,7 @@ export default function Market() {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Ürün ara..."
+                placeholder={t("market.searchPlaceholder")}
                 className="w-full pl-9 pr-3 py-2.5 bg-secondary border border-border rounded-lg text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
@@ -289,13 +287,12 @@ export default function Market() {
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  {f === "all" ? "TÜMÜ" : f === "digital" ? "DİJİTAL" : "FİZİKSEL"}
+                  {f === "all" ? t("market.filterAll") : f === "digital" ? t("market.filterDigital") : t("market.filterPhysical")}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Category chips */}
           <div className="flex gap-2 mb-6 flex-wrap">
             <button
               onClick={() => setCategoryFilter("all")}
@@ -305,7 +302,7 @@ export default function Market() {
                   : "bg-secondary text-muted-foreground border-border hover:text-foreground"
               }`}
             >
-              Tüm Kategoriler
+              {t("market.allCategories")}
             </button>
             {categories.map((c) => (
               <button
@@ -325,14 +322,14 @@ export default function Market() {
           {filtered.length === 0 && (
             <div className="glass-card rounded-lg p-12 text-center">
               <Package className="w-10 h-10 text-muted-foreground mx-auto mb-3 opacity-40" />
-              <div className="text-muted-foreground font-mono text-sm">Ürün bulunamadı.</div>
+              <div className="text-muted-foreground font-mono text-sm">{t("market.noProducts")}</div>
             </div>
           )}
 
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map((p, i) => {
               const totalPrice = p.price + p.price * SERVICE_FEE_RATE;
-              const vendorName = vendorNames[p.vendor_id] || "Anonim";
+              const vendorName = vendorNames[p.vendor_id] || t("market.anonymous");
               return (
                 <motion.div
                   key={p.id}
@@ -378,7 +375,6 @@ export default function Market() {
                       </div>
                     )}
 
-                    {/* Vendor link */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -398,7 +394,7 @@ export default function Market() {
                       }}
                       className="flex items-center gap-1 mt-2 text-[10px] font-mono text-primary hover:underline"
                     >
-                      <Eye className="w-3 h-3" /> Detaylar
+                      <Eye className="w-3 h-3" /> {t("market.details")}
                     </button>
 
                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
@@ -423,12 +419,12 @@ export default function Market() {
                           ) : (
                             <Package className="w-3 h-3" />
                           )}
-                          {p.type === "digital" ? "DİJİTAL" : "FİZİKSEL"}
+                          {p.type === "digital" ? t("market.filterDigital") : t("market.filterPhysical")}
                         </span>
                         <span
                           className={`text-[9px] font-mono ${p.stock > 5 ? "text-green-500" : "text-yellow-500"}`}
                         >
-                          {p.stock > 5 ? `${p.stock} stok` : `Son ${p.stock}!`}
+                          {p.stock > 5 ? `${p.stock} ${t("market.stockUnit")}` : `${t("market.stockLeft")} ${p.stock}!`}
                         </span>
                       </div>
                     </div>
@@ -439,13 +435,12 @@ export default function Market() {
           </div>
         </div>
 
-        {/* Sidebar: Live Activity */}
         <div className="space-y-6">
           <div className="glass-card p-5 rounded-xl border-l-2 border-primary">
             <div className="flex items-center gap-2 mb-4">
               <Activity className="w-4 h-4 text-primary animate-pulse" />
               <h3 className="text-xs font-mono font-bold text-foreground uppercase tracking-widest">
-                Canlı Aktivite
+                {t("market.liveActivity")}
               </h3>
             </div>
             <div className="space-y-4">
@@ -471,24 +466,24 @@ export default function Market() {
                 ))
               ) : (
                 <div className="text-[10px] font-mono text-muted-foreground text-center py-4">
-                  Aktivite aranıyor...
+                  {t("market.searching")}
                 </div>
               )}
             </div>
             <button className="w-full mt-4 py-2 border border-white/5 rounded-lg text-[9px] font-mono text-muted-foreground hover:bg-secondary/30 transition-all uppercase tracking-widest">
-              Tüm Aktiviteyi Gör
+              {t("market.seeAllActivity")}
             </button>
           </div>
 
           <div className="glass-card p-5 rounded-xl">
             <h3 className="text-xs font-mono font-bold text-foreground uppercase tracking-widest mb-4">
-              Pazar İstatistikleri
+              {t("market.marketStats")}
             </h3>
             <div className="space-y-3">
               {[
-                { label: "Toplam Ürün", value: marketStats.totalProducts.toLocaleString() },
-                { label: "Aktif Satıcı", value: marketStats.activeVendors.toLocaleString() },
-                { label: "24s Hacim", value: `${marketStats.volume24h.toFixed(2)} LTC` },
+                { label: t("market.totalProducts"), value: marketStats.totalProducts.toLocaleString() },
+                { label: t("market.activeVendors"), value: marketStats.activeVendors.toLocaleString() },
+                { label: t("market.volume24h"), value: `${marketStats.volume24h.toFixed(2)} LTC` },
               ].map((s) => (
                 <div key={s.label} className="flex justify-between items-center">
                   <span className="text-[10px] font-mono text-muted-foreground">{s.label}</span>

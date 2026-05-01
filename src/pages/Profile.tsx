@@ -10,6 +10,7 @@ import PgpVault from "@/components/PgpVault";
 import PgpBadge from "@/components/PgpBadge";
 import CipherNotes from "@/components/CipherNotes";
 import { devError } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
 
 interface ProfileData {
   display_name: string | null;
@@ -29,6 +30,7 @@ interface OrderRow {
 
 export default function Profile() {
   const { user, role } = useAuth();
+  const { t } = useI18n();
   const [profile, setProfile] = useState<ProfileData>({
     display_name: "",
     avatar_url: null,
@@ -96,14 +98,13 @@ export default function Profile() {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
-    // Accept images and GIFs
     const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
-      toast.error("Desteklenen formatlar: JPG, PNG, GIF, WebP");
+      toast.error(t("supportedFormats"));
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("Maksimum dosya boyutu: 5MB");
+      toast.error(t("vendor.maxFileSize5"));
       return;
     }
 
@@ -120,7 +121,7 @@ export default function Profile() {
 
       if (upErr) {
         devError("Error uploading avatar:", upErr);
-        toast.error("Yükleme hatası");
+        toast.error(t("profile.uploadError"));
         setUploading(false);
         return;
       }
@@ -138,14 +139,14 @@ export default function Profile() {
 
       if (updateError) {
         devError("Error updating profile avatar_url:", updateError);
-        toast.error("Profil güncellenemedi");
+        toast.error(t("profile.profileUpdateError"));
       } else {
         setProfile((p) => ({ ...p, avatar_url: publicUrl }));
-        toast.success("Avatar güncellendi! 🎉");
+        toast.success(t("profile.avatarUpdated"));
       }
     } catch (e) {
       devError("Catch error in handleAvatarUpload:", e);
-      if (isMounted.current) toast.error("Beklenmedik bir hata oluştu");
+      if (isMounted.current) toast.error(t("unexpectedError"));
     } finally {
       if (isMounted.current) setUploading(false);
     }
@@ -157,11 +158,11 @@ export default function Profile() {
 
     const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
-      toast.error("Desteklenen formatlar: JPG, PNG, GIF, WebP");
+      toast.error(t("supportedFormats"));
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
-      toast.error("Maksimum dosya boyutu: 10MB");
+      toast.error(t("maxFileSize"));
       return;
     }
 
@@ -178,7 +179,7 @@ export default function Profile() {
 
       if (upErr) {
         devError("Error uploading banner:", upErr);
-        toast.error("Banner yükleme hatası: " + upErr.message);
+        toast.error(t("profile.uploadError") + ": " + upErr.message);
         setUploadingBanner(false);
         return;
       }
@@ -196,14 +197,14 @@ export default function Profile() {
 
       if (updateError) {
         devError("Error updating profile banner_url:", updateError);
-        toast.error("Profil güncellenemedi");
+        toast.error(t("profile.profileUpdateError"));
       } else {
         setProfile((p) => ({ ...p, banner_url: publicUrl }));
-        toast.success("Banner güncellendi! 🖼️");
+        toast.success(t("profile.bannerUpdated"));
       }
     } catch (e) {
       devError("Catch error in handleBannerUpload:", e);
-      if (isMounted.current) toast.error("Beklenmedik bir hata oluştu");
+      if (isMounted.current) toast.error(t("unexpectedError"));
     } finally {
       if (isMounted.current) setUploadingBanner(false);
     }
@@ -227,11 +228,11 @@ export default function Profile() {
         devError("Error saving profile:", error);
         toast.error(error.message);
       } else {
-        toast.success("Profil kaydedildi!");
+        toast.success(t("profile.saved"));
       }
     } catch (e) {
       devError("Catch error in handleSave:", e);
-      if (isMounted.current) toast.error("Beklenmedik bir hata oluştu");
+      if (isMounted.current) toast.error(t("unexpectedError"));
     } finally {
       if (isMounted.current) setSaving(false);
     }
@@ -247,30 +248,30 @@ export default function Profile() {
 
       if (error) {
         devError("Error confirming delivery in profile:", error);
-        toast.error("İşlem sırasında hata oluştu");
+        toast.error(t("err.generic"));
         return;
       }
 
       if (data && (data as any).success) {
-        toast.success("Teslimat onaylandı! Escrow serbest bırakıldı.");
+        toast.success(t("profile.deliveryConfirmed"));
         setOrders((prev) =>
           prev.map((o) =>
             o.id === orderId ? { ...o, delivery_confirmed: true, status: "completed" } : o,
           ),
         );
       } else {
-        toast.error((data as any)?.error || "Hata oluştu");
+        toast.error((data as any)?.error || t("err.generic"));
       }
     } catch (e) {
       devError("Catch error in profile confirmDelivery:", e);
-      if (isMounted.current) toast.error("Beklenmedik bir hata oluştu");
+      if (isMounted.current) toast.error(t("unexpectedError"));
     }
   };
 
   return (
     <PageShell>
       <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-xl font-mono font-bold text-primary neon-text">Profilim</h1>
+        <h1 className="text-xl font-mono font-bold text-primary neon-text">{t("profile.myProfile")}</h1>
 
         {/* Banner */}
         <motion.div
@@ -293,7 +294,7 @@ export default function Profile() {
               <>
                 <ImagePlus className="w-5 h-5 text-primary" />
                 <span className="text-xs font-mono text-foreground">
-                  Banner Değiştir (GIF destekli)
+                  {t("profile.changeBanner")}
                 </span>
               </>
             )}
@@ -351,7 +352,7 @@ export default function Profile() {
             <div className="flex-1 space-y-3">
               <div>
                 <label className="text-xs text-muted-foreground font-mono mb-1 block">
-                  GÖRÜNTÜLEME ADI
+                  {t("profile.displayNameLabel")}
                 </label>
                 <input
                   value={profile.display_name || ""}
@@ -361,14 +362,14 @@ export default function Profile() {
               </div>
               <div>
                 <label className="text-xs text-muted-foreground font-mono mb-1 block">
-                  BİYOGRAFİ
+                  {t("profile.bioLabel")}
                 </label>
                 <textarea
                   value={profile.bio || ""}
                   onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
                   rows={2}
                   className="w-full bg-secondary border border-border rounded px-3 py-2 text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none"
-                  placeholder="Kendinizi tanıtın..."
+                  placeholder={t("profile.bioPlaceholder")}
                 />
               </div>
               <div className="flex items-center gap-3 flex-wrap">
@@ -388,7 +389,7 @@ export default function Profile() {
                 ) : (
                   <Save className="w-3 h-3" />
                 )}
-                Kaydet
+                {t("save")}
               </button>
             </div>
           </div>
@@ -397,9 +398,7 @@ export default function Profile() {
         {/* Supported Formats Info */}
         <div className="glass-card rounded-lg p-3 flex items-center gap-2">
           <span className="text-[10px] font-mono text-muted-foreground">
-            💡 Profil fotoğrafı ve banner için{" "}
-            <span className="text-primary">GIF, PNG, JPG, WebP</span> formatları desteklenir.
-            Hareketli GIF'ler otomatik olarak oynatılır!
+            {t("profile.formatInfo")}
           </span>
         </div>
 
@@ -415,10 +414,10 @@ export default function Profile() {
         {/* Order History for Buyers */}
         {role === "buyer" && (
           <div>
-            <h2 className="text-sm font-mono font-bold text-foreground mb-3">Sipariş Geçmişi</h2>
+            <h2 className="text-sm font-mono font-bold text-foreground mb-3">{t("profile.orderHistory")}</h2>
             {orders.length === 0 ? (
               <div className="glass-card rounded-lg p-6 text-center text-muted-foreground font-mono text-sm">
-                Henüz sipariş yok.
+                {t("profile.noOrders")}
               </div>
             ) : (
               <div className="space-y-2">
@@ -442,7 +441,7 @@ export default function Profile() {
                       )}
                       <div>
                         <div className="text-sm font-medium text-foreground">
-                          {o.products?.name || "Ürün"}
+                          {o.products?.name || t("profile.product")}
                         </div>
                         <div className="text-[10px] text-muted-foreground font-mono">
                           {new Date(o.created_at).toLocaleDateString("tr-TR")}
@@ -458,11 +457,11 @@ export default function Profile() {
                           onClick={() => confirmDelivery(o.id)}
                           className="flex items-center gap-1 px-2 py-1 bg-green-600 text-primary-foreground text-[10px] font-mono rounded hover:bg-green-700 transition-colors"
                         >
-                          <CheckCircle className="w-3 h-3" /> Teslimatı Onayla
+                          <CheckCircle className="w-3 h-3" /> {t("profile.confirmDelivery")}
                         </button>
                       ) : o.delivery_confirmed ? (
                         <span className="flex items-center gap-1 text-[10px] font-mono text-green-500">
-                          <CheckCircle className="w-3 h-3" /> Teslim Edildi
+                          <CheckCircle className="w-3 h-3" /> {t("profile.deliveryDone")}
                         </span>
                       ) : (
                         <span className="flex items-center gap-1 text-[10px] font-mono text-yellow-500">

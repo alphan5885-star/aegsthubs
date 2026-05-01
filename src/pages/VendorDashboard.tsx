@@ -27,6 +27,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
+import { useI18n } from "@/lib/i18n";
 
 interface ProductRow {
   id: string;
@@ -48,6 +49,7 @@ const CATEGORIES = ["Dijital Veriler", "Lojistik Rotaları", "VIP Erişim"];
 
 export default function VendorDashboard() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [salesData, setSalesData] = useState<any[]>([]);
@@ -96,15 +98,14 @@ export default function VendorDashboard() {
 
         if (!isMounted.current) return;
 
-        if (prodRes.error) toast.error("Ürünler yüklenirken hata oluştu");
-        if (orderRes.error) toast.error("Siparişler yüklenirken hata oluştu");
+        if (prodRes.error) toast.error(t("vendor.loadError"));
+        if (orderRes.error) toast.error(t("vendor.ordersLoadError"));
 
         if (prodRes.data) setProducts(prodRes.data as any);
         if (orderRes.data) {
           const ords = orderRes.data;
           setOrders(ords);
 
-          // Stats
           const totalRevenue = ords.reduce(
             (acc, o) => acc + (o.status === "completed" ? Number(o.amount) : 0),
             0,
@@ -118,7 +119,6 @@ export default function VendorDashboard() {
           });
 
           // Chart data (last 7 days)
-          const days = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
           const chartMap = new Map();
           for (let i = 6; i >= 0; i--) {
             const d = new Date();
@@ -153,21 +153,18 @@ export default function VendorDashboard() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
-      toast.error("Desteklenen formatlar: JPG, PNG, GIF, WebP");
+      toast.error(t("vendor.supportedFormats"));
       return;
     }
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("Maksimum dosya boyutu: 5MB");
+      toast.error(t("vendor.maxFileSize5"));
       return;
     }
-    // Sanitize extension
     const ext = file.name.split(".").pop()?.toLowerCase();
     if (!ext || !["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) {
-      toast.error("Geçersiz dosya uzantısı");
+      toast.error(t("vendor.invalidFileType"));
       return;
     }
 
@@ -186,7 +183,7 @@ export default function VendorDashboard() {
         const allowedExts = ["jpg", "jpeg", "png", "gif", "webp"];
         const ext = imageFile.name.split(".").pop()?.toLowerCase();
         if (!ext || !allowedExts.includes(ext)) {
-          toast.error("Geçersiz dosya uzantısı");
+          toast.error(t("vendor.invalidFileType"));
           if (isMounted.current) setSaving(false);
           return;
         }
@@ -197,7 +194,7 @@ export default function VendorDashboard() {
 
         if (upErr) {
           if (import.meta.env.DEV) console.error("Error uploading product image:", upErr);
-          toast.error("Resim yüklenemedi");
+          toast.error(t("vendor.imageUploadError"));
           if (isMounted.current) setSaving(false);
           return;
         }
@@ -254,11 +251,11 @@ export default function VendorDashboard() {
         setImageFile(null);
         setImagePreview(null);
         setShowAdd(false);
-        toast.success("Ürün eklendi!");
+        toast.success(t("vendor.productAdded"));
       }
     } catch (e) {
       if (import.meta.env.DEV) console.error("Catch error in VendorDashboard handleSave:", e);
-      if (isMounted.current) toast.error("Beklenmedik bir hata oluştu");
+      if (isMounted.current) toast.error(t("unexpectedError"));
     } finally {
       if (isMounted.current) setSaving(false);
     }
@@ -274,22 +271,22 @@ export default function VendorDashboard() {
         return;
       }
       setProducts((prev) => prev.filter((p) => p.id !== id));
-      toast.success("Ürün silindi");
+      toast.success(t("vendor.productDeleted"));
     } catch (e) {
       if (import.meta.env.DEV) console.error("Catch error in VendorDashboard handleDelete:", e);
-      if (isMounted.current) toast.error("Silme işlemi sırasında hata oluştu");
+      if (isMounted.current) toast.error(t("vendor.deleteError"));
     }
   };
 
   return (
     <PageShell>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-mono font-bold text-primary neon-text">Satıcı Paneli</h1>
+        <h1 className="text-xl font-mono font-bold text-primary neon-text">{t("vendor.panelTitle")}</h1>
         <button
           onClick={() => setShowAdd(!showAdd)}
           className="flex items-center gap-1 px-3 py-1.5 bg-primary text-primary-foreground text-xs font-mono rounded neon-glow-btn"
         >
-          <Plus className="w-3 h-3" /> Yeni Ürün
+          <Plus className="w-3 h-3" /> {t("vendor.newProduct")}
         </button>
       </div>
 
@@ -297,28 +294,28 @@ export default function VendorDashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[
           {
-            label: "Toplam Satış",
+            label: t("vendor.totalSalesLabel"),
             value: stats.totalSales,
             icon: ShoppingBag,
             color: "text-blue-400",
             bg: "bg-blue-400/10",
           },
           {
-            label: "Aktif Ürünler",
+            label: t("vendor.activeProductsLabel"),
             value: stats.activeProducts,
             icon: Package,
             color: "text-purple-400",
             bg: "bg-purple-400/10",
           },
           {
-            label: "Bekleyen Sipariş",
+            label: t("vendor.pendingOrdersLabel"),
             value: stats.pendingOrders,
             icon: Loader2,
             color: "text-orange-400",
             bg: "bg-orange-400/10",
           },
           {
-            label: "Toplam Gelir",
+            label: t("vendor.totalRevenueLabel"),
             value: `${stats.totalRevenue.toFixed(3)} LTC`,
             icon: Coins,
             color: "text-emerald-400",
@@ -362,13 +359,13 @@ export default function VendorDashboard() {
               <TrendingUp className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <h2 className="text-sm font-mono font-bold text-foreground">Satış Analitiği</h2>
-              <p className="text-[10px] text-muted-foreground font-mono">Son 7 günlük performans</p>
+              <h2 className="text-sm font-mono font-bold text-foreground">{t("vendor.salesAnalytics")}</h2>
+              <p className="text-[10px] text-muted-foreground font-mono">{t("vendor.last7Days")}</p>
             </div>
           </div>
           <div className="flex items-center gap-1.5 px-2 py-1 bg-secondary rounded text-[10px] font-mono text-muted-foreground border border-white/5">
             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            Canlı Veri
+            {t("vendor.liveData")}
           </div>
         </div>
 
@@ -424,7 +421,7 @@ export default function VendorDashboard() {
       <div className="flex items-center gap-2 mb-4">
         <Package className="w-4 h-4 text-primary" />
         <h2 className="text-sm font-mono font-bold text-foreground uppercase tracking-widest">
-          Ürünlerim
+          {t("vendor.products")}
         </h2>
       </div>
 
@@ -446,7 +443,7 @@ export default function VendorDashboard() {
                 <>
                   <ImageIcon className="w-8 h-8 text-muted-foreground mb-2" />
                   <span className="text-xs font-mono text-muted-foreground">
-                    Ürün fotoğrafı yükle
+                    {t("vendor.uploadPhoto")}
                   </span>
                 </>
               )}
@@ -464,7 +461,7 @@ export default function VendorDashboard() {
             <input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="Ürün adı"
+              placeholder={t("vendor.productNamePlaceholder")}
               className="bg-secondary border border-border rounded px-3 py-2 text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             />
             <select
@@ -472,13 +469,13 @@ export default function VendorDashboard() {
               onChange={(e) => setForm({ ...form, type: e.target.value })}
               className="bg-secondary border border-border rounded px-3 py-2 text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             >
-              <option value="digital">Dijital</option>
-              <option value="physical">Fiziksel</option>
+              <option value="digital">{t("vendor.digital")}</option>
+              <option value="physical">{t("vendor.physical")}</option>
             </select>
             <input
               value={form.price}
               onChange={(e) => setForm({ ...form, price: e.target.value })}
-              placeholder="Fiyat (LTC)"
+              placeholder={t("vendor.priceLtc")}
               type="number"
               step="0.01"
               className="bg-secondary border border-border rounded px-3 py-2 text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
@@ -486,7 +483,7 @@ export default function VendorDashboard() {
             <input
               value={form.stock}
               onChange={(e) => setForm({ ...form, stock: e.target.value })}
-              placeholder="Stok"
+              placeholder={t("vendor.stockPlaceholder")}
               type="number"
               className="bg-secondary border border-border rounded px-3 py-2 text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             />
@@ -516,7 +513,7 @@ export default function VendorDashboard() {
             <textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              placeholder="Açıklama"
+              placeholder={t("vendor.descriptionPlaceholder")}
               className="col-span-2 bg-secondary border border-border rounded px-3 py-2 text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               rows={2}
             />
@@ -524,7 +521,7 @@ export default function VendorDashboard() {
               value={form.deliveryData}
               onChange={(e) => setForm({ ...form, deliveryData: e.target.value })}
               placeholder={
-                form.type === "digital" ? "Teslimat verisi (key/link)" : "Kargo takip no"
+                form.type === "digital" ? t("vendor.deliveryDataKey") : t("vendor.trackingNo")
               }
               className="col-span-2 bg-secondary border border-border rounded px-3 py-2 text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             />
@@ -535,14 +532,14 @@ export default function VendorDashboard() {
             className="mt-3 px-4 py-2 bg-primary text-primary-foreground text-xs font-mono rounded neon-glow-btn flex items-center gap-1.5"
           >
             {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
-            Ürünü Kaydet
+            {t("vendor.saveProduct")}
           </button>
         </motion.div>
       )}
 
       {products.length === 0 && !showAdd && (
         <div className="glass-card rounded-lg p-8 text-center text-muted-foreground font-mono text-sm">
-          Henüz ürün eklenmedi.
+          {t("vendor.noProductsYet")}
         </div>
       )}
 
@@ -573,7 +570,7 @@ export default function VendorDashboard() {
             <div className="flex items-center gap-4">
               <div className="text-right">
                 <div className="text-sm font-mono font-bold text-primary">{p.price} LTC</div>
-                <div className="text-[10px] text-muted-foreground font-mono">Stok: {p.stock}</div>
+                <div className="text-[10px] text-muted-foreground font-mono">{t("vendor.stockLabel")} {p.stock}</div>
               </div>
               <span
                 className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-mono ${
@@ -587,7 +584,7 @@ export default function VendorDashboard() {
                 ) : (
                   <Package className="w-3 h-3" />
                 )}
-                {p.type === "digital" ? "DİJİTAL" : "FİZİKSEL"}
+                {p.type === "digital" ? t("vendor.digital").toUpperCase() : t("vendor.physical").toUpperCase()}
               </span>
               <button
                 onClick={() => handleDelete(p.id)}

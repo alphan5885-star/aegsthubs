@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import PageShell from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
+import { useI18n } from "@/lib/i18n";
 import { MessageSquare, DollarSign, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 
@@ -23,6 +24,7 @@ interface MessageRow {
 
 export default function Disputes() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const [disputes, setDisputes] = useState<DisputeRow[]>([]);
   const [selected, setSelected] = useState<DisputeRow | null>(null);
   const [messages, setMessages] = useState<MessageRow[]>([]);
@@ -40,7 +42,7 @@ export default function Disputes() {
         if (!isMounted.current) return;
         if (error) {
           if (import.meta.env.DEV) console.error("Error fetching disputes:", error);
-          toast.error("Uyuşmazlıklar yüklenirken hata oluştu");
+          toast.error(t("disputes.loadError"));
           return;
         }
         if (data && data.length > 0) {
@@ -96,12 +98,12 @@ export default function Disputes() {
 
       if (error) {
         if (import.meta.env.DEV) console.error(`Error performing dispute action (${type}):`, error);
-        toast.error("İşlem gerçekleştirilirken hata oluştu");
+        toast.error(t("disputes.actionError"));
         return;
       }
 
       toast.success(
-        type === "release" ? "Fonlar satıcıya serbest bırakıldı." : "Fonlar alıcıya iade edildi.",
+        type === "release" ? t("disputes.releaseSuccess") : t("disputes.refundSuccess"),
       );
       setDisputes((prev) =>
         prev.map((d) => (d.id === selected.id ? { ...d, status: newStatus } : d)),
@@ -125,7 +127,7 @@ export default function Disputes() {
 
       if (error) {
         if (import.meta.env.DEV) console.error("Error sending dispute message:", error);
-        toast.error("Mesaj gönderilirken hata oluştu");
+        toast.error(t("disputes.messageSendError"));
         return;
       }
 
@@ -147,12 +149,12 @@ export default function Disputes() {
   return (
     <PageShell>
       <h1 className="text-xl font-mono font-bold text-primary neon-text mb-6">
-        Dispute Resolution
+        {t("disputes.resolutionTitle")}
       </h1>
 
       {disputes.length === 0 ? (
         <div className="glass-card rounded-lg p-8 text-center text-muted-foreground font-mono text-sm">
-          Henüz uyuşmazlık yok.
+          {t("disputes.noDisputes")}
         </div>
       ) : (
         <div className="grid grid-cols-3 gap-4">
@@ -189,7 +191,7 @@ export default function Disputes() {
             <div className="col-span-2 glass-card rounded-lg p-4">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-xs text-muted-foreground font-mono">
-                  Uyuşmazlık: {selected.product_name}
+                  {t("disputes.disputeLabel")}{selected.product_name}
                 </span>
                 {selected.status !== "resolved" && (
                   <div className="flex gap-2">
@@ -197,13 +199,13 @@ export default function Disputes() {
                       onClick={() => handleAction("release")}
                       className="flex items-center gap-1 px-3 py-1.5 bg-green-600/20 text-green-500 text-xs font-mono rounded hover:bg-green-600/30 transition-all"
                     >
-                      <DollarSign className="w-3 h-3" /> Serbest Bırak
+                      <DollarSign className="w-3 h-3" /> {t("disputes.release")}
                     </button>
                     <button
                       onClick={() => handleAction("refund")}
                       className="flex items-center gap-1 px-3 py-1.5 bg-primary/20 text-primary text-xs font-mono rounded hover:bg-primary/30 transition-all"
                     >
-                      <RotateCcw className="w-3 h-3" /> İade Et
+                      <RotateCcw className="w-3 h-3" /> {t("disputes.refund")}
                     </button>
                   </div>
                 )}
@@ -212,7 +214,7 @@ export default function Disputes() {
               <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
                 {messages.length === 0 && (
                   <div className="text-xs text-muted-foreground text-center py-4">
-                    Henüz mesaj yok.
+                    {t("disputes.noMessages")}
                   </div>
                 )}
                 {messages.map((m) => (
@@ -244,7 +246,7 @@ export default function Disputes() {
                   value={newMsg}
                   onChange={(e) => setNewMsg(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                  placeholder="Admin mesajı..."
+                  placeholder={t("disputes.adminMessage")}
                   className="flex-1 bg-secondary border border-border rounded px-3 py-2 text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 />
                 <button

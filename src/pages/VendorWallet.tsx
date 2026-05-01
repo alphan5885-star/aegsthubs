@@ -37,6 +37,7 @@ export default function VendorWalletPage() {
   });
   const [withdrawAddr, setWithdrawAddr] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [withdrawing, setWithdrawing] = useState(false);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
 
   const isMounted = useRef(true);
@@ -107,12 +108,33 @@ export default function VendorWalletPage() {
     };
   }, [user]);
 
-  const handleWithdraw = () => {
+  const handleWithdraw = async () => {
     if (!withdrawAddr || !withdrawAmount) return;
-    if (isMounted.current) {
-      toast.success(`${withdrawAmount} LTC çekim talebi oluşturuldu.`);
+    const amt = parseFloat(withdrawAmount);
+    if (isNaN(amt) || amt <= 0) { toast.error("Geçersiz miktar"); return; }
+    if (amt > wallet.available) { toast.error("Yetersiz bakiye"); return; }
+    setWithdrawing(true);
+    try {
+      const { data, error } = await supabase.rpc("vendor_withdraw_ltc", {
+        _address: withdrawAddr,
+        _amount: amt,
+      });
+      if (error || !(data as any)?.success) {
+        const msg = (data as any)?.error;
+        toast.error(
+          msg === "insufficient_balance" ? "Yetersiz bakiye" :
+          msg === "invalid_address" ? "Geçersiz LTC adresi" : "Çekim başarısız",
+        );
+        return;
+      }
+      toast.success(`${amt} LTC çekim talebi oluşturuldu. Manuel transfer sonrası bakiyenizden düşer.`);
       setWithdrawAddr("");
       setWithdrawAmount("");
+      if (isMounted.current) {
+        setWallet((prev) => ({ ...prev, available: prev.available - amt }));
+      }
+    } finally {
+      setWithdrawing(false);
     }
   };
 
@@ -132,8 +154,8 @@ export default function VendorWalletPage() {
       bg: "bg-green-500/10",
     },
     {
-      label: "Sistem Kesintisi (%5)",
-      value: orderSummary.totalCommission,
+      label: "Sistem Kesintisi (%10)",
+      value: wallet.commission,
       icon: Percent,
       color: "text-primary",
       bg: "bg-primary/10",
@@ -237,27 +259,37 @@ export default function VendorWalletPage() {
 
       {/* Withdraw */}
       <div className="glass-card rounded-lg p-4">
-        <h2 className="text-sm font-mono text-muted-foreground mb-3">Çekim Talebi</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-mono text-muted-foreground">Çekim Talebi</h2>
+          <span className="text-[10px] font-mono text-muted-foreground">
+            Maks: {wallet.available.toFixed(8)} LTC
+          </span>
+        </div>
         <div className="flex gap-3">
           <input
             value={withdrawAddr}
             onChange={(e) => setWithdrawAddr(e.target.value)}
             placeholder="LTC Cüzdan Adresi"
             className="flex-1 bg-secondary border border-border rounded px-3 py-2 text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+            disabled={withdrawing}
           />
           <input
             value={withdrawAmount}
             onChange={(e) => setWithdrawAmount(e.target.value)}
             placeholder="Miktar"
             type="number"
-            step="0.01"
+            step="0.00000001"
+            min="0"
+            max={wallet.available}
             className="w-32 bg-secondary border border-border rounded px-3 py-2 text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+            disabled={withdrawing}
           />
           <button
             onClick={handleWithdraw}
-            className="px-4 py-2 bg-primary text-primary-foreground text-xs font-mono rounded font-bold neon-glow-btn"
+            disabled={withdrawing || wallet.available <= 0}
+            className="px-4 py-2 bg-primary text-primary-foreground text-xs font-mono rounded font-bold neon-glow-btn disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Çek
+            {withdrawing ? "..." : "Çek"}
           </button>
         </div>
       </div>
