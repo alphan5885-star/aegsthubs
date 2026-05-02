@@ -682,7 +682,7 @@ const tr = {
   "updates.news": "Yenilikler",
 };
 
-const en: typeof tr = {
+const en: Partial<typeof tr> = {
   loading: "Loading...", logout: "Logout", save: "Save", cancel: "Cancel", delete: "Delete", reset: "Reset", search: "Search", close: "Close", back: "Back", next: "Next", confirm: "Confirm", yes: "Yes", no: "No", error: "Error", success: "Success", copy: "Copy", copied: "Copied", edit: "Edit", view: "View", send: "Send", submit: "Submit", retry: "Retry", refresh: "Refresh", empty: "No records", required: "Required", optional: "Optional", total: "Total", amount: "Amount", price: "Price", date: "Date", type: "Type", status: "Status", actions: "Actions", details: "Details", description: "Description", category: "Category", all: "All", none: "None", unknown: "Unknown", unexpectedError: "An unexpected error occurred",
 
   login: "Sign In", signup: "Sign Up", email: "Email", password: "Password", displayName: "Display Name", noAccount: "No account?", hasAccount: "Have account?", buyer: "Buyer", vendor: "Vendor", admin: "Admin", loginSubtitle: "Secure login", signupSubtitle: "Create account", selectRole: "Select role", mfaCode: "MFA Code", mfaVerify: "Verify", accountNoRole: "Could not load permissions.",
@@ -1072,7 +1072,7 @@ emptyTitle: "Nothing here", comingSoon: "Coming soon",
   "updates.news": "News",
 };
 
-const ru: typeof tr = {
+const ru: Partial<typeof tr> = {
   loading: "Загрузка...", logout: "Выход", save: "Сохранить", cancel: "Отмена", delete: "Удалить", reset: "Сбросить", search: "Поиск", close: "Закрыть", back: "Назад", next: "Далее", confirm: "Подтвердить", yes: "Да", no: "Нет", error: "Ошибка", success: "Успех", copy: "Копировать", copied: "Скопировано", edit: "Изменить", view: "Просмотр", send: "Отправить", submit: "Отправить", retry: "Повторить", refresh: "Обновить", empty: "Нет записей", required: "Обязательно", optional: "Необязательно", total: "Итого", amount: "Сумма", price: "Цена", date: "Дата", type: "Тип", status: "Статус", actions: "Действия", details: "Детали", description: "Описание", category: "Категория", all: "Все", none: "Нет", unknown: "Неизвестно", unexpectedError: "Произошла непредвиденная ошибка",
 
   login: "Войти", signup: "Регистрация", email: "Эл. почта", password: "Пароль", displayName: "Имя", noAccount: "Нет аккаунта?", hasAccount: "Есть аккаунт?", buyer: "Покупатель", vendor: "Продавец", admin: "Админ", loginSubtitle: "Безопасный вход", signupSubtitle: "Создать аккаунт", selectRole: "Роль", mfaCode: "Код MFA", mfaVerify: "Проверить", accountNoRole: "Не удалось загрузить роль.",
