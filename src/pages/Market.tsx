@@ -100,15 +100,16 @@ if (data) {
           // Fetch real market stats from backend
           try {
             const { data: statsData, error: statsError } = await supabase.rpc("get_market_stats");
+            const s = (statsData as any) || {};
             if (!statsError && statsData) {
               setMarketStats((prev) => ({
                 ...prev,
-                online: Number(statsData.online || 0),
-                orders24h: Number(statsData.orders24h || 0),
+                online: Number(s.online || 0),
+                orders24h: Number(s.orders24h || 0),
                 topCategory,
-                totalProducts: Number(statsData.totalProducts || data.length),
-                activeVendors: Number(statsData.activeVendors || vendorIds.length),
-                volume24h: Number(statsData.volume24h || 0),
+                totalProducts: Number(s.totalProducts || data.length),
+                activeVendors: Number(s.activeVendors || vendorIds.length),
+                volume24h: Number(s.volume24h || 0),
               }));
             } else {
               setMarketStats((prev) => ({
