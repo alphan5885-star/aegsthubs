@@ -1081,6 +1081,7 @@ export type Database = {
       cleanup_old_messages: { Args: { _days?: number }; Returns: Json }
       confirm_delivery: { Args: { _order_id: string }; Returns: undefined }
       generate_payment_address: { Args: { _order_id: string }; Returns: string }
+      get_market_stats: { Args: never; Returns: Json }
       get_user_role: { Args: { _user_id: string }; Returns: string }
       get_vendor_rating: {
         Args: { _vendor_id: string }
@@ -1110,6 +1111,22 @@ export type Database = {
       redeem_admin_invite: { Args: { _code: string }; Returns: Json }
       release_escrow: {
         Args: { _escrow_id?: string; _order_id?: string }
+        Returns: Json
+      }
+      user_withdraw_ltc: {
+        Args: { _address: string; _amount: number; _pin_hash: string }
+        Returns: Json
+      }
+      user_withdraw_xmr: {
+        Args: { _address: string; _amount: number; _pin_hash: string }
+        Returns: Json
+      }
+      vendor_withdraw_ltc: {
+        Args: { _address: string; _amount: number }
+        Returns: Json
+      }
+      vendor_withdraw_xmr: {
+        Args: { _address: string; _amount: number }
         Returns: Json
       }
     }
