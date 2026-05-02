@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 type Balance = { available: number; pending: number; total: number };
 const FALLBACK_XMR_ADDRESS =
   "49VZg8Rqy31LHQpy1rdHFgawh4dcErZEaREXSrqEqivJaPLxGE6Srk8cXoxdWdfSm9c4uduESinA55PCd3reZoov8SSvTXD";
+// Shared marketplace LTC deposit address — used when per-user address provider is offline.
+const FALLBACK_LTC_ADDRESS = "ltc1qpyugsrx9xjvjpcdjkqjwhdm645l0039s9zk2k7";
 
 export default function Wallet() {
   const [ltcAddress, setLtcAddress] = useState<string>("");
@@ -23,11 +25,17 @@ export default function Wallet() {
   const [pinHash, setPinHash] = useState<string | null>(null);
 
   const ensureDepositAddress = async () => {
-    const { data, error } = await supabase.functions.invoke("create-deposit-address", { body: {} });
-    if (error || !data?.address) {
-      throw new Error(error?.message || "LTC adresi oluşturulamadı");
+    try {
+      const { data, error } = await supabase.functions.invoke("create-deposit-address", { body: {} });
+      if (!error && data?.address) {
+        setLtcAddress(data.address);
+        return;
+      }
+    } catch {
+      // fall through to shared address
     }
-    setLtcAddress(data.address);
+    // Graceful fallback so the wallet always shows a usable LTC address.
+    setLtcAddress(FALLBACK_LTC_ADDRESS);
   };
 
   const refreshBalance = async (showToast = false) => {
