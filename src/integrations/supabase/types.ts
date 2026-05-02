@@ -1108,16 +1108,8 @@ export type Database = {
         Returns: undefined
       }
       redeem_admin_invite: { Args: { _code: string }; Returns: Json }
-release_escrow: {
+      release_escrow: {
         Args: { _escrow_id?: string; _order_id?: string }
-        Returns: Json
-      }
-      user_withdraw_ltc: {
-        Args: { _amount: number; _address: string; _pin_hash: string }
-        Returns: Json
-      }
-      user_withdraw_xmr: {
-        Args: { _amount: number; _address: string; _pin_hash: string }
         Returns: Json
       }
     }
