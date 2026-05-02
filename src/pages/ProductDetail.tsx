@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "@/lib/router-shim";
 import PageShell from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
-import { ShoppingCart, Key, Package, User, Shield, Hash, Lock } from "lucide-react";
+import { ShoppingCart, Key, Package, User, Shield, Hash, Lock, Plus, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import VendorRating from "@/components/VendorRating";
@@ -12,6 +12,7 @@ import DeliveryMethodSelector from "@/components/DeliveryMethodSelector";
 import MathCaptcha from "@/components/MathCaptcha";
 import { encryptForRecipient } from "@/lib/pgp";
 import { useI18n } from "@/lib/i18n";
+import { useCart } from "@/lib/cartContext";
 
 const SERVICE_FEE_RATE = 0;
 type DeliveryMethod = "cargo" | "dead_drop" | "mailbox";
@@ -49,6 +50,9 @@ export default function ProductDetail() {
 
   const serviceFee = product ? product.price * SERVICE_FEE_RATE : 0;
   const totalPrice = product ? product.price + serviceFee : 0;
+
+  const { addItem, isInCart: checkIsInCart } = useCart();
+  const isAlreadyInCart = product ? checkIsInCart(product.id) : false;
 
   const isMounted = useRef(true);
 
@@ -115,7 +119,22 @@ export default function ProductDetail() {
     };
   }, [id]);
 
-  const startPayment = async () => {
+  const handleAddToCart = () => {
+    if (!product) return;
+    addItem({
+      id: crypto.randomUUID(),
+      productId: product.id,
+      name: product.name,
+      price: totalPrice,
+      imageUrl: product.image_url,
+      imageEmoji: product.image_emoji,
+      type: product.type as "digital" | "physical",
+      vendorId: product.vendor_id,
+    });
+    toast.success(t("product.addedToCart"));
+  };
+
+  const handleStartPayment = async () => {
     if (!product || !user) return;
     if (!captchaOk) {
       toast.error(t("product.captchaRequired"));
@@ -267,7 +286,7 @@ export default function ProductDetail() {
           <div>
             <div className="text-[11px] font-mono font-bold text-primary">{t("product.escrowTitle")}</div>
             <div className="text-[9px] font-mono text-muted-foreground">
-              Once wallet'a LTC yukle • Satin alimda escrow hold • Teslimde %90/%10 dagitim
+              Once wallet'a LTC/XMR yukle ��� Satin alimda escrow hold • Teslimde %90/%10 dagitim
             </div>
           </div>
         </div>
@@ -334,13 +353,34 @@ export default function ProductDetail() {
                 <div className="glass-card rounded-lg p-4 mb-3">
                   <MathCaptcha onValidChange={setCaptchaOk} label={t("product.securityCheck")} />
                 </div>
+
+                {/* Add to Cart Button */}
                 <motion.button
-                  onClick={startPayment}
+                  onClick={handleAddToCart}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full flex items-center justify-center gap-2 py-3 mb-2 bg-secondary text-foreground rounded-lg font-mono font-bold border border-primary/30 text-sm hover:bg-primary/10 transition-colors"
+                >
+{isAlreadyInCart ? (
+                    <>
+                      <CheckCircle className="w-4 h-4 text-green-400" />
+                      {t("product.inCart")}
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4" />
+                      {t("product.addToCart")}
+                    </>
+                  )}
+                </motion.button>
+
+                {/* Buy Now Button */}
+                <motion.button
+                  onClick={handleStartPayment}
                   whileTap={{ scale: 0.98 }}
                   disabled={!captchaOk || creating}
                   className="w-full flex items-center justify-center gap-2 py-3.5 bg-primary text-primary-foreground rounded-lg font-mono font-bold neon-glow-btn text-sm disabled:opacity-50"
                 >
-                  <ShoppingCart className="w-4 h-4" />{" "}
+                  <ShoppingCart className="w-4 h-4" />
                   {creating
                     ? t("product.preparing")
                     : `${t("product.buyBtn")} — ${totalPrice.toFixed(4)} LTC / ${(totalPrice * 0.62).toFixed(4)} XMR`}

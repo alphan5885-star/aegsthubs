@@ -12,9 +12,11 @@ import { I18nProvider } from "@/lib/i18n";
 import { SessionTimerProvider } from "@/lib/sessionTimerContext";
 import { SecurityProvider } from "@/lib/securityContext";
 import { StealthProvider } from "@/lib/stealthContext";
+import { CartProvider } from "@/lib/cartContext";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import SecurityHud from "@/components/SecurityHud";
 import TorWarningBanner from "@/components/TorWarningBanner";
+import CartIcon from "@/components/CartIcon";
 
 import NotFound from "@/pages/NotFound";
 
@@ -105,7 +107,10 @@ function RootComponent() {
             <StealthProvider>
               {!lightDev && <TorWarningBanner />}
               <AuthGuard>
-                <Outlet />
+                <CartProvider>
+                  <Outlet />
+                  <CartIcon />
+                </CartProvider>
               </AuthGuard>
               {!lightDev && <SecurityHud />}
               {!lightDev && <BackgroundMusic />}

@@ -139,19 +139,18 @@ export default function PaymentTracker({ orderId, amount }: Props) {
   return (
     <div className="glass-card rounded-lg p-4 space-y-3">
       <div className="flex items-center justify-between gap-3">
-        <h3 className="font-mono text-sm font-bold text-primary">XMR Escrow Bekleniyor</h3>
+        <h3 className="font-mono text-sm font-bold text-primary">LTC/XMR Escrow Bekleniyor</h3>
         <span className="inline-flex items-center gap-1 rounded border border-primary/30 bg-primary/10 px-2 py-1 text-[10px] font-mono text-primary">
-          <Coins className="w-3 h-3" /> MONERO-FIRST
+          <Coins className="w-3 h-3" /> LTC/XMR
         </span>
       </div>
 
       <div className="rounded border border-primary/25 bg-primary/10 p-3 text-xs font-mono text-foreground">
         <div className="flex items-center gap-2 font-bold text-primary mb-1">
-          <ShieldCheck className="w-4 h-4" /> Manuel doğrulamalı XMR escrow
+          <ShieldCheck className="w-4 h-4" /> LTC otomatik / XMR manuel doğrulamalı escrow
         </div>
         <p className="text-muted-foreground leading-relaxed">
-          Bu sipariş XMR öncelikli işaretlendi. Gerçek Monero node/subaddress bağlanana kadar
-          otomatik onay gösterilmez; admin manuel doğrulama sonrası operasyon DM açar.
+          LTC ödeme otomatik onaylanır. XMR ödeme manuel doğrulama sonrası operasyon DM açar.
         </p>
       </div>
 
@@ -168,7 +167,7 @@ export default function PaymentTracker({ orderId, amount }: Props) {
 
           <div className="space-y-1">
             <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
-              Ödeme Adresi (XMR/LTC Fallback)
+              Ödeme Adresi (LTC / XMR)
             </label>
             <div className="flex gap-2">
               <code className="flex-1 text-[11px] font-mono bg-background border border-border rounded px-2 py-1.5 break-all select-all">

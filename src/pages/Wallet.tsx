@@ -16,9 +16,11 @@ export default function Wallet() {
   const [balance, setBalance] = useState<Balance>({ available: 0, pending: 0, total: 0 });
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [withdrawCoin, setWithdrawCoin] = useState<"ltc" | "xmr">("ltc");
   const [withdrawAddr, setWithdrawAddr] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawing, setWithdrawing] = useState(false);
+  const [pinHash, setPinHash] = useState<string | null>(null);
 
   const ensureDepositAddress = async () => {
     const { data, error } = await supabase.functions.invoke("create-deposit-address", { body: {} });
@@ -52,11 +54,19 @@ export default function Wallet() {
     }
   };
 
-  useEffect(() => {
+useEffect(() => {
     const init = async () => {
       try {
         await ensureDepositAddress();
         await refreshBalance(false);
+        // Get user's pin hash for withdrawals
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("withdraw_pin_hash")
+          .maybeSingle();
+        if (profileData?.withdraw_pin_hash) {
+          setPinHash(profileData.withdraw_pin_hash);
+        }
       } catch (e) {
         toast.error(e instanceof Error ? e.message : "Cüzdan yüklenemedi");
       } finally {
@@ -73,19 +83,41 @@ export default function Wallet() {
     if (amt > balance.available) { toast.error("Yetersiz bakiye"); return; }
     setWithdrawing(true);
     try {
-      const { data, error } = await supabase.rpc("user_withdraw_ltc", {
-        _address: withdrawAddr,
-        _amount: amt,
-      });
-      if (error || !(data as any)?.success) {
-        const msg = (data as any)?.error;
-        toast.error(
-          msg === "insufficient_balance" ? "Yetersiz bakiye" :
-          msg === "invalid_address" ? "Geçersiz LTC adresi" : "Çekim başarısız",
-        );
+if (!pinHash) {
+        toast.error("Para çekme PIN'i belirlenmemiş. Profil sayfasından PIN oluştur.");
         return;
       }
-      toast.success(`${amt} LTC çekim talebi oluşturuldu.`);
+      if (withdrawCoin === "ltc") {
+        const { data, error } = await supabase.rpc("user_withdraw_ltc", {
+          _address: withdrawAddr,
+          _amount: amt,
+          _pin_hash: pinHash,
+        });
+        if (error || !(data as any)?.success) {
+          const msg = (data as any)?.error;
+          toast.error(
+            msg === "insufficient_balance" ? "Yetersiz bakiye" :
+            msg === "invalid_address" ? "Geçersiz LTC adresi" : "Çekim başarısız",
+          );
+          return;
+        }
+        toast.success(`${amt} LTC çekim talebi oluşturuldu.`);
+      } else {
+        const { data, error } = await supabase.rpc("user_withdraw_xmr", {
+          _address: withdrawAddr,
+          _amount: amt,
+          _pin_hash: pinHash,
+        });
+        if (error || !(data as any)?.success) {
+          const msg = (data as any)?.error;
+          toast.error(
+            msg === "insufficient_balance" ? "Yetersiz bakiye" :
+            msg === "invalid_address" ? "Geçersiz XMR adresi" : "Çekim başarısız",
+          );
+          return;
+        }
+        toast.success(`${amt} XMR çekim talebi oluşturuldu.`);
+      }
       setWithdrawAddr("");
       setWithdrawAmount("");
       setBalance((prev) => ({
@@ -107,9 +139,9 @@ export default function Wallet() {
     <PageShell>
       <div className="max-w-2xl mx-auto space-y-6">
         <div>
-          <h1 className="text-2xl font-mono font-bold text-primary neon-text">Wallet</h1>
+<h1 className="text-2xl font-mono font-bold text-primary neon-text">Cüzdan</h1>
           <p className="text-xs font-mono text-muted-foreground mt-1">
-            LTC deposit adresine para yatir, 3 onaydan sonra bakiyene otomatik yansir
+            LTC/XMR cüzdan adreslerine para yatır, 3 onaydan sonra bakiyene otomatik yansır
           </p>
         </div>
 
@@ -118,19 +150,19 @@ export default function Wallet() {
             <div className="rounded border border-border p-3 bg-background/40">
               <div className="text-[10px] text-muted-foreground font-mono">Kullanilabilir</div>
               <div className="text-lg font-mono text-primary">
-                {balance.available.toFixed(8)} LTC
+                {balance.available.toFixed(8)} <span className="text-xs">LTC</span>
               </div>
             </div>
             <div className="rounded border border-border p-3 bg-background/40">
               <div className="text-[10px] text-muted-foreground font-mono">Bekleyen</div>
               <div className="text-lg font-mono text-foreground">
-                {balance.pending.toFixed(8)} LTC
+                {balance.pending.toFixed(8)} <span className="text-xs">LTC</span>
               </div>
             </div>
             <div className="rounded border border-border p-3 bg-background/40">
               <div className="text-[10px] text-muted-foreground font-mono">Toplam</div>
               <div className="text-lg font-mono text-foreground">
-                {balance.total.toFixed(8)} LTC
+                {balance.total.toFixed(8)} <span className="text-xs">LTC</span>
               </div>
             </div>
           </div>
@@ -190,16 +222,41 @@ export default function Wallet() {
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <h2 className="font-mono text-sm text-foreground">LTC Çekimi</h2>
+              <h2 className="font-mono text-sm text-foreground">Para Çekimi</h2>
               <span className="text-[10px] font-mono text-muted-foreground">
                 Maks: {balance.available.toFixed(8)} LTC
               </span>
             </div>
+            
+            {/* Coin Selection */}
+            <div className="flex gap-2 mb-3">
+              <button
+                onClick={() => setWithdrawCoin("ltc")}
+                className={`px-3 py-1.5 rounded text-xs font-mono transition-colors ${
+                  withdrawCoin === "ltc"
+                    ? "bg-blue-500 text-white"
+                    : "bg-background/60 border border-border text-muted-foreground hover:border-primary"
+                }`}
+              >
+                LTC Çek
+              </button>
+              <button
+                onClick={() => setWithdrawCoin("xmr")}
+                className={`px-3 py-1.5 rounded text-xs font-mono transition-colors ${
+                  withdrawCoin === "xmr"
+                    ? "bg-orange-500 text-white"
+                    : "bg-background/60 border border-border text-muted-foreground hover:border-primary"
+                }`}
+              >
+                XMR Çek
+              </button>
+            </div>
+
             <div className="flex gap-2">
               <input
                 value={withdrawAddr}
                 onChange={(e) => setWithdrawAddr(e.target.value)}
-                placeholder="LTC Cüzdan Adresi"
+                placeholder={withdrawCoin === "ltc" ? "LTC Cüzdan Adresi" : "XMR Cüzdan Adresi"}
                 disabled={withdrawing}
                 className="flex-1 bg-background/60 border border-border rounded px-3 py-2 text-xs font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               />
@@ -235,8 +292,7 @@ export default function Wallet() {
           <div className="flex items-start gap-2 px-3 py-2 rounded bg-primary/10 border border-primary/40 text-xs font-mono text-primary">
             <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
             <span>
-              LTC transferleri BlockCypher'da 3 onay aldiginda otomatik bakiyene eklenir. Satin
-              alimda bakiye escrowa kilitlenir; teslimatta %90 saticiya, %10 admin hesaba aktarilir.
+              LTC transferleri BlockCypher'da 3 onay aldiginda otomatik bakiyene eklenir. XMR manuel doğrulama ile işlenir. Satin alimda bakiye escrowa kilitlenir; teslimatta %90 saticiya, %10 admin hesaba aktarilir.
             </span>
           </div>
         </div>

@@ -21,6 +21,7 @@ import { Route as MirrorsRouteImport } from './routes/mirrors'
 import { Route as MarketRouteImport } from './routes/market'
 import { Route as ForumRouteImport } from './routes/forum'
 import { Route as CustomizationRouteImport } from './routes/customization'
+import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VendorWalletRouteImport } from './routes/vendor.wallet'
@@ -91,6 +92,11 @@ const CustomizationRoute = CustomizationRouteImport.update({
   path: '/customization',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -140,6 +146,7 @@ const AdminDisputesRoute = AdminDisputesRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/checkout': typeof CheckoutRoute
   '/customization': typeof CustomizationRoute
   '/forum': typeof ForumRoute
   '/market': typeof MarketRoute
@@ -163,6 +170,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/checkout': typeof CheckoutRoute
   '/customization': typeof CustomizationRoute
   '/forum': typeof ForumRoute
   '/market': typeof MarketRoute
@@ -187,6 +195,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/checkout': typeof CheckoutRoute
   '/customization': typeof CustomizationRoute
   '/forum': typeof ForumRoute
   '/market': typeof MarketRoute
@@ -212,6 +221,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/checkout'
     | '/customization'
     | '/forum'
     | '/market'
@@ -235,6 +245,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/checkout'
     | '/customization'
     | '/forum'
     | '/market'
@@ -258,6 +269,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/checkout'
     | '/customization'
     | '/forum'
     | '/market'
@@ -282,6 +294,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  CheckoutRoute: typeof CheckoutRoute
   CustomizationRoute: typeof CustomizationRoute
   ForumRoute: typeof ForumRoute
   MarketRoute: typeof MarketRoute
@@ -383,6 +396,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomizationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -481,6 +501,7 @@ const VendorRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  CheckoutRoute: CheckoutRoute,
   CustomizationRoute: CustomizationRoute,
   ForumRoute: ForumRoute,
   MarketRoute: MarketRoute,

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/authContext";
 import { useSessionTimer } from "@/lib/sessionTimerContext";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Shield,
   AlertTriangle,
@@ -85,9 +86,29 @@ export default function Login() {
     const v = window.localStorage.getItem("session_duration_min");
     return v ? Number(v) : 60;
   });
-  const { login, signup, mfaChallenge, verifyMfa } = useAuth();
+const { login, signup, mfaChallenge, verifyMfa, user } = useAuth();
   const { startSession } = useSessionTimer();
   const { t } = useI18n();
+
+  // Fetch anti-phishing code from database on mount
+  useEffect(() => {
+    if (!user) return;
+    const fetchPhishingCode = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("anti_phishing_codes")
+          .select("code")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (data?.code) {
+          setAntiPhishingCode(data.code);
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
+    fetchPhishingCode();
+  }, [user]);
 
   const passwordRules = {
     length: password.length >= 8,

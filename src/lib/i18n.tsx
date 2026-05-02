@@ -232,8 +232,30 @@ const tr = {
   "product.stockLabel": "Stok",
   "product.escrowTitle": "Bakiye Bazlı Escrow",
   "product.orderLabel": "Sipariş:",
-  "product.pgpAutoEncrypt": "🔐 PGP otomatik şifrelenecek",
+"product.pgpAutoEncrypt": "🔐 PGP otomatik şifrelenecek",
   "product.orderDesc": "Bakiye escrow'a alındı. Satıcı teslim ettiğinde fonlar otomatik dağıtılır.",
+"product.addedToCart": "Ürün sepete eklendi!",
+  "product.addToCart": "SEPETE EKLE",
+  "product.inCart": "SEPETTE",
+
+  // Cart
+  "cart.sepet": "Sepet",
+  "cart.toplam": "Toplam",
+  "cart.temizle": "Temizle",
+  "cart.checkout": "ÖDE",
+  "cart.emptyCart": "Sepetin boş",
+  "cart.emptyCartDesc": "Önce ürün ekle",
+  "cart.goToMarket": "Markete Git",
+  "cart.checkoutTitle": "Ödeme",
+  "cart.items": "Ürünler",
+  "cart.subtotal": "Ara Toplam",
+  "cart.inXmr": "(XMR)",
+  "cart.total": "TOPLAM",
+  "cart.escrowNote": "Ödeme escrow'da tutulur. Teslimatta satıcıya aktarılır.",
+  "cart.clearCart": "Sepeti Boşalt",
+  "cart.processing": "İşleniyor...",
+  "cart.orderFailed": "sipariş başarısız",
+  "cart.ordersCreated": "sipariş oluşturuldu!",
 
   // Orders
   "orders.title": "Siparişlerim",
@@ -262,8 +284,9 @@ const tr = {
   "status.held": "Escrow'da",
   "status.released": "Bırakıldı",
 
-  // Wallet
+// Wallet
   "wallet.title": "Cüzdan",
+  "wallet.desc": "LTC/XMR cüzdan adreslerine para yatır, 3 onaydan sonra bakiyene otomatik yansır",
   "wallet.balance": "Bakiye",
   "wallet.available": "Kullanılabilir",
   "wallet.pendingBalance": "Bekleyen",
@@ -404,7 +427,11 @@ const tr = {
   "vendor.maxFileSize5": "Maksimum dosya boyutu: 5MB",
   "vendor.stockLabel": "Stok:",
 
-  // Security
+// Security
+  "security.connectionStatus": "Bağlantı Durumu",
+  "security.online": "Çevrimiçi",
+  "security.offline": "Çevrimdışı",
+  "security.networkError": "Ağ hatası",
   "security.phishingCodeSaved": "Anti-phishing kodunuz kaydedildi!",
   "security.phishingCodeError": "Kod kaydedilirken hata oluştu",
   "security.wrongCode": "Kod yanlış. Tekrar deneyin.",
@@ -626,7 +653,7 @@ const tr = {
   "tx.withdrawal": "Çekim",
   "tx.deposit": "Yatırma",
 
-  // Errors
+// Errors
   "err.generic": "Bir şeyler ters gitti",
   "err.network": "Bağlantı hatası",
   "err.unauthorized": "Yetkisiz işlem",
@@ -634,10 +661,25 @@ const tr = {
   "err.invalid": "Geçersiz veri",
   "err.required": "Bu alan zorunlu",
   "err.tryAgain": "Lütfen tekrar dene",
+  "err.walletLoadFailed": "Cüzdan yüklenemedi",
+  "err.invalidAmount": "Geçersiz miktar",
+  "err.insufficientBalance": "Yetersiz bakiye",
 
-  // Empty / general
+// Empty / general
   emptyTitle: "Hiçbir şey yok",
   comingSoon: "Yakında",
+
+  // Updates
+  "updates.title": "Yenilikler & Güncellemeler",
+  "updates.newFeatures": "Yeni Özellikler",
+  "updates.viewAll": "Tümünü Gör",
+  "updates.forum": "Forumda tartış",
+  "updates.version": "Sürüm",
+  "updates.category": "Kategori",
+  "updates.feature": "Özellik",
+  "updates.security": "Güvenlik",
+  "updates.improvement": "İyileştirme",
+  "updates.news": "Yenilikler",
 };
 
 const en: typeof tr = {
@@ -746,7 +788,7 @@ const en: typeof tr = {
 
   "status.pending": "Pending", "status.paid": "Paid", "status.shipped": "Shipped", "status.delivered": "Delivered", "status.completed": "Completed", "status.cancelled": "Cancelled", "status.disputed": "Disputed", "status.refunded": "Refunded", "status.held": "In Escrow", "status.released": "Released",
 
-  "wallet.title": "Wallet", "wallet.balance": "Balance", "wallet.available": "Available", "wallet.pendingBalance": "Pending", "wallet.depositAddress": "Deposit Address", "wallet.deposit": "Deposit", "wallet.withdraw": "Withdraw", "wallet.withdrawAmount": "Amount", "wallet.withdrawTo": "Destination", "wallet.withdrawPin": "Withdraw PIN", "wallet.invalidAmount": "Invalid amount", "wallet.insufficientFunds": "Insufficient funds", "wallet.withdrawSuccess": "Withdraw request sent", "wallet.empty": "No transactions",
+"wallet.title": "Wallet", "wallet.desc": "Deposit to LTC/XMR wallet addresses, balance updates after 3 confirmations", "wallet.balance": "Balance",
 
   "delivery.title": "Enter Delivery Info", "delivery.method": "Delivery Method", "delivery.cargo": "Cargo", "delivery.deadDrop": "Dead-Drop", "delivery.mailbox": "Anonymous Mail", "delivery.carrier": "Carrier", "delivery.trackingCode": "Tracking Code", "delivery.trackingHint": "Tracking code is encrypted with buyer's PGP key", "delivery.countryFrom": "Origin Country", "delivery.countryTo": "Destination Country", "delivery.stealthMethod": "Stealth Method", "delivery.coverIdentity": "Cover Sender", "delivery.generateCover": "Generate Cover", "delivery.anonymous": "Anonymous Mode", "delivery.notesOptional": "Notes (optional)", "delivery.submit": "Submit & Mark Shipped", "delivery.submitted": "Delivery info saved", "delivery.encryptionWarning": "Tracking code is end-to-end encrypted. Lost = unrecoverable.", "delivery.noBuyerKey": "Buyer has no PGP key — code stored in plaintext", "delivery.waiting": "Waiting for delivery info...", "delivery.encryptedTracking": "Encrypted Tracking Code", "delivery.decryptHint": "Decrypt with your private key in PGP Tools",
 
@@ -1012,9 +1054,22 @@ const en: typeof tr = {
   "tx.withdrawal": "Withdrawal",
   "tx.deposit": "Deposit",
 
-  "err.generic": "Something went wrong", "err.network": "Network error", "err.unauthorized": "Unauthorized", "err.notFound": "Not found", "err.invalid": "Invalid data", "err.required": "Required field", "err.tryAgain": "Please try again",
+"err.generic": "Something went wrong", "err.network": "Network error", "err.unauthorized": "Unauthorized", "err.notFound": "Not found", "err.invalid": "Invalid data", "err.required": "Required field", "err.tryAgain": "Please try again",
+  "err.walletLoadFailed": "Wallet failed to load", "err.invalidAmount": "Invalid amount", "err.insufficientBalance": "Insufficient balance",
 
-  emptyTitle: "Nothing here", comingSoon: "Coming soon",
+emptyTitle: "Nothing here", comingSoon: "Coming soon",
+
+  // Updates
+  "updates.title": "Updates & Changelog",
+  "updates.newFeatures": "New Features",
+  "updates.viewAll": "View All",
+  "updates.forum": "Discuss on forum",
+  "updates.version": "Version",
+  "updates.category": "Category",
+  "updates.feature": "Feature",
+  "updates.security": "Security",
+  "updates.improvement": "Improvement",
+  "updates.news": "News",
 };
 
 const ru: typeof tr = {
@@ -1123,7 +1178,7 @@ const ru: typeof tr = {
 
   "status.pending": "Ожидает", "status.paid": "Оплачено", "status.shipped": "Отправлено", "status.delivered": "Доставлено", "status.completed": "Завершено", "status.cancelled": "Отменено", "status.disputed": "Спор", "status.refunded": "Возврат", "status.held": "В эскроу", "status.released": "Выпущено",
 
-  "wallet.title": "Кошелёк", "wallet.balance": "Баланс", "wallet.available": "Доступно", "wallet.pendingBalance": "Ожидает", "wallet.depositAddress": "Адрес пополнения", "wallet.deposit": "Пополнить", "wallet.withdraw": "Вывести", "wallet.withdrawAmount": "Сумма", "wallet.withdrawTo": "Адрес получателя", "wallet.withdrawPin": "PIN вывода", "wallet.invalidAmount": "Неверная сумма", "wallet.insufficientFunds": "Недостаточно средств", "wallet.withdrawSuccess": "Запрос отправлен", "wallet.empty": "Нет операций",
+"wallet.title": "Кошелёк", "wallet.desc": "Пополните кошелёк адресом LTC/XMR, баланс обновится после 3 подтверждений", "wallet.balance": "Баланс", "wallet.available": "Доступно", "wallet.pendingBalance": "Ожидает", "wallet.depositAddress": "Адрес пополнения", "wallet.deposit": "Пополнить", "wallet.withdraw": "Вывести", "wallet.withdrawAmount": "Сумма", "wallet.withdrawTo": "Адрес получателя", "wallet.withdrawPin": "PIN вывода", "wallet.invalidAmount": "Неверная сумма", "wallet.insufficientFunds": "Недостаточно средств", "wallet.withdrawSuccess": "Запрос отправлен", "wallet.empty": "Нет операций",
 
   "delivery.title": "Информация о доставке", "delivery.method": "Способ", "delivery.cargo": "Курьер", "delivery.deadDrop": "Закладка", "delivery.mailbox": "Аноним. почта", "delivery.carrier": "Перевозчик", "delivery.trackingCode": "Код отслеживания", "delivery.trackingHint": "Код шифруется PGP-ключом покупателя", "delivery.countryFrom": "Страна отправки", "delivery.countryTo": "Страна получения", "delivery.stealthMethod": "Метод маскировки", "delivery.coverIdentity": "Подставной отправитель", "delivery.generateCover": "Сгенерировать", "delivery.anonymous": "Анонимный режим", "delivery.notesOptional": "Заметки (опц.)", "delivery.submit": "Отправить и пометить", "delivery.submitted": "Информация сохранена", "delivery.encryptionWarning": "Код шифруется E2E. Утрата = невозможно восстановить.", "delivery.noBuyerKey": "У покупателя нет PGP — код сохранён открыто", "delivery.waiting": "Ожидание информации...", "delivery.encryptedTracking": "Зашифрованный код", "delivery.decryptHint": "Расшифруйте в PGP-инструментах",
 
@@ -1389,9 +1444,22 @@ const ru: typeof tr = {
   "tx.withdrawal": "Вывод",
   "tx.deposit": "Пополнение",
 
-  "err.generic": "Что-то пошло не так", "err.network": "Ошибка сети", "err.unauthorized": "Нет доступа", "err.notFound": "Не найдено", "err.invalid": "Неверные данные", "err.required": "Обязательное поле", "err.tryAgain": "Повторите",
+"err.generic": "Что-то пошло не так", "err.network": "Ошибка сети", "err.unauthorized": "Нет доступа", "err.notFound": "Не найдено", "err.invalid": "Неверные данные", "err.required": "Обязательное поле", "err.tryAgain": "Повторите",
+  "err.walletLoadFailed": "Кошелёк не загрузился", "err.invalidAmount": "Неверная сумма", "err.insufficientBalance": "Недостаточно средств",
 
-  emptyTitle: "Пусто", comingSoon: "Скоро",
+emptyTitle: "Пусто", comingSoon: "Скоро",
+
+  // Updates
+  "updates.title": "Обновления и changelog",
+  "updates.newFeatures": "Новые функции",
+  "updates.viewAll": "Все смотреть",
+  "updates.forum": "Обсудить на форуме",
+  "updates.version": "Версия",
+  "updates.category": "Категория",
+  "updates.feature": "Функция",
+  "updates.security": "Безопасность",
+  "updates.improvement": "Улучшение",
+  "updates.news": "Новости",
 };
 
 const translations = { tr, en, ru } as const;

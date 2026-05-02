@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Bot, Command, Copy, EyeOff, Moon, PanelLeftClose, PanelLeftOpen, Shield } from "lucide-react";
+import { Bot, Command, Copy, EyeOff, Moon, PanelLeftClose, PanelLeftOpen, Rocket, Shield } from "lucide-react";
 import { useLocation } from "@/lib/router-shim";
 import { useCustomization } from "@/lib/customizationContext";
 import { useStealth } from "@/lib/stealthContext";
+import UpdatesModal from "./UpdatesModal";
 
 const dispatch = (name: string) => window.dispatchEvent(new CustomEvent(name));
 
@@ -12,6 +13,7 @@ export default function QuickTools() {
   const { toggleStealth } = useStealth();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [updatesOpen, setUpdatesOpen] = useState(false);
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
@@ -31,7 +33,7 @@ export default function QuickTools() {
     window.setTimeout(() => setCopied(false), 1200);
   };
 
-  const tools = [
+const tools = [
     {
       label: "Komut paleti",
       icon: Command,
@@ -62,33 +64,41 @@ export default function QuickTools() {
       icon: copied ? Shield : Copy,
       action: copySnapshot,
     },
+    {
+      label: "Yenilikler",
+      icon: Rocket,
+      action: () => setUpdatesOpen(true),
+    },
   ];
 
   return (
-    <div className="fixed bottom-4 right-4 z-40 flex flex-col items-end gap-2">
-      {open && (
-        <div className="glass-card neon-border rounded-lg p-2 grid grid-cols-3 gap-1">
-          {tools.map((tool) => (
-            <button
-              key={tool.label}
-              type="button"
-              title={tool.label}
-              onClick={tool.action}
-              className="w-10 h-10 rounded-md border border-border bg-secondary/70 text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors flex items-center justify-center"
-            >
-              <tool.icon className="w-4 h-4" />
-            </button>
-          ))}
-        </div>
-      )}
-      <button
-        type="button"
-        title="Hızlı araçlar"
-        onClick={() => setOpen((value) => !value)}
-        className="w-11 h-11 rounded-full border border-primary/40 bg-card text-primary neon-border hover:scale-105 transition-transform flex items-center justify-center"
-      >
-        <Command className="w-5 h-5" />
-      </button>
-    </div>
+    <>
+      <UpdatesModal open={updatesOpen} onOpenChange={setUpdatesOpen} />
+      <div className="fixed bottom-4 right-4 z-40 flex flex-col items-end gap-2">
+        {open && (
+          <div className="glass-card neon-border rounded-lg p-2 grid grid-cols-3 gap-1">
+            {tools.map((tool) => (
+              <button
+                key={tool.label}
+                type="button"
+                title={tool.label}
+                onClick={tool.action}
+                className="w-10 h-10 rounded-md border border-border bg-secondary/70 text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors flex items-center justify-center"
+              >
+                <tool.icon className="w-4 h-4" />
+              </button>
+            ))}
+          </div>
+        )}
+        <button
+          type="button"
+          title="Hızlı araçlar"
+          onClick={() => setOpen((value) => !value)}
+          className="w-11 h-11 rounded-full border border-primary/40 bg-card text-primary neon-border hover:scale-105 transition-transform flex items-center justify-center"
+        >
+          <Command className="w-5 h-5" />
+        </button>
+      </div>
+    </>
   );
 }

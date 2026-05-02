@@ -86,7 +86,7 @@ export default function Market() {
           return;
         }
 
-        if (data) {
+if (data) {
           setProducts(data as ProductRow[]);
           const vendorIds = Array.from(new Set(data.map((p: any) => p.vendor_id)));
           const categoryCounts = new Map<string, number>();
@@ -97,29 +97,51 @@ export default function Market() {
           const topCategory =
             [...categoryCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
 
-          if (isMounted.current) {
+          // Fetch real market stats from backend
+          try {
+            const { data: statsData, error: statsError } = await supabase.rpc("get_market_stats");
+            if (!statsError && statsData) {
+              setMarketStats((prev) => ({
+                ...prev,
+                online: Number(statsData.online || 0),
+                orders24h: Number(statsData.orders24h || 0),
+                topCategory,
+                totalProducts: Number(statsData.totalProducts || data.length),
+                activeVendors: Number(statsData.activeVendors || vendorIds.length),
+                volume24h: Number(statsData.volume24h || 0),
+              }));
+            } else {
+              setMarketStats((prev) => ({
+                ...prev,
+                online: 0,
+                orders24h: 0,
+                topCategory,
+                totalProducts: data.length,
+                activeVendors: vendorIds.length,
+                volume24h: 0,
+              }));
+            }
+          } catch (statsErr) {
+            if (import.meta.env.DEV) console.error("Market stats fetch error:", statsErr);
             setMarketStats((prev) => ({
               ...prev,
-              online: 0,
-              orders24h: 0,
               topCategory,
               totalProducts: data.length,
               activeVendors: vendorIds.length,
-              volume24h: 0,
             }));
-
-            const activity = (data as any[])
-              .slice(0, 2)
-              .map((p) => ({
-                user: `vend***${String(p.vendor_id).substring(0, 3)}`,
-                action: t("market.newProduct"),
-                item: p.name,
-                time: formatRelativeTime(p.created_at),
-              }))
-              .sort((a, b) => 0.5 - Math.random());
-
-            setLiveActivity(activity);
           }
+
+          const activity = (data as any[])
+            .slice(0, 2)
+            .map((p) => ({
+              user: `vend***${String(p.vendor_id).substring(0, 3)}`,
+              action: t("market.newProduct"),
+              item: p.name,
+              time: formatRelativeTime(p.created_at),
+            }))
+            .sort((a, b) => 0.5 - Math.random());
+
+          setLiveActivity(activity);
 
           if (vendorIds.length) {
             const { data: profiles, error: profileError } = await supabase

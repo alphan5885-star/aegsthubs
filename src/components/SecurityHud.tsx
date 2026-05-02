@@ -1,12 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSecurity } from "@/lib/securityContext";
 import { useStealth } from "@/lib/stealthContext";
-import { Shield, ShieldAlert, ShieldCheck, X, EyeOff } from "lucide-react";
+import { checkConnectionStatus } from "@/lib/canvasNoise";
+import { Shield, ShieldAlert, ShieldCheck, X, EyeOff, Wifi, WifiOff, Signal } from "lucide-react";
 
 export default function SecurityHud() {
   const { threatLevel, events, blocked, unblock } = useSecurity();
   const { isStealth } = useStealth();
   const [open, setOpen] = useState(false);
+  const [connection, setConnection] = useState({ online: true, type: "unknown", downlink: 0, rtt: 0 });
+
+  useEffect(() => {
+    setConnection(checkConnectionStatus());
+    const interval = setInterval(() => setConnection(checkConnectionStatus()), 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const Icon =
     threatLevel === "danger" ? ShieldAlert : threatLevel === "warn" ? Shield : ShieldCheck;
@@ -54,6 +62,29 @@ export default function SecurityHud() {
             className="glass-card neon-border rounded-lg p-5 w-full max-w-md max-h-[80vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
+{/* Connection Status */}
+            <div className="flex items-center justify-between gap-2 mb-3 p-2 rounded bg-secondary/30 border border-border">
+              <div className="flex items-center gap-1.5">
+                {connection.online ? (
+                  <Wifi className="w-3 h-3 text-green-500" />
+                ) : (
+                  <WifiOff className="w-3 h-3 text-destructive" />
+                )}
+                <span className="text-[10px] font-mono">
+                  {connection.online ? `${connection.type.toUpperCase()}` : "OFFLINE"}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Signal className="w-3 h-3 text-muted-foreground" />
+                <span className="text-[10px] font-mono text-muted-foreground">
+                  {connection.downlink > 0 ? `${connection.downlink}Mbps` : "-"}
+                </span>
+              </div>
+              <div className="text-[10px] font-mono text-muted-foreground">
+                {connection.rtt > 0 ? `${connection.rtt}ms` : ""}
+              </div>
+            </div>
+
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-mono font-bold text-primary flex items-center gap-2">
                 <Shield className="w-4 h-4" />

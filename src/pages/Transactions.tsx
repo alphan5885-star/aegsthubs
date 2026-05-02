@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import PageShell from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
+import { useI18n } from "@/lib/i18n";
 import { ArrowUpRight, ArrowDownLeft, Clock } from "lucide-react";
 
 interface Transaction {
@@ -10,6 +11,7 @@ interface Transaction {
   amount: number;
   description: string | null;
   created_at: string;
+  currency?: string;
 }
 
 const typeLabels: Record<string, string> = {
@@ -24,6 +26,7 @@ const typeLabels: Record<string, string> = {
 
 export default function Transactions() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const [txs, setTxs] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const isMounted = useRef(true);
@@ -32,12 +35,22 @@ export default function Transactions() {
     isMounted.current = true;
     if (!user) return;
     const fetchTransactions = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("transactions")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(30);
+try {
+        // Filter transactions by user role (buyer or vendor)
+        const query = user 
+          ? supabase
+              .from("transactions")
+              .select("*")
+              .or(`buyer_id.eq.${user.id},vendor_id.eq.${user.id}`)
+              .order("created_at", { ascending: false })
+              .limit(30)
+          : supabase
+              .from("transactions")
+              .select("*")
+              .order("created_at", { ascending: false })
+              .limit(30);
+              
+        const { data, error } = await query;
 
         if (!isMounted.current) return;
         if (error) {
@@ -57,14 +70,22 @@ export default function Transactions() {
     };
   }, [user]);
 
+  const getTypeLabel = (type: string): string => {
+    const key = `tx.${type}` as any;
+    const translated = t(key);
+    return translated !== key ? translated : typeLabels[type] || type;
+  };
+
   return (
     <PageShell>
-      <h1 className="text-xl font-mono font-bold text-primary neon-text mb-6">İşlem Geçmişi</h1>
+      <h1 className="text-xl font-mono font-bold text-primary neon-text mb-6">
+        {t("tx.title")}
+      </h1>
 
       {loading ? (
-        <div className="text-muted-foreground font-mono animate-pulse">Yükleniyor...</div>
+        <div className="text-muted-foreground font-mono animate-pulse">{t("loading")}</div>
       ) : txs.length === 0 ? (
-        <div className="text-muted-foreground font-mono text-sm">Henüz işlem yok.</div>
+        <div className="text-muted-foreground font-mono text-sm">{t("tx.empty")}</div>
       ) : (
         <div className="space-y-2">
           {txs.map((tx) => (
@@ -88,7 +109,7 @@ export default function Transactions() {
                 </div>
                 <div>
                   <div className="text-sm font-mono font-bold text-foreground">
-                    {typeLabels[tx.type] || tx.type}
+                    {getTypeLabel(tx.type)}
                   </div>
                   <div className="text-xs text-muted-foreground font-mono">{tx.description}</div>
                 </div>
@@ -98,7 +119,7 @@ export default function Transactions() {
                   className={`text-sm font-mono font-bold ${tx.amount >= 0 ? "text-green-500" : "text-destructive"}`}
                 >
                   {tx.amount >= 0 ? "+" : ""}
-                  {tx.amount} LTC
+                  {tx.amount} {tx.currency || "LTC"}
                 </div>
                 <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-mono">
                   <Clock className="w-3 h-3" />

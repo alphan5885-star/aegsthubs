@@ -3,6 +3,7 @@ import PageShell from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
 import { useNavigate } from "@/lib/router-shim";
+import { useI18n } from "@/lib/i18n";
 import { Heart, Package } from "lucide-react";
 import WatchlistButton from "@/components/WatchlistButton";
 import { motion } from "framer-motion";
@@ -22,6 +23,7 @@ interface Row {
 export default function Watchlist() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [items, setItems] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const isMounted = useRef(true);
@@ -91,28 +93,30 @@ export default function Watchlist() {
     };
   }, [load]);
 
+  const productName = (name: string | null) => name || t("product.product") || "Ürün";
+
   return (
     <PageShell>
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
           <Heart className="w-6 h-6 text-destructive fill-current" />
-          <h1 className="text-2xl font-mono font-bold neon-text">Favori Listem</h1>
+          <h1 className="text-2xl font-mono font-bold neon-text">{t("watchlist")}</h1>
           <span className="ml-auto text-xs font-mono text-muted-foreground">
-            {items.length} ürün
+            {items.length} {t("market.stockUnit")}
           </span>
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-muted-foreground font-mono">Yükleniyor...</div>
+          <div className="text-center py-12 text-muted-foreground font-mono">{t("loading")}</div>
         ) : items.length === 0 ? (
           <div className="glass-card neon-border rounded-lg p-12 text-center">
             <Heart className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-sm font-mono text-muted-foreground">Henüz favori ürün yok</p>
+            <p className="text-sm font-mono text-muted-foreground">{t("emptyTitle")}</p>
             <button
               onClick={() => navigate("/market")}
               className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded font-mono text-sm"
             >
-              Markete git
+              {t("orders.goToMarket")}
             </button>
           </div>
         ) : (
@@ -143,7 +147,7 @@ export default function Watchlist() {
                       <WatchlistButton productId={row.product.id} />
                     </div>
                     <h3 className="font-mono text-sm font-bold text-foreground line-clamp-2">
-                      {row.product.name || "Ürün"}
+                      {productName(row.product.name)}
                     </h3>
                     <div className="mt-2 flex items-center justify-between">
                       <span className="text-primary font-mono text-sm font-bold">
