@@ -544,6 +544,33 @@ export type Database = {
           },
         ]
       }
+      processed_deposits: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          network: string
+          tx_hash: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          network?: string
+          tx_hash: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          network?: string
+          tx_hash?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           category: string | null
@@ -866,6 +893,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_deposit_addresses: {
+        Row: {
+          address: string
+          created_at: string
+          id: string
+          network: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          id?: string
+          network?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          id?: string
+          network?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_pgp_keys: {
         Row: {
           created_at: string
@@ -1080,8 +1134,28 @@ export type Database = {
       }
       cleanup_old_messages: { Args: { _days?: number }; Returns: Json }
       confirm_delivery: { Args: { _order_id: string }; Returns: undefined }
+      confirm_order_payment_by_tx: {
+        Args: {
+          _address: string
+          _amount_satoshi: number
+          _confirmations: number
+          _tx_hash: string
+        }
+        Returns: Json
+      }
+      credit_confirmed_deposit: {
+        Args: {
+          _address: string
+          _amount_satoshi: number
+          _confirmations: number
+          _tx_hash: string
+          _user_id: string
+        }
+        Returns: Json
+      }
       generate_payment_address: { Args: { _order_id: string }; Returns: string }
       get_market_stats: { Args: never; Returns: Json }
+      get_or_create_order_chat: { Args: { _order_id: string }; Returns: string }
       get_user_role: { Args: { _user_id: string }; Returns: string }
       get_vendor_rating: {
         Args: { _vendor_id: string }
