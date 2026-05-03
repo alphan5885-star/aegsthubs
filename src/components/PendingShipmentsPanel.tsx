@@ -5,6 +5,7 @@ import { useI18n } from "@/lib/i18n";
 import { Truck, Send } from "lucide-react";
 import AnonymousShippingForm from "./AnonymousShippingForm";
 import EmptyState from "./EmptyState";
+import OrderChatButton from "./OrderChatButton";
 
 interface PendingOrder {
   id: string;
@@ -64,12 +65,15 @@ export default function PendingShipmentsPanel() {
                   {o.amount} LTC · {o.delivery_method === "dead_drop" ? t("delivery.deadDrop") : o.delivery_method === "mailbox" ? t("delivery.mailbox") : t("delivery.cargo")}
                 </div>
               </div>
-              <button
-                onClick={() => setActive(o)}
-                className="flex items-center gap-1 px-2 py-1 bg-primary text-primary-foreground text-[10px] font-mono rounded hover:opacity-90"
-              >
-                <Send className="w-3 h-3" /> {t("vendor.fulfillNow")}
-              </button>
+              <div className="flex items-center gap-2">
+                <OrderChatButton orderId={o.id} label="Alıcı" />
+                <button
+                  onClick={() => setActive(o)}
+                  className="flex items-center gap-1 px-2 py-1 bg-primary text-primary-foreground text-[10px] font-mono rounded hover:opacity-90"
+                >
+                  <Send className="w-3 h-3" /> {t("vendor.fulfillNow")}
+                </button>
+              </div>
             </div>
           ))}
         </div>

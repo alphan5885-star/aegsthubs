@@ -487,17 +487,18 @@ export default function VendorDashboard() {
               type="number"
               className="bg-secondary border border-border rounded px-3 py-2 text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             />
-            <select
+            <input
+              list="vendor-categories"
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
+              placeholder="📂 Kategori (yaz veya seç)"
               className="col-span-2 bg-secondary border border-border rounded px-3 py-2 text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            >
+            />
+            <datalist id="vendor-categories">
               {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  📂 {c}
-                </option>
+                <option key={c} value={c} />
               ))}
-            </select>
+            </datalist>
             <input
               value={form.origin}
               onChange={(e) => setForm({ ...form, origin: e.target.value })}

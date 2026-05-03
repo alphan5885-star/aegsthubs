@@ -79,6 +79,14 @@ Deno.serve(async (req) => {
         if (!creditErr && (result as { credited?: boolean } | null)?.credited) {
           totalCredited += 1;
         }
+
+        // Sipariş ödemesi olarak da eşleştirmeyi dene (payment_address eşleşmesi)
+        await service.rpc("confirm_order_payment_by_tx", {
+          _address: row.address,
+          _tx_hash: txHash,
+          _amount_satoshi: amountSatoshi,
+          _confirmations: confirmations,
+        });
       }
       processed += 1;
     } catch (e) {
