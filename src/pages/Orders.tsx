@@ -10,6 +10,7 @@ import RateOrderDialog from "@/components/RateOrderDialog";
 import OrderDeliveryInfo from "@/components/OrderDeliveryInfo";
 import OrderStatusTimeline from "@/components/OrderStatusTimeline";
 import EmptyState from "@/components/EmptyState";
+import OrderChatButton from "@/components/OrderChatButton";
 import { useI18n } from "@/lib/i18n";
 
 interface OrderRow {
@@ -136,6 +137,9 @@ export default function Orders() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  {["paid","shipped","delivered","completed"].includes(o.status) && (
+                    <OrderChatButton orderId={o.id} label="Satıcıyla Mesajlaş" />
+                  )}
                   {role === "buyer" && o.status === "pending" && (
                     <button onClick={(e) => { e.stopPropagation(); cancelOrder(o.id); }} className="flex items-center gap-1 px-2 py-1 bg-red-600/80 text-white text-[10px] font-mono rounded hover:bg-red-700">
                       <X className="w-3 h-3" /> {t("orders.cancel")}
