@@ -233,15 +233,8 @@ if (data) {
 
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
         <div className="xl:col-span-3">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             {[
-              {
-                label: "LTC/USD",
-                value: `$${marketStats.ltcUsd.toFixed(2)}`,
-                trend: "+2.4%",
-                up: true,
-                icon: TrendingUp,
-              },
               {
                 label: t("market.mostPopular"),
                 value: marketStats.topCategory,
