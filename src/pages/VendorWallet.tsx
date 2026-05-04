@@ -115,35 +115,19 @@ export default function VendorWalletPage() {
     if (amt > wallet.available) { toast.error("Yetersiz bakiye"); return; }
     setWithdrawing(true);
     try {
-      if (withdrawCoin === "ltc") {
-        const { data, error } = await supabase.rpc("vendor_withdraw_ltc", {
-          _address: withdrawAddr,
-          _amount: amt,
-        });
-        if (error || !(data as any)?.success) {
-          const msg = (data as any)?.error;
-          toast.error(
-            msg === "insufficient_balance" ? "Yetersiz bakiye" :
-            msg === "invalid_address" ? "Geçersiz LTC adresi" : "Çekim başarısız",
-          );
-          return;
-        }
-        toast.success(`${amt} LTC çekim talebi oluşturuldu.`);
-      } else {
-        const { data, error } = await supabase.rpc("vendor_withdraw_xmr", {
-          _address: withdrawAddr,
-          _amount: amt,
-        });
-        if (error || !(data as any)?.success) {
-          const msg = (data as any)?.error;
-          toast.error(
-            msg === "insufficient_balance" ? "Yetersiz bakiye" :
-            msg === "invalid_address" ? "Geçersiz XMR adresi" : "Çekim başarısız",
-          );
-          return;
-        }
-        toast.success(`${amt} XMR çekim talebi oluşturuldu.`);
+      const { data, error } = await supabase.rpc("vendor_withdraw_ltc", {
+        _address: withdrawAddr,
+        _amount: amt,
+      });
+      if (error || !(data as any)?.success) {
+        const msg = (data as any)?.error;
+        toast.error(
+          msg === "insufficient_balance" ? "Yetersiz bakiye" :
+          msg === "invalid_address" ? "Geçersiz LTC adresi" : "Çekim başarısız",
+        );
+        return;
       }
+      toast.success(`${amt} LTC çekim talebi oluşturuldu.`);
       setWithdrawAddr("");
       setWithdrawAmount("");
       if (isMounted.current) {
