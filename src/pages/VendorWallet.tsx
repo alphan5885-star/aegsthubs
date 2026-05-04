@@ -35,7 +35,6 @@ export default function VendorWalletPage() {
     totalRevenue: 0,
     totalCommission: 0,
   });
-  const [withdrawCoin, setWithdrawCoin] = useState<"ltc" | "xmr">("ltc");
   const [withdrawAddr, setWithdrawAddr] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawing, setWithdrawing] = useState(false);
