@@ -135,7 +135,7 @@ useEffect(() => {
         <div>
 <h1 className="text-2xl font-mono font-bold text-primary neon-text">Cüzdan</h1>
           <p className="text-xs font-mono text-muted-foreground mt-1">
-            LTC/XMR cüzdan adreslerine para yatır, 3 onaydan sonra bakiyene otomatik yansır
+            LTC cüzdan adresine para yatır, 3 onaydan sonra bakiyene otomatik yansır
           </p>
         </div>
 
