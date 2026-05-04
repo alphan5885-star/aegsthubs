@@ -242,7 +242,7 @@ useEffect(() => {
           <div className="flex items-start gap-2 px-3 py-2 rounded bg-primary/10 border border-primary/40 text-xs font-mono text-primary">
             <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
             <span>
-              LTC transferleri BlockCypher'da 3 onay aldiginda otomatik bakiyene eklenir. XMR manuel doğrulama ile işlenir. Satin alimda bakiye escrowa kilitlenir; teslimatta %90 saticiya, %10 admin hesaba aktarilir.
+              LTC transferleri BlockCypher'da 3 onay aldiginda otomatik bakiyene eklenir. Satin alimda bakiye escrowa kilitlenir; teslimatta %95 saticiya, %5 admin hesaba aktarilir.
             </span>
           </div>
         </div>
