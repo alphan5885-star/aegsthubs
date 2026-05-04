@@ -7,16 +7,12 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 type Balance = { available: number; pending: number; total: number };
-const FALLBACK_XMR_ADDRESS =
-  "49VZg8Rqy31LHQpy1rdHFgawh4dcErZEaREXSrqEqivJaPLxGE6Srk8cXoxdWdfSm9c4uduESinA55PCd3reZoov8SSvTXD";
 
 export default function Wallet() {
   const [ltcAddress, setLtcAddress] = useState<string>("");
-  const [xmrAddress] = useState<string>(FALLBACK_XMR_ADDRESS);
   const [balance, setBalance] = useState<Balance>({ available: 0, pending: 0, total: 0 });
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
-  const [withdrawCoin, setWithdrawCoin] = useState<"ltc" | "xmr">("ltc");
   const [withdrawAddr, setWithdrawAddr] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawing, setWithdrawing] = useState(false);
