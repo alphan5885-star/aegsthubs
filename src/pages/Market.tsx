@@ -222,10 +222,8 @@ if (data) {
                 <span className="text-xs font-mono font-bold text-foreground">{s.value}</span>
               </div>
             ))}
-            <div className="flex items-center gap-1 text-[10px] font-mono text-orange-400">
-              <span>XMR</span>
-              <span className="text-muted-foreground">/</span>
-              <span className="text-blue-400">LTC</span>
+            <div className="flex items-center gap-1 text-[10px] font-mono text-blue-400">
+              <span>LTC</span>
             </div>
           </div>
         </div>
