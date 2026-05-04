@@ -35,7 +35,6 @@ export default function VendorWalletPage() {
     totalRevenue: 0,
     totalCommission: 0,
   });
-  const [withdrawCoin, setWithdrawCoin] = useState<"ltc" | "xmr">("ltc");
   const [withdrawAddr, setWithdrawAddr] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawing, setWithdrawing] = useState(false);
@@ -116,35 +115,19 @@ export default function VendorWalletPage() {
     if (amt > wallet.available) { toast.error("Yetersiz bakiye"); return; }
     setWithdrawing(true);
     try {
-      if (withdrawCoin === "ltc") {
-        const { data, error } = await supabase.rpc("vendor_withdraw_ltc", {
-          _address: withdrawAddr,
-          _amount: amt,
-        });
-        if (error || !(data as any)?.success) {
-          const msg = (data as any)?.error;
-          toast.error(
-            msg === "insufficient_balance" ? "Yetersiz bakiye" :
-            msg === "invalid_address" ? "Geçersiz LTC adresi" : "Çekim başarısız",
-          );
-          return;
-        }
-        toast.success(`${amt} LTC çekim talebi oluşturuldu.`);
-      } else {
-        const { data, error } = await supabase.rpc("vendor_withdraw_xmr", {
-          _address: withdrawAddr,
-          _amount: amt,
-        });
-        if (error || !(data as any)?.success) {
-          const msg = (data as any)?.error;
-          toast.error(
-            msg === "insufficient_balance" ? "Yetersiz bakiye" :
-            msg === "invalid_address" ? "Geçersiz XMR adresi" : "Çekim başarısız",
-          );
-          return;
-        }
-        toast.success(`${amt} XMR çekim talebi oluşturuldu.`);
+      const { data, error } = await supabase.rpc("vendor_withdraw_ltc", {
+        _address: withdrawAddr,
+        _amount: amt,
+      });
+      if (error || !(data as any)?.success) {
+        const msg = (data as any)?.error;
+        toast.error(
+          msg === "insufficient_balance" ? "Yetersiz bakiye" :
+          msg === "invalid_address" ? "Geçersiz LTC adresi" : "Çekim başarısız",
+        );
+        return;
       }
+      toast.success(`${amt} LTC çekim talebi oluşturuldu.`);
       setWithdrawAddr("");
       setWithdrawAmount("");
       if (isMounted.current) {
@@ -282,36 +265,12 @@ export default function VendorWalletPage() {
             Maks: {wallet.available.toFixed(8)} LTC
           </span>
         </div>
-        
-        {/* Coin Selection */}
-        <div className="flex gap-2 mb-3">
-          <button
-            onClick={() => setWithdrawCoin("ltc")}
-            className={`px-3 py-1.5 rounded text-xs font-mono transition-colors ${
-              withdrawCoin === "ltc"
-                ? "bg-blue-500 text-white"
-                : "bg-background/60 border border-border text-muted-foreground hover:border-primary"
-            }`}
-          >
-            LTC Çek
-          </button>
-          <button
-            onClick={() => setWithdrawCoin("xmr")}
-            className={`px-3 py-1.5 rounded text-xs font-mono transition-colors ${
-              withdrawCoin === "xmr"
-                ? "bg-orange-500 text-white"
-                : "bg-background/60 border border-border text-muted-foreground hover:border-primary"
-            }`}
-          >
-            XMR Çek
-          </button>
-        </div>
-        
+
         <div className="flex gap-3">
           <input
             value={withdrawAddr}
             onChange={(e) => setWithdrawAddr(e.target.value)}
-            placeholder={withdrawCoin === "ltc" ? "LTC Cüzdan Adresi" : "XMR Cüzdan Adresi"}
+            placeholder="LTC Cüzdan Adresi"
             className="flex-1 bg-secondary border border-border rounded px-3 py-2 text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             disabled={withdrawing}
           />

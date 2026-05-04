@@ -7,16 +7,12 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 type Balance = { available: number; pending: number; total: number };
-const FALLBACK_XMR_ADDRESS =
-  "49VZg8Rqy31LHQpy1rdHFgawh4dcErZEaREXSrqEqivJaPLxGE6Srk8cXoxdWdfSm9c4uduESinA55PCd3reZoov8SSvTXD";
 
 export default function Wallet() {
   const [ltcAddress, setLtcAddress] = useState<string>("");
-  const [xmrAddress] = useState<string>(FALLBACK_XMR_ADDRESS);
   const [balance, setBalance] = useState<Balance>({ available: 0, pending: 0, total: 0 });
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
-  const [withdrawCoin, setWithdrawCoin] = useState<"ltc" | "xmr">("ltc");
   const [withdrawAddr, setWithdrawAddr] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawing, setWithdrawing] = useState(false);
@@ -98,41 +94,24 @@ useEffect(() => {
     if (amt > balance.available) { toast.error("Yetersiz bakiye"); return; }
     setWithdrawing(true);
     try {
-if (!pinHash) {
+      if (!pinHash) {
         toast.error("Para çekme PIN'i belirlenmemiş. Profil sayfasından PIN oluştur.");
         return;
       }
-      if (withdrawCoin === "ltc") {
-        const { data, error } = await supabase.rpc("user_withdraw_ltc", {
-          _address: withdrawAddr,
-          _amount: amt,
-          _pin_hash: pinHash,
-        });
-        if (error || !(data as any)?.success) {
-          const msg = (data as any)?.error;
-          toast.error(
-            msg === "insufficient_balance" ? "Yetersiz bakiye" :
-            msg === "invalid_address" ? "Geçersiz LTC adresi" : "Çekim başarısız",
-          );
-          return;
-        }
-        toast.success(`${amt} LTC çekim talebi oluşturuldu.`);
-      } else {
-        const { data, error } = await supabase.rpc("user_withdraw_xmr", {
-          _address: withdrawAddr,
-          _amount: amt,
-          _pin_hash: pinHash,
-        });
-        if (error || !(data as any)?.success) {
-          const msg = (data as any)?.error;
-          toast.error(
-            msg === "insufficient_balance" ? "Yetersiz bakiye" :
-            msg === "invalid_address" ? "Geçersiz XMR adresi" : "Çekim başarısız",
-          );
-          return;
-        }
-        toast.success(`${amt} XMR çekim talebi oluşturuldu.`);
+      const { data, error } = await supabase.rpc("user_withdraw_ltc", {
+        _address: withdrawAddr,
+        _amount: amt,
+        _pin_hash: pinHash,
+      });
+      if (error || !(data as any)?.success) {
+        const msg = (data as any)?.error;
+        toast.error(
+          msg === "insufficient_balance" ? "Yetersiz bakiye" :
+          msg === "invalid_address" ? "Geçersiz LTC adresi" : "Çekim başarısız",
+        );
+        return;
       }
+      toast.success(`${amt} LTC çekim talebi oluşturuldu.`);
       setWithdrawAddr("");
       setWithdrawAmount("");
       setBalance((prev) => ({
@@ -156,7 +135,7 @@ if (!pinHash) {
         <div>
 <h1 className="text-2xl font-mono font-bold text-primary neon-text">Cüzdan</h1>
           <p className="text-xs font-mono text-muted-foreground mt-1">
-            LTC/XMR cüzdan adreslerine para yatır, 3 onaydan sonra bakiyene otomatik yansır
+            LTC cüzdan adresine para yatır, 3 onaydan sonra bakiyene otomatik yansır
           </p>
         </div>
 
@@ -215,63 +194,19 @@ if (!pinHash) {
             </div>
           </div>
 
-          <h2 className="font-mono text-sm text-foreground">XMR (Monero) Adresi</h2>
-          <div className="flex flex-col items-center gap-3 p-4 bg-background/40 rounded">
-            <div className="bg-white p-3 rounded">
-              <QRCodeCanvas value={xmrAddress} size={160} />
-            </div>
-            <div className="w-full flex items-center gap-2">
-              <code className="flex-1 text-xs font-mono break-all bg-background/60 px-2 py-1.5 rounded border border-border text-primary">
-                {xmrAddress}
-              </code>
-              <Button
-                onClick={() => copy(xmrAddress)}
-                size="sm"
-                variant="outline"
-                className="shrink-0"
-              >
-                <Copy className="w-3 h-3" />
-              </Button>
-            </div>
-          </div>
-
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <h2 className="font-mono text-sm text-foreground">Para Çekimi</h2>
+              <h2 className="font-mono text-sm text-foreground">Para Çekimi (LTC)</h2>
               <span className="text-[10px] font-mono text-muted-foreground">
                 Maks: {balance.available.toFixed(8)} LTC
               </span>
-            </div>
-            
-            {/* Coin Selection */}
-            <div className="flex gap-2 mb-3">
-              <button
-                onClick={() => setWithdrawCoin("ltc")}
-                className={`px-3 py-1.5 rounded text-xs font-mono transition-colors ${
-                  withdrawCoin === "ltc"
-                    ? "bg-blue-500 text-white"
-                    : "bg-background/60 border border-border text-muted-foreground hover:border-primary"
-                }`}
-              >
-                LTC Çek
-              </button>
-              <button
-                onClick={() => setWithdrawCoin("xmr")}
-                className={`px-3 py-1.5 rounded text-xs font-mono transition-colors ${
-                  withdrawCoin === "xmr"
-                    ? "bg-orange-500 text-white"
-                    : "bg-background/60 border border-border text-muted-foreground hover:border-primary"
-                }`}
-              >
-                XMR Çek
-              </button>
             </div>
 
             <div className="flex gap-2">
               <input
                 value={withdrawAddr}
                 onChange={(e) => setWithdrawAddr(e.target.value)}
-                placeholder={withdrawCoin === "ltc" ? "LTC Cüzdan Adresi" : "XMR Cüzdan Adresi"}
+                placeholder="LTC Cüzdan Adresi"
                 disabled={withdrawing}
                 className="flex-1 bg-background/60 border border-border rounded px-3 py-2 text-xs font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               />
@@ -307,7 +242,7 @@ if (!pinHash) {
           <div className="flex items-start gap-2 px-3 py-2 rounded bg-primary/10 border border-primary/40 text-xs font-mono text-primary">
             <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
             <span>
-              LTC transferleri BlockCypher'da 3 onay aldiginda otomatik bakiyene eklenir. XMR manuel doğrulama ile işlenir. Satin alimda bakiye escrowa kilitlenir; teslimatta %90 saticiya, %10 admin hesaba aktarilir.
+              LTC transferleri BlockCypher'da 3 onay aldiginda otomatik bakiyene eklenir. Satin alimda bakiye escrowa kilitlenir; teslimatta %95 saticiya, %5 admin hesaba aktarilir.
             </span>
           </div>
         </div>
