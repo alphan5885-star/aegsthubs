@@ -94,41 +94,24 @@ useEffect(() => {
     if (amt > balance.available) { toast.error("Yetersiz bakiye"); return; }
     setWithdrawing(true);
     try {
-if (!pinHash) {
+      if (!pinHash) {
         toast.error("Para çekme PIN'i belirlenmemiş. Profil sayfasından PIN oluştur.");
         return;
       }
-      if (withdrawCoin === "ltc") {
-        const { data, error } = await supabase.rpc("user_withdraw_ltc", {
-          _address: withdrawAddr,
-          _amount: amt,
-          _pin_hash: pinHash,
-        });
-        if (error || !(data as any)?.success) {
-          const msg = (data as any)?.error;
-          toast.error(
-            msg === "insufficient_balance" ? "Yetersiz bakiye" :
-            msg === "invalid_address" ? "Geçersiz LTC adresi" : "Çekim başarısız",
-          );
-          return;
-        }
-        toast.success(`${amt} LTC çekim talebi oluşturuldu.`);
-      } else {
-        const { data, error } = await supabase.rpc("user_withdraw_xmr", {
-          _address: withdrawAddr,
-          _amount: amt,
-          _pin_hash: pinHash,
-        });
-        if (error || !(data as any)?.success) {
-          const msg = (data as any)?.error;
-          toast.error(
-            msg === "insufficient_balance" ? "Yetersiz bakiye" :
-            msg === "invalid_address" ? "Geçersiz XMR adresi" : "Çekim başarısız",
-          );
-          return;
-        }
-        toast.success(`${amt} XMR çekim talebi oluşturuldu.`);
+      const { data, error } = await supabase.rpc("user_withdraw_ltc", {
+        _address: withdrawAddr,
+        _amount: amt,
+        _pin_hash: pinHash,
+      });
+      if (error || !(data as any)?.success) {
+        const msg = (data as any)?.error;
+        toast.error(
+          msg === "insufficient_balance" ? "Yetersiz bakiye" :
+          msg === "invalid_address" ? "Geçersiz LTC adresi" : "Çekim başarısız",
+        );
+        return;
       }
+      toast.success(`${amt} LTC çekim talebi oluşturuldu.`);
       setWithdrawAddr("");
       setWithdrawAmount("");
       setBalance((prev) => ({
