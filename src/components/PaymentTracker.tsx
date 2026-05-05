@@ -18,7 +18,7 @@ export default function PaymentTracker({ orderId, amount }: Props) {
   const [roomId, setRoomId] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
 
-  // 1. Generate fallback address on mount (XMR is manual escrow until a dedicated node is connected)
+  // 1. Generate LTC payment address on mount
   useEffect(() => {
     isMounted.current = true;
     const init = async () => {
