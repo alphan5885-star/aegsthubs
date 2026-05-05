@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Globe } from "lucide-react";
+
 
 /**
  * Tarayıcı .onion üzerindeyse "TOR" rozeti gösterir.
@@ -16,12 +16,12 @@ export default function TorBadge({ collapsed }: { collapsed?: boolean }) {
   if (collapsed) {
     return (
       <div
-        title={isOnion ? "Tor üzerinden bağlısın" : "Clearnet bağlantı"}
+        title={isOnion ? "Tor üzerinden bağlısın" : "Clearweb — anonim mod aktif"}
         className={`flex items-center justify-center py-1.5 rounded text-[9px] font-mono ${
-          isOnion ? "bg-primary/10 text-primary border border-primary/40" : "text-muted-foreground"
+          isOnion ? "bg-primary/10 text-primary border border-primary/40" : "text-muted-foreground animate-pulse"
         }`}
       >
-        {isOnion ? "🧅" : <Globe className="w-3 h-3" />}
+        {isOnion ? "🧅" : "🕵️"}
       </div>
     );
   }
@@ -35,10 +35,10 @@ export default function TorBadge({ collapsed }: { collapsed?: boolean }) {
       }`}
     >
       <span className="flex items-center gap-1.5">
-        {isOnion ? <span>🧅</span> : <Globe className="w-3 h-3" />}
-        <span>{isOnion ? "TOR" : "CLEARNET"}</span>
+        {isOnion ? <span>🧅</span> : <span className="animate-pulse">🕵️</span>}
+        <span>{isOnion ? "TOR" : "ANONIM"}</span>
       </span>
-      <span className="text-[9px] opacity-60">{isOnion ? "anonim" : "şeffaf"}</span>
+      <span className="text-[9px] opacity-60">{isOnion ? "onion" : "clearweb"}</span>
     </div>
   );
 }
