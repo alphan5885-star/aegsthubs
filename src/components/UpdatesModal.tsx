@@ -13,6 +13,14 @@ type Update = {
 
 const updatesData: Update[] = [
   {
+    version: "3.5.0",
+    date: "2026-05-05",
+    title: "Clearweb Anonymous Mode",
+    description: "Platform shifted to clearweb access with stealth mode, anonymous browsing, and BlockCypher-powered automatic LTC deposit sync.",
+    icon: "rocket",
+    category: "new",
+  },
+  {
     version: "3.0.0",
     date: "2025-06-01",
     title: "aeigsthub v3.0 - Ultimate Security",
@@ -71,8 +79,8 @@ const updatesData: Update[] = [
   {
     version: "2.0.0",
     date: "2024-11-01",
-    title: "Multi-Currency Wallet",
-    description: "LTC and XMR support with automatic deposit sync.",
+    title: "LTC Wallet",
+    description: "Native Litecoin wallet with automatic deposit sync.",
     icon: "rocket",
     category: "new",
   },

@@ -159,9 +159,6 @@ export default function Checkout() {
                   <div className="text-sm font-mono font-bold text-foreground">
                     {(item.price * item.quantity).toFixed(4)} LTC
                   </div>
-                  <div className="text-[10px] font-mono text-muted-foreground">
-                    {(item.price * item.quantity * 0.62).toFixed(4)} XMR
-                  </div>
                 </div>
               </div>
             ))}
@@ -173,12 +170,6 @@ export default function Checkout() {
             <span className="font-mono text-muted-foreground">{t("cart.subtotal")}</span>
             <span className="text-lg font-mono font-bold text-foreground">
               {totalPrice.toFixed(4)} LTC
-            </span>
-          </div>
-          <div className="flex items-center justify-between mb-4">
-            <span className="font-mono text-muted-foreground">{t("cart.inXmr")}</span>
-            <span className="text-sm font-mono text-orange-400">
-              {(totalPrice * 0.62).toFixed(4)} XMR
             </span>
           </div>
           <div className="flex items-center justify-between pt-4 border-t border-border">

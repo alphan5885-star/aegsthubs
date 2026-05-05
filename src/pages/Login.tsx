@@ -562,8 +562,6 @@ const { login, signup, mfaChallenge, verifyMfa, user } = useAuth();
             <div>
               <div className="text-[10px] font-mono text-muted-foreground mb-1">{t("login.payment")}</div>
               <div className="text-xs font-mono">
-                <span className="text-orange-400">XMR</span>
-                <span className="text-muted-foreground mx-1">/</span>
                 <span className="text-blue-400">LTC</span>
               </div>
             </div>

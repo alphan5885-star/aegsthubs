@@ -244,9 +244,6 @@ export default function ProductDetail() {
                 <div className="text-xl font-mono font-bold text-foreground">
                   {totalPrice.toFixed(4)} LTC
                 </div>
-                <div className="text-sm font-mono text-orange-400">
-                  {(totalPrice * 0.62).toFixed(4)} XMR
-                </div>
                 <div className="text-[10px] font-mono text-muted-foreground mt-0.5">
                   +%{(SERVICE_FEE_RATE * 100).toFixed(0)} escrow
                 </div>
@@ -286,7 +283,7 @@ export default function ProductDetail() {
           <div>
             <div className="text-[11px] font-mono font-bold text-primary">{t("product.escrowTitle")}</div>
             <div className="text-[9px] font-mono text-muted-foreground">
-              Once wallet'a LTC/XMR yukle ��� Satin alimda escrow hold • Teslimde %90/%10 dagitim
+              Önce wallet'a LTC yükle • Satın alımda escrow hold • Teslimde %95/%5 dağıtım
             </div>
           </div>
         </div>
@@ -383,7 +380,7 @@ export default function ProductDetail() {
                   <ShoppingCart className="w-4 h-4" />
                   {creating
                     ? t("product.preparing")
-                    : `${t("product.buyBtn")} — ${totalPrice.toFixed(4)} LTC / ${(totalPrice * 0.62).toFixed(4)} XMR`}
+                    : `${t("product.buyBtn")} — ${totalPrice.toFixed(4)} LTC`}
                 </motion.button>
               </>
             )}

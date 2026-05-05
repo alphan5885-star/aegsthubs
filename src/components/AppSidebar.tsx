@@ -367,7 +367,7 @@ export default function AppSidebar() {
 
         {!collapsed && (
           <div className="flex items-center gap-1 p-1 bg-background/40 rounded border border-white/5">
-            {["LTC", "XMR", "USD"].map((c) => (
+            {["LTC", "USD"].map((c) => (
               <button
                 key={c}
                 onClick={() => updateSettings({ preferredCurrency: c as any })}
