@@ -35,10 +35,10 @@ export default function TorBadge({ collapsed }: { collapsed?: boolean }) {
       }`}
     >
       <span className="flex items-center gap-1.5">
-        {isOnion ? <span>🧅</span> : <Globe className="w-3 h-3" />}
-        <span>{isOnion ? "TOR" : "CLEARNET"}</span>
+        {isOnion ? <span>🧅</span> : <span className="animate-pulse">🕵️</span>}
+        <span>{isOnion ? "TOR" : "ANONIM"}</span>
       </span>
-      <span className="text-[9px] opacity-60">{isOnion ? "anonim" : "şeffaf"}</span>
+      <span className="text-[9px] opacity-60">{isOnion ? "onion" : "clearweb"}</span>
     </div>
   );
 }
