@@ -1,38 +1,42 @@
-## Plan
+## Eksikleri Derleme Planı
 
-### 1. BlockCypher Token Kurulumu
-- `BLOCKCYPHER_TOKEN` secret olarak eklenir (`be7108df52714399be6716f85ae7edb1`).
-- `create-deposit-address` ve `cron-sync-deposits` edge function'ları zaten bu token'ı bekliyor — ek kod değişikliği yok, sadece secret eklemek yeterli.
+Önceki turlarda XMR ve mirrors/.onion büyük oranda kaldırıldı ama kod tabanında hâlâ tutarsız kalıntılar var. Bunları temizleyeceğim.
 
-### 2. Otomatik LTC Sync (pg_cron)
-- `pg_cron` + `pg_net` extension'ları aktifleştirilir.
-- Her 5 dakikada bir `cron-sync-deposits` edge function'ı tetiklenir:
-  - Tüm aktif kullanıcı LTC adreslerini tarar
-  - 3+ konfirmasyonlu işlemleri `credit_confirmed_deposit` ile bakiyeye yazar
-  - Sipariş ödemelerini `confirm_order_payment_by_tx` ile eşleştirir → escrow + admin %5 + satıcı dağıtımı otomatik
+### 1. PaymentTracker'ı LTC'ye sadeleştir
+`src/components/PaymentTracker.tsx` — şu an "LTC/XMR Escrow", "XMR manuel doğrulama", `awaiting_manual_xmr` status, "veya eşdeğer XMR" notu gibi yerler var. Hepsini sadece **LTC** anlatacak şekilde günceller, `awaiting_manual_xmr` → `awaiting_payment` yaparım. Başlık: "LTC Escrow Bekleniyor".
 
-### 3. Monero (XMR) Devre Dışı
-BlockCypher Monero'yu desteklemiyor, yanıltıcı olmasın diye UI'dan gizlenir:
-- `Wallet.tsx`: XMR yatırma/çekme tab'ı kaldırılır (sadece LTC kalır)
-- `VendorWallet.tsx`: XMR çekim seçeneği kaldırılır
-- `Market.tsx` ticker'ında "XMR / LTC" yazısı sadeleştirilir
-- DB'deki `vendor_withdraw_xmr` / `user_withdraw_xmr` RPC'leri silinmez (gelecekte XMR node eklenirse hazır kalır), sadece UI'dan erişim kapatılır
+### 2. Checkout / ProductDetail / Market — XMR çevirisi kaldır
+- `src/pages/Checkout.tsx` (line 163, 179-181): `XMR` satırı ve `cart.inXmr` etiketi silinir.
+- `src/pages/ProductDetail.tsx` (line 248, 289, 386): `(price * 0.62) XMR` ifadeleri ve "LTC/XMR" buton metni LTC'ye sadeleşir.
+- `src/pages/Market.tsx` (line 420): aynı XMR satırı silinir.
+- `src/components/QuickViewModal.tsx`: `priceXMR` hesabı ve XMR seçeneği kaldırılır.
+- `src/pages/Login.tsx` (line 565): dekoratif `<span>XMR</span>` çıkarılır.
 
-### 4. Market Sayfası Temizliği
-`src/pages/Market.tsx` (line 237-244): üst satırdaki **"LTC/USD $84.xx +2.4%"** kartı tamamen kaldırılır. Yerine geriye kalan iki kart (En Popüler Kategori, Güvenlik) `md:grid-cols-2`'ye düşürülür. Sahte/sabit fiyat verisi sergilemekten kurtuluruz.
+### 3. Sidebar para birimi seçici
+`src/components/AppSidebar.tsx` line 370: `["LTC","XMR","USD"]` → `["LTC","USD"]`.
 
-### 5. Test Rehberi (uygulama sonrası)
-1. `/wallet` → "LTC Adresi Oluştur" → kişisel adres üretilir
-2. O adrese küçük miktar LTC gönder (mainnet)
-3. ~5–15 dk sonra (3 konfirmasyon + cron tick) bakiye otomatik artar, bildirim gelir
-4. Market'tan ürün al → ödeme adresine LTC gönder → sipariş otomatik `paid` → escrow tutulur → satıcıya kazanç dağılır
+### 4. Customization context
+`src/lib/customizationContext.tsx`: `preferredCurrency` tipinden `"XMR"` çıkar; mevcut storage'ta XMR varsa LTC'ye düşürülür.
+
+### 5. AppSidebar — Mirrors menü öğesi
+`src/components/AppSidebar.tsx` içinde halen `mirrors: "Mirrors"` label'ı translation key olarak referans var ama route silindi. Sidebar'da `to: "/mirrors"` linki varsa kaldırılır (önceden bahsedilmişti, doğrulayıp temizleyeceğim).
+
+### 6. i18n temizliği
+`src/lib/i18n.tsx`:
+- TR/EN/RU üç dilde de `mirrors.*` anahtarları (title/empty/url/.onion vb.) ve `dashboard...mirrors:` etiketi silinir.
+- `cart.inXmr` anahtarları silinir.
+- `wallet.desc` metinlerinde "LTC/XMR" → "LTC".
+
+### 7. UpdatesModal changelog
+`src/components/UpdatesModal.tsx`: "LTC and XMR support…" satırı LTC-only olarak güncellenir; ayrıca clearweb geçişi için yeni bir 3.0.0 changelog girdisi eklenir ("Clearweb access, anonymous mode") — son değişiklikleri kullanıcıya görünür kılmak için.
+
+### 8. securityContext .onion kontrolü
+`src/lib/securityContext.tsx`: `.onion` host kontrolü kalır (gelecekte Tor'a taşıma planı sürdüğü için faydalı), dokunulmaz. Sadece bilgi.
 
 ### Etkilenen dosyalar
-- Yeni secret: `BLOCKCYPHER_TOKEN`
-- DB migration: `pg_cron` + `pg_net` enable + 5 dk'lık `cron-sync-deposits` job
-- `src/pages/Market.tsx` — LTC/USD kartı silinir, ticker sadeleşir
-- `src/pages/Wallet.tsx` — XMR sekmesi kaldırılır
-- `src/pages/VendorWallet.tsx` — XMR çekim seçeneği kaldırılır
+- `src/components/PaymentTracker.tsx`
+- `src/pages/Checkout.tsx`, `src/pages/ProductDetail.tsx`, `src/pages/Market.tsx`, `src/pages/Login.tsx`
+- `src/components/QuickViewModal.tsx`, `src/components/AppSidebar.tsx`, `src/components/UpdatesModal.tsx`
+- `src/lib/customizationContext.tsx`, `src/lib/i18n.tsx`
 
-### Bitcart Notu
-Bitcart entegrasyonu YAPILMAYACAK (ayrı VPS + full node + bakım yükü Tor pazaryeri için pratik değil). İleride Monero gerçekten şart olursa NowNodes API veya kendi `monero-wallet-rpc` node'u ile ayrı bir edge function eklenir — mevcut altyapı silinmez, üzerine eklenir.
+DB / edge functions / migrations'a dokunulmayacak — ödeme altyapısı (BlockCypher LTC + cron sync) zaten çalışıyor.

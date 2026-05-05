@@ -42,15 +42,12 @@ export default function QuickViewModal({
 
   const commission = product.price * 0.05;
   const priceLTC = product.price + commission;
-  const priceXMR = priceLTC * 0.62;
   const priceUSD = priceLTC * 84.22;
 
   const displayPrice =
-    settings.preferredCurrency === "XMR"
-      ? priceXMR.toFixed(4)
-      : settings.preferredCurrency === "USD"
-        ? priceUSD.toFixed(2)
-        : priceLTC.toFixed(4);
+    settings.preferredCurrency === "USD"
+      ? priceUSD.toFixed(2)
+      : priceLTC.toFixed(4);
 
   const currencyLabel = settings.preferredCurrency;
 

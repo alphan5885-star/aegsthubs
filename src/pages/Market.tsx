@@ -416,9 +416,6 @@ if (data) {
                         <span className="text-sm font-mono font-bold text-foreground">
                           {totalPrice.toFixed(4)} LTC
                         </span>
-                        <span className="text-[10px] font-mono text-orange-400">
-                          {(totalPrice * 0.62).toFixed(4)} XMR
-                        </span>
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         <span

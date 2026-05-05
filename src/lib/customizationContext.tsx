@@ -13,7 +13,7 @@ export interface CustomizationSettings {
   sidebarCollapsed: boolean;
   sidebarPosition: "left" | "right";
   // Currency
-  preferredCurrency: "LTC" | "USD" | "XMR";
+  preferredCurrency: "LTC" | "USD";
 }
 
 const defaults: CustomizationSettings = {
@@ -92,7 +92,10 @@ export function CustomizationProvider({ children }: { children: ReactNode }) {
     if (typeof window === "undefined") return defaults;
     try {
       const stored = window.localStorage.getItem(STORAGE_KEY);
-      return stored ? { ...defaults, ...JSON.parse(stored) } : defaults;
+      if (!stored) return defaults;
+      const parsed = JSON.parse(stored);
+      if (parsed?.preferredCurrency === "XMR") parsed.preferredCurrency = "LTC";
+      return { ...defaults, ...parsed };
     } catch {
       return defaults;
     }

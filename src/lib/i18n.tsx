@@ -249,7 +249,6 @@ const tr = {
   "cart.checkoutTitle": "Ödeme",
   "cart.items": "Ürünler",
   "cart.subtotal": "Ara Toplam",
-  "cart.inXmr": "(XMR)",
   "cart.total": "TOPLAM",
   "cart.escrowNote": "Ödeme escrow'da tutulur. Teslimatta satıcıya aktarılır.",
   "cart.clearCart": "Sepeti Boşalt",
@@ -286,7 +285,7 @@ const tr = {
 
 // Wallet
   "wallet.title": "Cüzdan",
-  "wallet.desc": "LTC/XMR cüzdan adreslerine para yatır, 3 onaydan sonra bakiyene otomatik yansır",
+  "wallet.desc": "LTC cüzdan adreslerine para yatır, 3 onaydan sonra bakiyene otomatik yansır",
   "wallet.balance": "Bakiye",
   "wallet.available": "Kullanılabilir",
   "wallet.pendingBalance": "Bekleyen",
@@ -527,16 +526,6 @@ const tr = {
   "admin.areSure": "EMİN MİSİN?",
   "admin.destroy": "🔥 İMHA ET",
 
-  // Mirrors
-  "mirrors.title": "Aynalar & Canary",
-  "mirrors.empty": "Ayna eklenmemiş",
-  "mirrors.add": "Ayna Ekle",
-  "mirrors.url": "URL (.onion)",
-  "mirrors.label": "Etiket",
-  "mirrors.signature": "PGP İmzası",
-  "mirrors.canary": "Canary Mesajı",
-  "mirrors.verified": "Doğrulandı",
-  "mirrors.lastChecked": "Son kontrol",
 
   // Bond (Vendor Bond)
   "bond.title": "Güven Depozitosu",
@@ -614,18 +603,6 @@ const tr = {
   "disputes.adminMessage": "Admin mesajı...",
   "disputes.disputeLabel": "Uyuşmazlık: ",
 
-  // Mirrors (extra keys)
-  "mirrors.subtitle": "Resmi .onion adresleri ve canary mesajları. Phishing'e karşı her zaman bu listeyi doğrula.",
-  "mirrors.canaryWarning": "UYARI: Canary mesajı 7 günden eski ise (veya hiç güncellenmiyorsa) siteyi kullanma — operatörler ele geçirilmiş olabilir.",
-  "mirrors.noMirrors": "Henüz mirror eklenmemiş.",
-  "mirrors.addNew": "Yeni mirror / canary ekle",
-  "mirrors.urlPlaceholder": "http://xxxxx.onion",
-  "mirrors.labelPlaceholder": "Etiket (ör: Ana ayna)",
-  "mirrors.signaturePlaceholder": "PGP imzalı canary mesajı (opsiyonel)",
-  "mirrors.isCanary": "Bu bir canary mesajıdır",
-  "mirrors.addBtn": "EKLE",
-  "mirrors.lastUpdate": "Son güncelleme:",
-  "mirrors.pgpSig": "PGP imza",
 
   // Security Logs
   "security.center": "Güvenlik Merkezi",
@@ -721,7 +698,7 @@ const en: Partial<typeof tr> = {
   "login.escrow": "Escrow",
   "login.active": "Active",
 
-  dashboard: "Dashboard", securityLogs: "Security Logs", disputes: "Disputes", transactions: "Transactions", forum: "Forum", security: "Security", customize: "Customize", myProducts: "My Products", wallet: "Wallet", deposit: "Bond", profile: "Profile", market: "Market", myOrders: "My Orders", store: "Store", watchlist: "Watchlist", pgpTool: "PGP Tools", cipherNotes: "Cipher Notes", stealthMode: "Stealth Mode", mirrors: "Mirrors",
+  dashboard: "Dashboard", securityLogs: "Security Logs", disputes: "Disputes", transactions: "Transactions", forum: "Forum", security: "Security", customize: "Customize", myProducts: "My Products", wallet: "Wallet", deposit: "Bond", profile: "Profile", market: "Market", myOrders: "My Orders", store: "Store", watchlist: "Watchlist", pgpTool: "PGP Tools", cipherNotes: "Cipher Notes", stealthMode: "Stealth Mode",
   notifications: "Notifications", noNotifications: "No notifications", markAllRead: "Mark all read",
 
   customization: "Customization", themeColor: "Theme Color", font: "Font", fontFamily: "Font", fontSize: "Size", small: "Small", normal: "Normal", large: "Large", animations: "Animation Settings", neonEffects: "Neon effects", animationsToggle: "Animations", sidebarLayout: "Sidebar Layout", position: "Position", left: "Left", right: "Right", collapseSidebar: "Collapse sidebar", backgroundImage: "Background", changeImage: "Change", selectImage: "Select Image", removeImage: "Remove", opacity: "Opacity", customHue: "Custom Hue", resetSettings: "Settings reset", themeApplied: "theme applied", bgUpdated: "Background updated! 🎨", bgRemoved: "Background removed", language: "Language", selectLanguage: "Language", systemFont: "System Font",
@@ -788,7 +765,7 @@ const en: Partial<typeof tr> = {
 
   "status.pending": "Pending", "status.paid": "Paid", "status.shipped": "Shipped", "status.delivered": "Delivered", "status.completed": "Completed", "status.cancelled": "Cancelled", "status.disputed": "Disputed", "status.refunded": "Refunded", "status.held": "In Escrow", "status.released": "Released",
 
-"wallet.title": "Wallet", "wallet.desc": "Deposit to LTC/XMR wallet addresses, balance updates after 3 confirmations", "wallet.balance": "Balance",
+"wallet.title": "Wallet", "wallet.desc": "Deposit to LTC wallet addresses, balance updates after 3 confirmations", "wallet.balance": "Balance",
 
   "delivery.title": "Enter Delivery Info", "delivery.method": "Delivery Method", "delivery.cargo": "Cargo", "delivery.deadDrop": "Dead-Drop", "delivery.mailbox": "Anonymous Mail", "delivery.carrier": "Carrier", "delivery.trackingCode": "Tracking Code", "delivery.trackingHint": "Tracking code is encrypted with buyer's PGP key", "delivery.countryFrom": "Origin Country", "delivery.countryTo": "Destination Country", "delivery.stealthMethod": "Stealth Method", "delivery.coverIdentity": "Cover Sender", "delivery.generateCover": "Generate Cover", "delivery.anonymous": "Anonymous Mode", "delivery.notesOptional": "Notes (optional)", "delivery.submit": "Submit & Mark Shipped", "delivery.submitted": "Delivery info saved", "delivery.encryptionWarning": "Tracking code is end-to-end encrypted. Lost = unrecoverable.", "delivery.noBuyerKey": "Buyer has no PGP key — code stored in plaintext", "delivery.waiting": "Waiting for delivery info...", "delivery.encryptedTracking": "Encrypted Tracking Code", "delivery.decryptHint": "Decrypt with your private key in PGP Tools",
 
@@ -944,7 +921,7 @@ const en: Partial<typeof tr> = {
   "admin.areSure": "ARE YOU SURE?",
   "admin.destroy": "🔥 DESTROY",
 
-  "mirrors.title": "Mirrors & Canary", "mirrors.empty": "No mirrors added", "mirrors.add": "Add Mirror", "mirrors.url": "URL (.onion)", "mirrors.label": "Label", "mirrors.signature": "PGP Signature", "mirrors.canary": "Canary Message", "mirrors.verified": "Verified", "mirrors.lastChecked": "Last checked",
+  
 
   "bond.title": "Trust Bond",
   "bond.required": "Vendor Bond Required",
@@ -1018,17 +995,6 @@ const en: Partial<typeof tr> = {
   "disputes.adminMessage": "Admin message...",
   "disputes.disputeLabel": "Dispute: ",
 
-  "mirrors.subtitle": "Official .onion addresses and canary messages. Always verify this list against phishing.",
-  "mirrors.canaryWarning": "WARNING: If the canary is older than 7 days (or never updated), stop using the site — operators may be compromised.",
-  "mirrors.noMirrors": "No mirrors added yet.",
-  "mirrors.addNew": "Add new mirror / canary",
-  "mirrors.urlPlaceholder": "http://xxxxx.onion",
-  "mirrors.labelPlaceholder": "Label (e.g. Main mirror)",
-  "mirrors.signaturePlaceholder": "PGP-signed canary message (optional)",
-  "mirrors.isCanary": "This is a canary message",
-  "mirrors.addBtn": "ADD",
-  "mirrors.lastUpdate": "Last update:",
-  "mirrors.pgpSig": "PGP signature",
 
   "security.center": "Security Center",
   "security.liveMonitor": "LIVE MONITOR",
@@ -1084,7 +1050,6 @@ emptyTitle: "Nothing here", comingSoon: "Coming soon",
   "cart.checkoutTitle": "Checkout",
   "cart.items": "Items",
   "cart.subtotal": "Subtotal",
-  "cart.inXmr": "in XMR",
   "cart.total": "Total",
   "cart.escrowNote": "Funds are held in escrow until you confirm delivery.",
   "cart.clearCart": "Clear cart",
@@ -1136,7 +1101,7 @@ const ru: Partial<typeof tr> = {
   "login.escrow": "Эскроу",
   "login.active": "Активен",
 
-  dashboard: "Панель", securityLogs: "Журнал безопасности", disputes: "Споры", transactions: "Транзакции", forum: "Форум", security: "Безопасность", customize: "Настройки", myProducts: "Мои товары", wallet: "Кошелёк", deposit: "Депозит", profile: "Профиль", market: "Маркет", myOrders: "Мои заказы", store: "Магазин", watchlist: "Избранное", pgpTool: "PGP", cipherNotes: "Заметки", stealthMode: "Невидимка", mirrors: "Зеркала",
+  dashboard: "Панель", securityLogs: "Журнал безопасности", disputes: "Споры", transactions: "Транзакции", forum: "Форум", security: "Безопасность", customize: "Настройки", myProducts: "Мои товары", wallet: "Кошелёк", deposit: "Депозит", profile: "Профиль", market: "Маркет", myOrders: "Мои заказы", store: "Магазин", watchlist: "Избранное", pgpTool: "PGP", cipherNotes: "Заметки", stealthMode: "Невидимка",
   notifications: "Уведомления", noNotifications: "Нет уведомлений", markAllRead: "Отметить прочитанным",
 
   customization: "Настройка", themeColor: "Цвет темы", font: "Шрифт", fontFamily: "Шрифт", fontSize: "Размер", small: "Малый", normal: "Обычный", large: "Большой", animations: "Анимации", neonEffects: "Неон", animationsToggle: "Анимации", sidebarLayout: "Боковая панель", position: "Позиция", left: "Слева", right: "Справа", collapseSidebar: "Свернуть", backgroundImage: "Фон", changeImage: "Изменить", selectImage: "Выбрать", removeImage: "Удалить", opacity: "Прозрачность", customHue: "Оттенок", resetSettings: "Сброшено", themeApplied: "тема применена", bgUpdated: "Фон обновлён! 🎨", bgRemoved: "Фон удалён", language: "Язык", selectLanguage: "Язык", systemFont: "Системный",
@@ -1203,7 +1168,7 @@ const ru: Partial<typeof tr> = {
 
   "status.pending": "Ожидает", "status.paid": "Оплачено", "status.shipped": "Отправлено", "status.delivered": "Доставлено", "status.completed": "Завершено", "status.cancelled": "Отменено", "status.disputed": "Спор", "status.refunded": "Возврат", "status.held": "В эскроу", "status.released": "Выпущено",
 
-"wallet.title": "Кошелёк", "wallet.desc": "Пополните кошелёк адресом LTC/XMR, баланс обновится после 3 подтверждений", "wallet.balance": "Баланс", "wallet.available": "Доступно", "wallet.pendingBalance": "Ожидает", "wallet.depositAddress": "Адрес пополнения", "wallet.deposit": "Пополнить", "wallet.withdraw": "Вывести", "wallet.withdrawAmount": "Сумма", "wallet.withdrawTo": "Адрес получателя", "wallet.withdrawPin": "PIN вывода", "wallet.invalidAmount": "Неверная сумма", "wallet.insufficientFunds": "Недостаточно средств", "wallet.withdrawSuccess": "Запрос отправлен", "wallet.empty": "Нет операций",
+"wallet.title": "Кошелёк", "wallet.desc": "Пополните кошелёк адресом LTC, баланс обновится после 3 подтверждений", "wallet.balance": "Баланс", "wallet.available": "Доступно", "wallet.pendingBalance": "Ожидает", "wallet.depositAddress": "Адрес пополнения", "wallet.deposit": "Пополнить", "wallet.withdraw": "Вывести", "wallet.withdrawAmount": "Сумма", "wallet.withdrawTo": "Адрес получателя", "wallet.withdrawPin": "PIN вывода", "wallet.invalidAmount": "Неверная сумма", "wallet.insufficientFunds": "Недостаточно средств", "wallet.withdrawSuccess": "Запрос отправлен", "wallet.empty": "Нет операций",
 
   "delivery.title": "Информация о доставке", "delivery.method": "Способ", "delivery.cargo": "Курьер", "delivery.deadDrop": "Закладка", "delivery.mailbox": "Аноним. почта", "delivery.carrier": "Перевозчик", "delivery.trackingCode": "Код отслеживания", "delivery.trackingHint": "Код шифруется PGP-ключом покупателя", "delivery.countryFrom": "Страна отправки", "delivery.countryTo": "Страна получения", "delivery.stealthMethod": "Метод маскировки", "delivery.coverIdentity": "Подставной отправитель", "delivery.generateCover": "Сгенерировать", "delivery.anonymous": "Анонимный режим", "delivery.notesOptional": "Заметки (опц.)", "delivery.submit": "Отправить и пометить", "delivery.submitted": "Информация сохранена", "delivery.encryptionWarning": "Код шифруется E2E. Утрата = невозможно восстановить.", "delivery.noBuyerKey": "У покупателя нет PGP — код сохранён открыто", "delivery.waiting": "Ожидание информации...", "delivery.encryptedTracking": "Зашифрованный код", "delivery.decryptHint": "Расшифруйте в PGP-инструментах",
 
@@ -1359,7 +1324,7 @@ const ru: Partial<typeof tr> = {
   "admin.areSure": "ВЫ УВЕРЕНЫ?",
   "admin.destroy": "🔥 УНИЧТОЖИТЬ",
 
-  "mirrors.title": "Зеркала и Канарейка", "mirrors.empty": "Зеркал нет", "mirrors.add": "Добавить", "mirrors.url": "URL (.onion)", "mirrors.label": "Метка", "mirrors.signature": "PGP-подпись", "mirrors.canary": "Канарейка", "mirrors.verified": "Проверено", "mirrors.lastChecked": "Проверено",
+  
 
   "bond.title": "Залог доверия",
   "bond.required": "Требуется залог продавца",
@@ -1433,17 +1398,6 @@ const ru: Partial<typeof tr> = {
   "disputes.adminMessage": "Сообщение администратора...",
   "disputes.disputeLabel": "Спор: ",
 
-  "mirrors.subtitle": "Официальные .onion адреса и сообщения-канарейки. Всегда проверяйте этот список для защиты от фишинга.",
-  "mirrors.canaryWarning": "ПРЕДУПРЕЖДЕНИЕ: Если канарейка старше 7 дней (или никогда не обновлялась) — не пользуйтесь сайтом. Операторы могут быть скомпрометированы.",
-  "mirrors.noMirrors": "Зеркал пока нет.",
-  "mirrors.addNew": "Добавить зеркало / канарейку",
-  "mirrors.urlPlaceholder": "http://xxxxx.onion",
-  "mirrors.labelPlaceholder": "Метка (напр. Главное зеркало)",
-  "mirrors.signaturePlaceholder": "Подписанное PGP-канарейка (необязательно)",
-  "mirrors.isCanary": "Это сообщение-канарейка",
-  "mirrors.addBtn": "ДОБАВИТЬ",
-  "mirrors.lastUpdate": "Последнее обновление:",
-  "mirrors.pgpSig": "PGP-подпись",
 
   "security.center": "Центр безопасности",
   "security.liveMonitor": "МОНИТОРИНГ",
@@ -1499,7 +1453,6 @@ emptyTitle: "Пусто", comingSoon: "Скоро",
   "cart.checkoutTitle": "Оформление",
   "cart.items": "Товары",
   "cart.subtotal": "Промежуточный итог",
-  "cart.inXmr": "в XMR",
   "cart.total": "Итого",
   "cart.escrowNote": "Средства удерживаются на эскроу до подтверждения доставки.",
   "cart.clearCart": "Очистить корзину",
