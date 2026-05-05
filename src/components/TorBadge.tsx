@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Globe } from "lucide-react";
+
 
 /**
  * Tarayıcı .onion üzerindeyse "TOR" rozeti gösterir.
