@@ -16,12 +16,12 @@ export default function TorBadge({ collapsed }: { collapsed?: boolean }) {
   if (collapsed) {
     return (
       <div
-        title={isOnion ? "Tor üzerinden bağlısın" : "Clearnet bağlantı"}
+        title={isOnion ? "Tor üzerinden bağlısın" : "Clearweb — anonim mod aktif"}
         className={`flex items-center justify-center py-1.5 rounded text-[9px] font-mono ${
-          isOnion ? "bg-primary/10 text-primary border border-primary/40" : "text-muted-foreground"
+          isOnion ? "bg-primary/10 text-primary border border-primary/40" : "text-muted-foreground animate-pulse"
         }`}
       >
-        {isOnion ? "🧅" : <Globe className="w-3 h-3" />}
+        {isOnion ? "🧅" : "🕵️"}
       </div>
     );
   }
