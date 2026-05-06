@@ -113,6 +113,27 @@ export default function AppSidebar() {
   const [expandedSections, setExpandedSections] = useState<string[]>(["Pazar"]);
   const [showActivity, setShowActivity] = useState(false);
   const [torCircuit, setTorCircuit] = useState<string[]>([]);
+  const [toolsOpen, setToolsOpen] = useState(false);
+  const [updatesOpen, setUpdatesOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.altKey && e.key.toLowerCase() === "q") {
+        e.preventDefault();
+        setToolsOpen((v) => !v);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  const copySnapshot = async () => {
+    const payload = [`route=${location.pathname}`, `time=${new Date().toISOString()}`].join("\n");
+    try { await navigator.clipboard?.writeText(payload); } catch {}
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1200);
+  };
 
   const anonymityScore = useMemo(() => {
     let score = 60; // Base score
