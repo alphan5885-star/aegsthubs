@@ -1,42 +1,59 @@
-## Eksikleri Derleme Planı
+Plan: Eksikleri toplu temizlik + Hızlı Araçları sidebara taşı ve iyileştirmeler 
 
-Önceki turlarda XMR ve mirrors/.onion büyük oranda kaldırıldı ama kod tabanında hâlâ tutarsız kalıntılar var. Bunları temizleyeceğim.
+Hepsi tek seferde yapılacak.
 
-### 1. PaymentTracker'ı LTC'ye sadeleştir
-`src/components/PaymentTracker.tsx` — şu an "LTC/XMR Escrow", "XMR manuel doğrulama", `awaiting_manual_xmr` status, "veya eşdeğer XMR" notu gibi yerler var. Hepsini sadece **LTC** anlatacak şekilde günceller, `awaiting_manual_xmr` → `awaiting_payment` yaparım. Başlık: "LTC Escrow Bekleniyor".
+### 1. Hızlı Araçlar → Sidebara taşı
 
-### 2. Checkout / ProductDetail / Market — XMR çevirisi kaldır
-- `src/pages/Checkout.tsx` (line 163, 179-181): `XMR` satırı ve `cart.inXmr` etiketi silinir.
-- `src/pages/ProductDetail.tsx` (line 248, 289, 386): `(price * 0.62) XMR` ifadeleri ve "LTC/XMR" buton metni LTC'ye sadeleşir.
-- `src/pages/Market.tsx` (line 420): aynı XMR satırı silinir.
-- `src/components/QuickViewModal.tsx`: `priceXMR` hesabı ve XMR seçeneği kaldırılır.
-- `src/pages/Login.tsx` (line 565): dekoratif `<span>XMR</span>` çıkarılır.
+- `src/components/AppSidebar.tsx`: "Kızılyürek AI" butonunun altına yeni bir **"Araçlar"** bölümü eklenir. Açılır/kapanır (collapsible). İçerik:
+  - Komut paleti (`palette:toggle`)
+  - AI asistan (`kizilyurek:toggle`)
+  - Menü daralt/aç (`updateSettings sidebarCollapsed`)
+  - Neon aç/kapa
+  - Stealth modu
+  - Durum kopyala (clipboard snapshot)
+  - Yenilikler (UpdatesModal aç)
+- Sidebar collapsed iken sadece ikonlar, açık iken ikon + label.
+- `Alt+Q` kısayolu korunur (Araçlar bölümünü açıp kapatır).
+- `UpdatesModal` import + state buraya taşınır.
 
-### 3. Sidebar para birimi seçici
-`src/components/AppSidebar.tsx` line 370: `["LTC","XMR","USD"]` → `["LTC","USD"]`.
+### 2. PageShell temizliği
 
-### 4. Customization context
-`src/lib/customizationContext.tsx`: `preferredCurrency` tipinden `"XMR"` çıkar; mevcut storage'ta XMR varsa LTC'ye düşürülür.
+- `src/components/PageShell.tsx`: `<QuickTools />` kullanımı ve importu silinir.
 
-### 5. AppSidebar — Mirrors menü öğesi
-`src/components/AppSidebar.tsx` içinde halen `mirrors: "Mirrors"` label'ı translation key olarak referans var ama route silindi. Sidebar'da `to: "/mirrors"` linki varsa kaldırılır (önceden bahsedilmişti, doğrulayıp temizleyeceğim).
+### 3. Eski QuickTools dosyası silinir
 
-### 6. i18n temizliği
-`src/lib/i18n.tsx`:
-- TR/EN/RU üç dilde de `mirrors.*` anahtarları (title/empty/url/.onion vb.) ve `dashboard...mirrors:` etiketi silinir.
-- `cart.inXmr` anahtarları silinir.
-- `wallet.desc` metinlerinde "LTC/XMR" → "LTC".
+- `src/components/QuickTools.tsx` → delete.
 
-### 7. UpdatesModal changelog
-`src/components/UpdatesModal.tsx`: "LTC and XMR support…" satırı LTC-only olarak güncellenir; ayrıca clearweb geçişi için yeni bir 3.0.0 changelog girdisi eklenir ("Clearweb access, anonymous mode") — son değişiklikleri kullanıcıya görünür kılmak için.
+### 4. i18n son artık temizliği
 
-### 8. securityContext .onion kontrolü
-`src/lib/securityContext.tsx`: `.onion` host kontrolü kalır (gelecekte Tor'a taşıma planı sürdüğü için faydalı), dokunulmaz. Sadece bilgi.
+- `src/lib/i18n.tsx` line ~120: `mirrors: "Aynalar"` (ve TR/EN/RU karşılıkları) kaldırılır. Son `mirrors` referansı.
+
+### 5. Sidebar versiyon rozeti güncellenir
+
+- `src/components/AppSidebar.tsx` line 254: `v3.0` → `v3.5` (UpdatesModal son changelog ile uyumlu).
+
+### 6. TODO.md güncellenir
+
+- Eski "QuickTools" notu kaldırılır, yerine "Araçlar sidebara taşındı" notu yazılır.
 
 ### Etkilenen dosyalar
-- `src/components/PaymentTracker.tsx`
-- `src/pages/Checkout.tsx`, `src/pages/ProductDetail.tsx`, `src/pages/Market.tsx`, `src/pages/Login.tsx`
-- `src/components/QuickViewModal.tsx`, `src/components/AppSidebar.tsx`, `src/components/UpdatesModal.tsx`
-- `src/lib/customizationContext.tsx`, `src/lib/i18n.tsx`
 
-DB / edge functions / migrations'a dokunulmayacak — ödeme altyapısı (BlockCypher LTC + cron sync) zaten çalışıyor.
+- `src/components/AppSidebar.tsx` (Araçlar bölümü + version rozeti)
+- `src/components/PageShell.tsx` (QuickTools kaldır)
+- `src/components/QuickTools.tsx` (silinir)
+- `src/lib/i18n.tsx` (mirrors anahtarı silinir)
+- `TODO.md` (güncellenir)
+
+DB / edge functions / migrations'a dokunulmaz.
+
+### iyileştirmeler
+
+4. ik denebilecek alanlar)**Changelog tutarlılığı** — UpdatesModal 3.5.0 girdisi var ama sidebar'da v3.0 yazıyor (AppSidebar.tsx:254). Versiyon etiketi 3.5'e güncellensin.
+
+4. **TorBadge & TorWarningBanner** — Tor katmanı kasıtlı olarak duruyor (gelecek için), dokunulmayacak. ✅
+5. **Yeni içerik eksikleri** (varsa söyle, ekleriz):
+  - Bildirim merkezi sayfası (sadece bell var, full liste yok)
+  - 2FA / TOTP kurulumu (PIN var ama TOTP yok)
+  - Vendor onboarding sihirbazı
+  - Help/SSS sayfası
+  - Yasal sayfalar (kullanım şartları / gizlilik)

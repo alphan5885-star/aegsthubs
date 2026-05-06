@@ -1,17 +1,14 @@
-# TODO - Updates Button Implementation
+# TODO
 
 ## Completed ✅
+- Hızlı Araçlar paneli sidebar'a "Araçlar" bölümü olarak taşındı (Alt+Q ile aç/kapa).
+- UpdatesModal entegrasyonu sidebar üzerinden yapılıyor.
+- Mirrors / .onion / XMR artıkları temizlendi.
+- Versiyon rozeti v3.5'e güncellendi.
 
-### Steps:
-- [x] 1. Analyze existing codebase structure
-- [x] 2. Create UpdatesModal component
-- [x] 3. Add i18n translations for updates
-- [x] 4. Integrate with QuickTools
-- [x] 5. Test the implementation
-
-## Implementation Summary
-- Created UpdatesModal showing platform changelog with version history
-- Added button to QuickTools floating panel (bottom-right)
-- Modal includes category filters (feature, security, improvement, new)
-- Supports TR/EN/RU languages
-- Integrated into existing QuickTools component
+## Sıradakiler (öneri)
+- Bildirim merkezi sayfası (full liste)
+- 2FA / TOTP kurulumu
+- Vendor onboarding sihirbazı
+- Help / SSS sayfası
+- Yasal sayfalar (kullanım şartları / gizlilik)

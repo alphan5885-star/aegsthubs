@@ -31,7 +31,15 @@ import {
   ShieldAlert,
   ChevronDown,
   Globe,
+  Command as CommandIcon,
+  Copy,
+  Moon,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Rocket,
+  Wrench,
 } from "lucide-react";
+import UpdatesModal from "@/components/UpdatesModal";
 
 type LinkDef = { to: string; labelKey: string; icon: any };
 
@@ -105,6 +113,27 @@ export default function AppSidebar() {
   const [expandedSections, setExpandedSections] = useState<string[]>(["Pazar"]);
   const [showActivity, setShowActivity] = useState(false);
   const [torCircuit, setTorCircuit] = useState<string[]>([]);
+  const [toolsOpen, setToolsOpen] = useState(false);
+  const [updatesOpen, setUpdatesOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.altKey && e.key.toLowerCase() === "q") {
+        e.preventDefault();
+        setToolsOpen((v) => !v);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  const copySnapshot = async () => {
+    const payload = [`route=${location.pathname}`, `time=${new Date().toISOString()}`].join("\n");
+    try { await navigator.clipboard?.writeText(payload); } catch {}
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1200);
+  };
 
   const anonymityScore = useMemo(() => {
     let score = 60; // Base score
@@ -251,7 +280,7 @@ export default function AppSidebar() {
           </button>
           <NotificationBell />
           <LanguageSwitcher />
-          {!collapsed && <span className="text-[8px] font-mono text-muted-foreground">v3.0</span>}
+          {!collapsed && <span className="text-[8px] font-mono text-muted-foreground">v3.5</span>}
         </div>
       </div>
 
@@ -287,6 +316,77 @@ export default function AppSidebar() {
           <Bot className="w-4 h-4 shrink-0" />
           {!collapsed && "Kızılyürek AI"}
         </button>
+
+        {/* Araçlar */}
+        {(() => {
+          const tools = [
+            { label: "Komut paleti", icon: CommandIcon, action: () => window.dispatchEvent(new CustomEvent("palette:toggle")), kbd: "⌘K" },
+            { label: "AI asistan", icon: Bot, action: () => window.dispatchEvent(new CustomEvent("kizilyurek:toggle")) },
+            {
+              label: settings.sidebarCollapsed ? "Menüyü aç" : "Menüyü daralt",
+              icon: settings.sidebarCollapsed ? PanelLeftOpen : PanelLeftClose,
+              action: () => updateSettings({ sidebarCollapsed: !settings.sidebarCollapsed }),
+            },
+            {
+              label: settings.neonEnabled ? "Neonu kapat" : "Neonu aç",
+              icon: Moon,
+              action: () => updateSettings({ neonEnabled: !settings.neonEnabled }),
+            },
+            { label: "Stealth modu", icon: EyeOff, action: toggleStealth },
+            { label: copied ? "Kopyalandı" : "Durumu kopyala", icon: copied ? Shield : Copy, action: copySnapshot },
+            { label: "Yenilikler", icon: Rocket, action: () => setUpdatesOpen(true) },
+          ];
+          if (collapsed) {
+            return (
+              <div className="mt-2 space-y-1">
+                {tools.map((tool) => (
+                  <button
+                    key={tool.label}
+                    onClick={tool.action}
+                    title={tool.label}
+                    className="w-full flex items-center justify-center p-2 rounded text-muted-foreground hover:text-primary hover:bg-secondary/40 transition-all"
+                  >
+                    <tool.icon className="w-4 h-4" />
+                  </button>
+                ))}
+              </div>
+            );
+          }
+          return (
+            <div className="mt-3">
+              <button
+                onClick={() => setToolsOpen((v) => !v)}
+                className="w-full px-3 py-1 mb-1 text-[10px] font-mono font-bold text-muted-foreground/60 hover:text-muted-foreground uppercase tracking-widest flex items-center justify-between transition-colors"
+              >
+                <span className="flex items-center gap-1.5">
+                  <Wrench className="w-3 h-3" />
+                  Araçlar
+                  <kbd className="text-[8px] font-mono opacity-50 ml-1">Alt+Q</kbd>
+                </span>
+                <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${toolsOpen ? "" : "-rotate-90"}`} />
+              </button>
+              {toolsOpen && (
+                <div className="space-y-0.5">
+                  {tools.map((tool) => (
+                    <button
+                      key={tool.label}
+                      onClick={tool.action}
+                      className="w-full flex items-center gap-2 px-3 py-1.5 rounded text-[12px] text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
+                    >
+                      <tool.icon className="w-3.5 h-3.5 shrink-0" />
+                      <span className="flex-1 text-left">{tool.label}</span>
+                      {(tool as any).kbd && (
+                        <kbd className="text-[9px] font-mono opacity-40">{(tool as any).kbd}</kbd>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        <UpdatesModal open={updatesOpen} onOpenChange={setUpdatesOpen} />
 
         {!collapsed && activity.length > 0 && (
           <div className="mt-6 pt-4 border-t border-border/50">
