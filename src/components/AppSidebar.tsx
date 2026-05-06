@@ -31,7 +31,15 @@ import {
   ShieldAlert,
   ChevronDown,
   Globe,
+  Command as CommandIcon,
+  Copy,
+  Moon,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Rocket,
+  Wrench,
 } from "lucide-react";
+import UpdatesModal from "@/components/UpdatesModal";
 
 type LinkDef = { to: string; labelKey: string; icon: any };
 
@@ -251,7 +259,7 @@ export default function AppSidebar() {
           </button>
           <NotificationBell />
           <LanguageSwitcher />
-          {!collapsed && <span className="text-[8px] font-mono text-muted-foreground">v3.0</span>}
+          {!collapsed && <span className="text-[8px] font-mono text-muted-foreground">v3.5</span>}
         </div>
       </div>
 

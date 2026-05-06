@@ -117,7 +117,7 @@ const tr = {
   pgpTool: "PGP Araçları",
   cipherNotes: "Şifreli Notlar",
   stealthMode: "Gizlenme Modu",
-  mirrors: "Aynalar",
+  
   notifications: "Bildirimler",
   noNotifications: "Bildirim yok",
   markAllRead: "Tümünü okundu işaretle",
