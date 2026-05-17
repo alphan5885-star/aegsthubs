@@ -12,339 +12,180 @@ import {
   Trash2,
   Wallpaper,
   Globe,
+  Zap,
+  Activity,
+  Maximize2
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { useRef, forwardRef } from "react";
-
-const themePresets: { nameKey: TranslationKey; hue: number }[] = [
-  { nameKey: "red", hue: 349 },
-  { nameKey: "blue", hue: 220 },
-  { nameKey: "green", hue: 142 },
-  { nameKey: "purple", hue: 270 },
-  { nameKey: "orange", hue: 25 },
-  { nameKey: "cyan", hue: 180 },
-  { nameKey: "pink", hue: 330 },
-  { nameKey: "yellow", hue: 50 },
-];
-
-const fontOptions: { value: CustomizationSettings["fontFamily"]; label: string }[] = [
-  { value: "inter", label: "Inter" },
-  { value: "jetbrains", label: "JetBrains Mono" },
-  { value: "system", label: "systemFont" },
-];
-
-const fontSizeOptions: { value: CustomizationSettings["fontSize"]; labelKey: TranslationKey }[] = [
-  { value: "small", labelKey: "small" },
-  { value: "normal", labelKey: "normal" },
-  { value: "large", labelKey: "large" },
-];
-
-const Section = forwardRef<HTMLDivElement, { icon: any; title: string; children: React.ReactNode }>(
-  ({ icon: Icon, title, children }, ref) => {
-    return (
-      <motion.div
-        ref={ref}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="glass-card rounded-lg p-5 neon-border space-y-4"
-      >
-        <div className="flex items-center gap-2">
-          <Icon className="w-4 h-4 text-primary" />
-          <h2 className="text-sm font-mono font-bold text-foreground">{title}</h2>
-        </div>
-        {children}
-      </motion.div>
-    );
-  },
-);
-Section.displayName = "Section";
+import { useRef } from "react";
 
 export default function Customization() {
   const { settings, updateSettings, resetSettings } = useCustomization();
-  const { backgroundUrl, setBackgroundUrl, backgroundOpacity, setBackgroundOpacity } =
-    useBackground();
+  const { backgroundUrl, setBackgroundUrl, backgroundOpacity, setBackgroundOpacity } = useBackground();
   const { t, language, setLanguage } = useI18n();
   const bgRef = useRef<HTMLInputElement>(null);
 
   const handleBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-    if (!allowedTypes.includes(file.type)) {
-      toast.error(t("supportedFormats"));
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error(t("maxFileSize"));
-      return;
-    }
     const reader = new FileReader();
     reader.onload = () => {
       setBackgroundUrl(reader.result as string);
-      toast.success(t("bgUpdated"));
+      toast.success("Arkaplan güncellendi.");
     };
     reader.readAsDataURL(file);
   };
 
   return (
     <PageShell>
-      <div className="max-w-2xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-mono font-bold text-primary neon-text">
-            {t("customization")}
-          </h1>
+      <div className="max-w-[1000px] mx-auto py-8 space-y-12 font-mono">
+        
+        {/* Header HUD */}
+        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-8 border-b border-white/5 pb-10">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 text-[9px] text-red-600 font-black tracking-[0.4em] uppercase">
+              <Zap className="w-4 h-4 shadow-[0_0_10px_#ff0000]" /> SYSTEM_CONFIG // CORE_v4.5
+            </div>
+            <h1 className="text-4xl font-black italic tracking-tighter text-white uppercase leading-none">
+              ÖZELLEŞTİR<span className="text-red-600">.UI</span>
+            </h1>
+          </div>
           <button
-            onClick={() => {
-              resetSettings();
-              toast.success(t("resetSettings"));
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-secondary border border-border text-xs font-mono rounded hover:border-destructive/30 transition-all text-muted-foreground hover:text-destructive"
+            onClick={() => { resetSettings(); toast.success("Sistem sıfırlandı."); }}
+            className="flex items-center gap-3 bg-white/5 border border-white/10 px-6 py-4 rounded-2xl text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-red-600 hover:border-red-600/40 transition-all"
           >
-            <RotateCcw className="w-3 h-3" />
-            {t("reset")}
+            <RotateCcw className="w-4 h-4" /> SIFIRLA
           </button>
         </div>
 
-        {/* Language */}
-        <Section icon={Globe} title={t("selectLanguage")}>
-          <div className="grid grid-cols-3 gap-2">
-            {languageOptions.map((lang) => (
-              <button
-                key={lang.value}
-                onClick={() => setLanguage(lang.value)}
-                className={`flex items-center justify-center gap-2 px-3 py-3 rounded-lg border text-sm font-mono transition-all ${
-                  language === lang.value
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border text-muted-foreground hover:border-muted-foreground"
-                }`}
-              >
-                <span className="text-lg">{lang.flag}</span>
-                <span>{lang.label}</span>
-              </button>
-            ))}
-          </div>
-        </Section>
-
-        {/* Theme Color */}
-        <Section icon={Palette} title={t("themeColor")}>
-          <div className="grid grid-cols-4 gap-2">
-            {themePresets.map((preset) => (
-              <button
-                key={preset.hue}
-                onClick={() => {
-                  updateSettings({ themeHue: preset.hue });
-                  toast.success(`${t(preset.nameKey)} ${t("themeApplied")}`);
-                }}
-                className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-all ${
-                  settings.themeHue === preset.hue
-                    ? "border-foreground bg-secondary"
-                    : "border-border hover:border-muted-foreground"
-                }`}
-              >
-                <div
-                  className="w-8 h-8 rounded-full shadow-lg"
-                  style={{ backgroundColor: `hsl(${preset.hue}, 100%, 50%)` }}
-                />
-                <span className="text-[10px] font-mono text-muted-foreground">
-                  {t(preset.nameKey)}
-                </span>
-              </button>
-            ))}
-          </div>
-          <div className="space-y-1 pt-2">
-            <label className="text-[10px] font-mono text-muted-foreground">
-              {t("customHue").toUpperCase()}: {settings.themeHue}°
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="360"
-              value={settings.themeHue}
-              onChange={(e) => updateSettings({ themeHue: parseInt(e.target.value) })}
-              className="w-full h-2 rounded-full appearance-none cursor-pointer"
-              style={{
-                background: `linear-gradient(to right, hsl(0,100%,50%), hsl(60,100%,50%), hsl(120,100%,50%), hsl(180,100%,50%), hsl(240,100%,50%), hsl(300,100%,50%), hsl(360,100%,50%))`,
-              }}
-            />
-          </div>
-        </Section>
-
-        {/* Font */}
-        <Section icon={Type} title={t("font")}>
-          <div className="space-y-3">
-            <div>
-              <label className="text-[10px] font-mono text-muted-foreground mb-2 block">
-                {t("fontFamily").toUpperCase()}
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {fontOptions.map((f) => (
-                  <button
-                    key={f.value}
-                    onClick={() => updateSettings({ fontFamily: f.value })}
-                    className={`px-3 py-2 rounded-lg border text-xs font-mono transition-all ${
-                      settings.fontFamily === f.value
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border text-muted-foreground hover:border-muted-foreground"
-                    }`}
-                  >
-                    {f.label === "systemFont" ? t("systemFont") : f.label}
-                  </button>
-                ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+           
+           {/* Section: Language */}
+           <div className="obsidian-card p-8 rounded-[40px] border-2 border-white/5 space-y-6">
+              <div className="flex items-center gap-3 text-[10px] text-red-600 font-black uppercase tracking-widest">
+                 <Globe className="w-4 h-4" /> DİL_KODLAMASI
               </div>
-            </div>
-            <div>
-              <label className="text-[10px] font-mono text-muted-foreground mb-2 block">
-                {t("fontSize").toUpperCase()}
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {fontSizeOptions.map((s) => (
-                  <button
-                    key={s.value}
-                    onClick={() => updateSettings({ fontSize: s.value })}
-                    className={`px-3 py-2 rounded-lg border text-xs font-mono transition-all ${
-                      settings.fontSize === s.value
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border text-muted-foreground hover:border-muted-foreground"
-                    }`}
-                  >
-                    {t(s.labelKey)}
-                  </button>
-                ))}
+              <div className="grid grid-cols-2 gap-3">
+                 {languageOptions.map(lang => (
+                   <button
+                     key={lang.value}
+                     onClick={() => setLanguage(lang.value)}
+                     className={`px-4 py-4 rounded-2xl border-2 transition-all text-[10px] font-black uppercase tracking-widest flex items-center gap-3 ${language === lang.value ? "border-red-600 bg-red-600/10 text-white" : "border-white/5 text-zinc-700 hover:border-white/10"}`}
+                   >
+                     <span className="text-base">{lang.flag}</span> {lang.label}
+                   </button>
+                 ))}
               </div>
-            </div>
-          </div>
-        </Section>
+           </div>
 
-        {/* Animations */}
-        <Section icon={Sparkles} title={t("animations")}>
-          <div className="space-y-3">
-            <label className="flex items-center justify-between cursor-pointer">
-              <span className="text-xs font-mono text-foreground">{t("neonEffects")}</span>
-              <button
-                onClick={() => updateSettings({ neonEnabled: !settings.neonEnabled })}
-                className={`w-10 h-5 rounded-full transition-all relative ${
-                  settings.neonEnabled ? "bg-primary" : "bg-secondary border border-border"
-                }`}
-              >
-                <div
-                  className={`w-4 h-4 rounded-full bg-foreground absolute top-0.5 transition-all ${settings.neonEnabled ? "left-5" : "left-0.5"}`}
-                />
-              </button>
-            </label>
-            <label className="flex items-center justify-between cursor-pointer">
-              <span className="text-xs font-mono text-foreground">{t("animationsToggle")}</span>
-              <button
-                onClick={() => updateSettings({ animationsEnabled: !settings.animationsEnabled })}
-                className={`w-10 h-5 rounded-full transition-all relative ${
-                  settings.animationsEnabled ? "bg-primary" : "bg-secondary border border-border"
-                }`}
-              >
-                <div
-                  className={`w-4 h-4 rounded-full bg-foreground absolute top-0.5 transition-all ${settings.animationsEnabled ? "left-5" : "left-0.5"}`}
-                />
-              </button>
-            </label>
-          </div>
-        </Section>
-
-        {/* Sidebar */}
-        <Section icon={PanelLeft} title={t("sidebarLayout")}>
-          <div className="space-y-3">
-            <div>
-              <label className="text-[10px] font-mono text-muted-foreground mb-2 block">
-                {t("position").toUpperCase()}
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {(["left", "right"] as const).map((pos) => (
-                  <button
-                    key={pos}
-                    onClick={() => updateSettings({ sidebarPosition: pos })}
-                    className={`px-3 py-2 rounded-lg border text-xs font-mono transition-all ${
-                      settings.sidebarPosition === pos
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border text-muted-foreground hover:border-muted-foreground"
-                    }`}
-                  >
-                    {pos === "left" ? t("left") : t("right")}
-                  </button>
-                ))}
+           {/* Section: Appearance */}
+           <div className="obsidian-card p-8 rounded-[40px] border-2 border-white/5 space-y-6">
+              <div className="flex items-center gap-3 text-[10px] text-red-600 font-black uppercase tracking-widest">
+                 <Palette className="w-4 h-4" /> RENK_TAYFI
               </div>
-            </div>
-            <label className="flex items-center justify-between cursor-pointer">
-              <span className="text-xs font-mono text-foreground">{t("collapseSidebar")}</span>
-              <button
-                onClick={() => updateSettings({ sidebarCollapsed: !settings.sidebarCollapsed })}
-                className={`w-10 h-5 rounded-full transition-all relative ${
-                  settings.sidebarCollapsed ? "bg-primary" : "bg-secondary border border-border"
-                }`}
-              >
-                <div
-                  className={`w-4 h-4 rounded-full bg-foreground absolute top-0.5 transition-all ${settings.sidebarCollapsed ? "left-5" : "left-0.5"}`}
-                />
-              </button>
-            </label>
-          </div>
-        </Section>
+              <div className="space-y-4">
+                 <div className="flex items-center justify-between text-[8px] text-zinc-800 font-black uppercase">
+                    <span>HUE_ADJUSTMENT</span>
+                    <span className="text-white">{settings.themeHue}°</span>
+                 </div>
+                 <input
+                   type="range"
+                   min="0"
+                   max="360"
+                   value={settings.themeHue}
+                   onChange={(e) => updateSettings({ themeHue: parseInt(e.target.value) })}
+                   className="w-full h-1.5 bg-white/5 rounded-full appearance-none cursor-pointer accent-red-600"
+                   style={{ background: "linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)" }}
+                 />
+              </div>
+           </div>
 
-        {/* Background Image */}
-        <Section icon={Wallpaper} title={t("backgroundImage")}>
-          {backgroundUrl && (
-            <div className="relative rounded-lg overflow-hidden h-24 border border-border">
-              <img
-                src={backgroundUrl}
-                alt={t("backgroundImage")}
-                className="w-full h-full object-cover"
-                style={{ opacity: backgroundOpacity }}
-              />
-              <div className="absolute inset-0 bg-background/60" />
-            </div>
-          )}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => bgRef.current?.click()}
-              className="flex items-center gap-1.5 px-3 py-2 bg-secondary border border-border text-xs font-mono rounded hover:border-primary/30 transition-all text-foreground"
-            >
-              <ImagePlus className="w-3.5 h-3.5 text-primary" />
-              {backgroundUrl ? t("changeImage") : t("selectImage")}
-            </button>
-            {backgroundUrl && (
-              <button
-                onClick={() => {
-                  setBackgroundUrl(null);
-                  toast.success(t("bgRemoved"));
-                }}
-                className="flex items-center gap-1.5 px-3 py-2 bg-secondary border border-border text-xs font-mono rounded hover:border-destructive/30 transition-all text-destructive"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                {t("removeImage")}
-              </button>
-            )}
-            <input
-              ref={bgRef}
-              type="file"
-              accept="image/*,.gif"
-              className="hidden"
-              onChange={handleBgUpload}
-            />
-          </div>
-          {backgroundUrl && (
-            <div className="space-y-1">
-              <label className="text-[10px] font-mono text-muted-foreground">
-                {t("opacity").toUpperCase()}: {Math.round(backgroundOpacity * 100)}%
-              </label>
-              <input
-                type="range"
-                min="0.05"
-                max="0.5"
-                step="0.05"
-                value={backgroundOpacity}
-                onChange={(e) => setBackgroundOpacity(parseFloat(e.target.value))}
-                className="w-full accent-primary h-1"
-              />
-            </div>
-          )}
-        </Section>
+           {/* Section: Typography */}
+           <div className="obsidian-card p-8 rounded-[40px] border-2 border-white/5 space-y-6">
+              <div className="flex items-center gap-3 text-[10px] text-red-600 font-black uppercase tracking-widest">
+                 <Type className="w-4 h-4" /> FONT_MODÜLÜ
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                 {["inter", "jetbrains", "system"].map(f => (
+                   <button
+                     key={f}
+                     onClick={() => updateSettings({ fontFamily: f as any })}
+                     className={`px-4 py-3 rounded-2xl border-2 transition-all text-[9px] font-black uppercase tracking-widest ${settings.fontFamily === f ? "border-red-600 bg-red-600/10 text-white" : "border-white/5 text-zinc-700 hover:border-white/10"}`}
+                   >
+                      {f}
+                   </button>
+                 ))}
+              </div>
+           </div>
+
+           {/* Section: Layout */}
+           <div className="obsidian-card p-8 rounded-[40px] border-2 border-white/5 space-y-6">
+              <div className="flex items-center gap-3 text-[10px] text-red-600 font-black uppercase tracking-widest">
+                 <PanelLeft className="w-4 h-4" /> PANEL_DÜZENİ
+              </div>
+              <div className="flex flex-col gap-4">
+                 <button
+                   onClick={() => updateSettings({ sidebarCollapsed: !settings.sidebarCollapsed })}
+                   className={`px-6 py-3 rounded-2xl border-2 transition-all text-[9px] font-black uppercase tracking-widest flex items-center justify-between ${settings.sidebarCollapsed ? "border-red-600 bg-red-600/10 text-white" : "border-white/5 text-zinc-700"}`}
+                 >
+                    SIDEBAR_COLLAPSE <span>{settings.sidebarCollapsed ? "ON" : "OFF"}</span>
+                 </button>
+                 <button
+                   onClick={() => updateSettings({ sidebarPosition: settings.sidebarPosition === "left" ? "right" : "left" })}
+                   className="px-6 py-3 rounded-2xl border-2 border-white/5 text-zinc-700 text-[9px] font-black uppercase tracking-widest flex items-center justify-between hover:border-white/10 transition-all"
+                 >
+                    POSITION <span>{settings.sidebarPosition.toUpperCase()}</span>
+                 </button>
+              </div>
+           </div>
+
+           {/* Section: Background */}
+           <div className="obsidian-card md:col-span-2 p-8 rounded-[40px] border-2 border-white/5 space-y-8">
+              <div className="flex items-center justify-between">
+                 <div className="flex items-center gap-3 text-[10px] text-red-600 font-black uppercase tracking-widest">
+                    <Wallpaper className="w-4 h-4" /> ATMOSFER_MATRİSİ
+                 </div>
+                 <div className="flex items-center gap-3">
+                    <button onClick={() => bgRef.current?.click()} className="bg-white/5 border border-white/5 p-3 rounded-xl text-zinc-500 hover:text-white transition-all"><ImagePlus className="w-4 h-4" /></button>
+                    {backgroundUrl && <button onClick={() => setBackgroundUrl(null)} className="bg-white/5 border border-white/5 p-3 rounded-xl text-zinc-500 hover:text-red-600 transition-all"><Trash2 className="w-4 h-4" /></button>}
+                 </div>
+              </div>
+              <input ref={bgRef} type="file" className="hidden" onChange={handleBgUpload} />
+              
+              {backgroundUrl && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                   <div className="relative h-24 rounded-2xl overflow-hidden border border-white/10">
+                      <img src={backgroundUrl} className="w-full h-full object-cover grayscale opacity-40" />
+                      <div className="absolute inset-0 flex items-center justify-center text-[8px] font-black text-white/20 uppercase tracking-[0.5em]">PREVIEW_ACTIVE</div>
+                   </div>
+                   <div className="space-y-4">
+                      <div className="flex items-center justify-between text-[8px] text-zinc-800 font-black uppercase">
+                         <span>OPACITY_LEVEL</span>
+                         <span className="text-white">{Math.round(backgroundOpacity * 100)}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.05"
+                        max="0.5"
+                        step="0.05"
+                        value={backgroundOpacity}
+                        onChange={(e) => setBackgroundOpacity(parseFloat(e.target.value))}
+                        className="w-full h-1.5 bg-white/5 rounded-full appearance-none cursor-pointer accent-red-600"
+                      />
+                   </div>
+                </div>
+              )}
+           </div>
+
+        </div>
+
+        {/* HUD Footer */}
+        <div className="flex justify-between items-center text-[9px] text-zinc-900 font-black uppercase tracking-[1em] pt-12 border-t border-white/5">
+           <span>X_CONFIG_STABLE</span>
+           <span>AE_ROOT_SYNC_OK</span>
+        </div>
+
       </div>
     </PageShell>
   );

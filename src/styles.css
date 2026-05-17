@@ -1,20 +1,12 @@
-/* Tor-ready: external font CDN kaldırıldı. System mono+sans stack kullanılıyor.
-   Self-host için font dosyalarını /public/fonts/ altına koyup @font-face ile yükleyebilirsin. */
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
-/*
- * aeigsthub — karanlık neon kırmızı tema
- * HSL token'ları (orijinal projeden birebir)
- */
-
 @theme inline {
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono:
-    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -40,141 +32,102 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
-
-  --color-sidebar: hsl(var(--sidebar-background));
-  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
-  --color-sidebar-primary: hsl(var(--sidebar-primary));
-  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
-  --color-sidebar-accent: hsl(var(--sidebar-accent));
-  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
-  --color-sidebar-border: hsl(var(--sidebar-border));
-  --color-sidebar-ring: hsl(var(--sidebar-ring));
 }
 
 :root {
-  --background: 0 0% 0%;
-  --foreground: 0 0% 85%;
-  --card: 0 0% 4%;
-  --card-foreground: 0 0% 85%;
-  --popover: 0 0% 4%;
-  --popover-foreground: 0 0% 85%;
-  --primary: 349 100% 50%;
+  --primary-hue: 349; /* Default Red */
+  --background: 0 0% 1%;
+  --foreground: 0 0% 98%;
+  --card: 0 0% 2%;
+  --card-foreground: 0 0% 98%;
+  --popover: 0 0% 2%;
+  --popover-foreground: 0 0% 98%;
+  --primary: var(--primary-hue) 100% 50%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 0 0% 8%;
-  --secondary-foreground: 0 0% 85%;
-  --muted: 0 0% 10%;
-  --muted-foreground: 0 0% 55%;
-  --accent: 349 100% 50%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 0 0% 12%;
-  --input: 0 0% 12%;
-  --ring: 349 100% 50%;
-  --radius: 0.375rem;
-  --sidebar-background: 0 0% 3%;
-  --sidebar-foreground: 0 0% 85%;
-  --sidebar-primary: 349 100% 50%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 0 0% 8%;
-  --sidebar-accent-foreground: 0 0% 85%;
-  --sidebar-border: 0 0% 12%;
-  --sidebar-ring: 349 100% 50%;
+  --secondary: 0 0% 4%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 0 0% 4%;
+  --muted-foreground: 0 0% 45%;
+  --accent: var(--primary-hue) 100% 50%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 4%;
+  --input: 0 0% 4%;
+  --ring: var(--primary-hue) 100% 50%;
+  --radius: 0rem;
 }
 
 @layer base {
-  * {
-    border-color: hsl(var(--border));
-  }
   body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
-    font-family: "Inter", sans-serif;
+    @apply bg-[#010101] text-foreground antialiased;
+    font-family: "JetBrains Mono", "Inter", monospace;
+    overflow-x: hidden;
   }
-  code,
-  .font-mono {
-    font-family: "JetBrains Mono", monospace;
-  }
-
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: hsl(var(--primary) / 0.45) hsl(var(--card));
-  }
-
-  *::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  *::-webkit-scrollbar-track {
-    background: hsl(var(--card));
-  }
-
-  *::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary) / 0.38);
-    border-radius: 999px;
-  }
-
-  *::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--primary) / 0.62);
-  }
+  ::-webkit-scrollbar { width: 0px; height: 0px; }
+  * { scrollbar-width: none !important; -ms-overflow-style: none !important; }
 }
 
 @layer utilities {
-  .neon-text {
-    text-shadow:
-      0 0 10px hsl(349 100% 50% / 0.6),
-      0 0 20px hsl(349 100% 50% / 0.3);
+  .neon-glow {
+    text-shadow: 0 0 10px hsla(var(--primary), 0.8), 0 0 20px hsla(var(--primary), 0.4);
   }
   .neon-border {
-    box-shadow:
-      0 0 10px hsl(349 100% 50% / 0.3),
-      inset 0 0 10px hsl(349 100% 50% / 0.05);
+    box-shadow: 0 0 20px hsla(var(--primary), 0.1);
   }
-  .neon-glow-btn {
-    box-shadow:
-      0 0 15px hsl(349 100% 50% / 0.4),
-      0 0 30px hsl(349 100% 50% / 0.2);
+  .obsidian-card {
+    @apply bg-[#020202] border border-white/5 backdrop-blur-3xl transition-all duration-700 relative;
+    background: linear-gradient(165deg, #050505 0%, #010101 100%);
   }
-  .glass-card {
-    background-color: hsl(var(--card));
-    border: 1px solid hsl(var(--border));
-    backdrop-filter: blur(4px);
+  .obsidian-card::before {
+    content: "";
+    @apply absolute inset-0 opacity-0 transition-opacity duration-700 pointer-events-none rounded-[inherit];
+    padding: 1px;
+    background: linear-gradient(90deg, transparent, hsla(var(--primary), 0.5), transparent);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+  .obsidian-card:hover::before {
+    @apply opacity-100;
+    animation: border-trace 3s linear infinite;
+  }
+  @keyframes border-trace {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+  .obsidian-card:hover {
+    border-color: hsla(var(--primary), 0.3);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 20px hsla(var(--primary), 0.05);
+    transform: translateY(-2px);
   }
   .cyber-grid {
-    background-image:
-      linear-gradient(rgba(255, 0, 51, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 0, 51, 0.03) 1px, transparent 1px);
-    background-size: 50px 50px;
+    background-image: 
+      linear-gradient(to right, hsla(var(--primary), 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, hsla(var(--primary), 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
   }
-  .status-online {
-    position: relative;
-  }
-  .status-online::before {
+  .scanline::after {
     content: "";
-    position: absolute;
-    left: -8px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 4px;
-    height: 4px;
-    background: #22c55e;
-    border-radius: 50%;
+    position: fixed;
+    inset: 0;
+    height: 2px;
+    background: linear-gradient(to bottom, transparent, hsla(var(--primary), 0.1), transparent);
+    animation: scanline 10s linear infinite;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.3;
   }
-}
-
-.no-neon .neon-text {
-  text-shadow: none !important;
-}
-.no-neon .neon-border {
-  box-shadow: none !important;
-}
-.no-neon .neon-glow-btn {
-  box-shadow: none !important;
-}
-.no-animations *,
-.no-animations *::before,
-.no-animations *::after {
-  animation-duration: 0s !important;
-  transition-duration: 0s !important;
+  @keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+  }
+  .animate-pulse-slow {
+    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
 }

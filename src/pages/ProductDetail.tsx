@@ -3,9 +3,9 @@ import { useNavigate, useParams } from "@/lib/router-shim";
 import PageShell from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
-import { ShoppingCart, Key, Package, User, Shield, Hash, Lock, Plus, CheckCircle } from "lucide-react";
+import { ShoppingCart, Key, Package, User, Shield, Lock, Plus, CheckCircle, Zap, ArrowUpRight, Activity } from "lucide-react";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import VendorRating from "@/components/VendorRating";
 import PgpBadge from "@/components/PgpBadge";
 import DeliveryMethodSelector from "@/components/DeliveryMethodSelector";
@@ -13,9 +13,6 @@ import MathCaptcha from "@/components/MathCaptcha";
 import { encryptForRecipient } from "@/lib/pgp";
 import { useI18n } from "@/lib/i18n";
 import { useCart } from "@/lib/cartContext";
-
-const SERVICE_FEE_RATE = 0;
-type DeliveryMethod = "cargo" | "dead_drop" | "mailbox";
 
 interface ProductRow {
   id: string;
@@ -27,8 +24,6 @@ interface ProductRow {
   stock: number;
   image_emoji: string | null;
   image_url: string | null;
-  tracking_number: string | null;
-  commission_rate: number | null;
   category: string | null;
 }
 
@@ -40,83 +35,28 @@ export default function ProductDetail() {
   const [product, setProduct] = useState<ProductRow | null>(null);
   const [vendorName, setVendorName] = useState<string>("");
   const [vendorPgp, setVendorPgp] = useState<string | null>(null);
-  const [orderId, setOrderId] = useState<string>("");
   const [loading, setLoading] = useState(true);
-  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>("cargo");
+  const [deliveryMethod, setDeliveryMethod] = useState<any>("cargo");
   const [shippingAddress, setShippingAddress] = useState("");
-  const [orderNotes, setOrderNotes] = useState("");
   const [captchaOk, setCaptchaOk] = useState(false);
   const [creating, setCreating] = useState(false);
 
-  const serviceFee = product ? product.price * SERVICE_FEE_RATE : 0;
-  const totalPrice = product ? product.price + serviceFee : 0;
-
-  const { addItem, isInCart: checkIsInCart } = useCart();
-  const isAlreadyInCart = product ? checkIsInCart(product.id) : false;
-
-  const isMounted = useRef(true);
+  const { addItem, isInCart } = useCart();
 
   useEffect(() => {
-    isMounted.current = true;
-    const fetchProduct = async () => {
-      if (!id) return;
-      try {
-        const { data, error } = await supabase
-          .from("products")
-          .select(
-            "id, name, description, price, type, vendor_id, stock, image_emoji, image_url, tracking_number, commission_rate, category",
-          )
-          .eq("id", id)
-          .maybeSingle();
-
-        if (!isMounted.current) return;
-
-        if (error) {
-          if (import.meta.env.DEV) console.error("Error fetching product details:", error);
-          setLoading(false);
-          return;
-        }
-
-        if (data) {
-          setProduct(data as ProductRow);
-          const { data: profile, error: profileError } = await supabase
-            .from("profiles")
-            .select("display_name")
-            .eq("user_id", data.vendor_id)
-            .maybeSingle();
-
-          if (!isMounted.current) return;
-
-          if (profileError) {
-            if (import.meta.env.DEV) console.error("Error fetching vendor profile:", profileError);
-          } else if (profile) {
-            setVendorName(profile.display_name || t("product.anonymousVendor"));
-          }
-
-          const { data: pgp, error: pgpError } = await (supabase as any)
-            .from("user_pgp_keys")
-            .select("public_key")
-            .eq("user_id", data.vendor_id)
-            .maybeSingle();
-
-          if (!isMounted.current) return;
-
-          if (pgpError) {
-            if (import.meta.env.DEV) console.error("Error fetching vendor PGP key:", pgpError);
-          } else if (pgp?.public_key) {
-            setVendorPgp(pgp.public_key);
-          }
-        }
-        setLoading(false);
-      } catch (e) {
-        if (import.meta.env.DEV) console.error("Catch error in ProductDetail fetchProduct:", e);
-        if (isMounted.current) setLoading(false);
+    if (!id) return;
+    const load = async () => {
+      const { data } = await supabase.from("products").select("*").eq("id", id).maybeSingle();
+      if (data) {
+        setProduct(data as ProductRow);
+        const { data: profile } = await supabase.from("profiles").select("display_name").eq("user_id", data.vendor_id).maybeSingle();
+        if (profile) setVendorName(profile.display_name || "ANONYMOUS_VENDOR");
+        const { data: pgp } = await (supabase as any).from("user_pgp_keys").select("public_key").eq("user_id", data.vendor_id).maybeSingle();
+        if (pgp) setVendorPgp(pgp.public_key);
       }
+      setLoading(false);
     };
-    fetchProduct();
-    return () => {
-      isMounted.current = false;
-    };
+    load();
   }, [id]);
 
   const handleAddToCart = () => {
@@ -125,282 +65,173 @@ export default function ProductDetail() {
       id: crypto.randomUUID(),
       productId: product.id,
       name: product.name,
-      price: totalPrice,
+      price: product.price,
       imageUrl: product.image_url,
       imageEmoji: product.image_emoji,
       type: product.type as "digital" | "physical",
       vendorId: product.vendor_id,
     });
-    toast.success(t("product.addedToCart"));
+    toast.success("Sepete eklendi.");
   };
 
   const handleStartPayment = async () => {
-    if (!product || !user) return;
-    if (!captchaOk) {
-      toast.error(t("product.captchaRequired"));
-      return;
-    }
-    if (product.type === "physical" && !shippingAddress.trim()) {
-      toast.error(t("product.deliveryRequired"));
-      return;
-    }
+    if (!product || !user || !captchaOk) return;
     setCreating(true);
-
-    let finalAddress: string | null = shippingAddress.trim() || null;
-    let finalNotes: string | null = orderNotes.trim() || null;
-    let encrypted = false;
-    if (vendorPgp && (finalAddress || finalNotes)) {
-      try {
-        const blob = `[ADDRESS]\n${finalAddress || "—"}\n\n[NOTES]\n${finalNotes || "—"}`;
-        const cipher = await encryptForRecipient(blob, vendorPgp);
-        if (!isMounted.current) return;
-        finalAddress = cipher;
-        finalNotes = "🔐 PGP encrypted (see shipping_address)";
-        encrypted = true;
-      } catch (e) {
-        if (import.meta.env.DEV) console.error("PGP encryption failed:", e);
-        if (isMounted.current) {
-          toast.error(t("product.pgpFailed"));
-          setCreating(false);
-        }
-        return;
-      }
-    }
-
     try {
-      const { data: orderResult, error } = await (supabase as any).rpc("create_order_with_escrow", {
-        _product_id: product.id,
-        _delivery_method: product.type === "digital" ? "cargo" : deliveryMethod,
-        _shipping_address: finalAddress,
-        _notes: finalNotes,
-      });
-
-      if (!isMounted.current) return;
-
-      const createdOrderId = (orderResult as { order_id?: string; error?: string } | null)
-        ?.order_id;
-      if (error || !createdOrderId) {
-        if (import.meta.env.DEV) console.error("Error creating order:", error);
-        toast.error(
-          (orderResult as { error?: string } | null)?.error === "insufficient_balance"
-            ? t("product.insufficientBalance")
-            : t("err.generic"),
-        );
-        setCreating(false);
-        return;
+      let finalAddress = shippingAddress;
+      if (vendorPgp && shippingAddress.trim()) {
+        finalAddress = await encryptForRecipient(shippingAddress, vendorPgp);
       }
-
-      if (encrypted) toast.success(t("product.pgpEncrypted"));
-      toast.success(t("product.escrowHeld"));
-      setOrderId(createdOrderId);
-    } catch (e) {
-      if (import.meta.env.DEV) console.error("Catch error in ProductDetail startPayment:", e);
-      if (isMounted.current) toast.error(t("product.unexpectedError"));
+      const { data, error } = await (supabase as any).rpc("create_order_with_escrow", {
+        _product_id: product.id,
+        _delivery_method: deliveryMethod,
+        _shipping_address: finalAddress,
+        _notes: "PGP_ENCRYPTED_PAYLOAD",
+      });
+      if (!error && (data as any)?.order_id) {
+        toast.success("Sipariş başarıyla oluşturuldu.");
+        navigate("/orders");
+      } else {
+        toast.error((data as any)?.error || "İşlem başarısız.");
+      }
+    } catch {
+      toast.error("Şifreleme veya sipariş hatası.");
     } finally {
-      if (isMounted.current) setCreating(false);
+      setCreating(false);
     }
   };
 
-  if (loading)
-    return (
-      <PageShell>
-        <div className="text-muted-foreground font-mono animate-pulse">{t("loading")}</div>
-      </PageShell>
-    );
-  if (!product)
-    return (
-      <PageShell>
-        <div className="text-muted-foreground font-mono">{t("product.notFound")}</div>
-      </PageShell>
-    );
+  if (loading) return <PageShell><div className="p-20 text-[10px] text-zinc-800 font-black animate-pulse">SİSTEM_VERİLERİ_YÜKLENİYOR...</div></PageShell>;
+  if (!product) return <PageShell><div className="p-20 text-red-600 font-black">VARLIK_BULUNAMADI</div></PageShell>;
 
   return (
     <PageShell>
-      <div className="max-w-2xl mx-auto">
-        <div className="glass-card rounded-lg overflow-hidden mb-4">
-          {product.image_url ? (
-            <div className="aspect-video bg-secondary">
-              <img
-                src={product.image_url}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          ) : (
-            <div className="aspect-video bg-secondary flex items-center justify-center">
-              <span className="text-7xl opacity-40">{product.image_emoji || "📦"}</span>
-            </div>
-          )}
-          <div className="p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <h1 className="text-lg font-bold text-foreground">{product.name}</h1>
-                <p className="text-sm text-muted-foreground mt-1">{product.description}</p>
-              </div>
-              <div className="text-right">
-                <div className="text-sm font-mono text-muted-foreground line-through">
-                  {product.price} LTC
-                </div>
-                <div className="text-xl font-mono font-bold text-foreground">
-                  {totalPrice.toFixed(4)} LTC
-                </div>
-                <div className="text-[10px] font-mono text-muted-foreground mt-0.5">
-                  +%{(SERVICE_FEE_RATE * 100).toFixed(0)} escrow
-                </div>
-                <span
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono mt-1 ${product.type === "digital" ? "bg-blue-500/10 text-blue-400" : "bg-orange-500/10 text-orange-400"}`}
-                >
-                  {product.type === "digital" ? (
-                    <Key className="w-3 h-3" />
-                  ) : (
-                    <Package className="w-3 h-3" />
-                  )}
-                  {product.type.toUpperCase()}
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 mt-4 pt-4 border-t border-border flex-wrap">
-              <button
-                onClick={() => navigate(`/vendor/${product.vendor_id}`)}
-                className="flex items-center gap-2 text-xs text-muted-foreground hover:text-primary font-mono transition-colors"
-              >
-                <User className="w-3 h-3" /> {vendorName}
-              </button>
-              <VendorRating vendorId={product.vendor_id} size="md" />
-              <PgpBadge userId={product.vendor_id} size="sm" />
-              <div className="text-xs text-muted-foreground font-mono">{t("product.stockLabel")}: {product.stock}</div>
-              {product.category && (
-                <div className="text-[10px] font-mono px-2 py-0.5 bg-secondary rounded text-muted-foreground">
-                  {product.category}
-                </div>
-              )}
-            </div>
-          </div>
+      <div className="max-w-[1200px] mx-auto py-8 space-y-12 font-mono">
+        
+        {/* Breadcrumb HUD */}
+        <div className="flex items-center gap-4 text-[9px] text-zinc-800 font-black uppercase tracking-[0.4em]">
+           <button onClick={() => navigate(-1)} className="hover:text-red-600 transition-colors">DATABASE</button>
+           <span>/</span>
+           <span className="text-red-600">ASSET_VIEW</span>
+           <span>/</span>
+           <span className="text-white">{product.id.slice(0,8)}</span>
         </div>
 
-        <div className="glass-card rounded-lg p-3 mb-4 flex items-center gap-3 border border-primary/20">
-          <Shield className="w-5 h-5 text-primary flex-shrink-0" />
-          <div>
-            <div className="text-[11px] font-mono font-bold text-primary">{t("product.escrowTitle")}</div>
-            <div className="text-[9px] font-mono text-muted-foreground">
-              Önce wallet'a LTC yükle • Satın alımda escrow hold • Teslimde %95/%5 dağıtım
-            </div>
-          </div>
-        </div>
-
-        {!orderId && (
-          <>
-            {product.type === "physical" && user?.id !== product.vendor_id && (
-              <>
-                <div className="glass-card rounded-lg p-4 mb-4">
-                  <DeliveryMethodSelector
-                    value={deliveryMethod}
-                    onChange={setDeliveryMethod}
-                    productType={product.type}
-                  />
-                </div>
-                <div className="glass-card rounded-lg p-4 mb-4 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Lock
-                      className={`w-4 h-4 ${vendorPgp ? "text-green-400" : "text-muted-foreground"}`}
-                    />
-                    <span className="text-xs font-mono font-bold text-foreground">
-                      {t("product.deliveryInfo")}
-                    </span>
-                    {vendorPgp ? (
-                      <span className="ml-auto text-[10px] font-mono text-green-400 px-2 py-0.5 rounded bg-green-500/10 border border-green-500/30">
-                        {t("product.pgpAutoEncrypt")}
-                      </span>
-                    ) : (
-                      <span className="ml-auto text-[10px] font-mono text-yellow-500">
-                        {t("product.noPgpWarning")}
-                      </span>
-                    )}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          
+          {/* Visual Column */}
+          <div className="lg:col-span-7 space-y-8">
+             <div className="aspect-video bg-black rounded-[40px] overflow-hidden border-2 border-white/5 relative group">
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10 opacity-80" />
+                {product.image_url ? (
+                  <img src={product.image_url} className="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-1000" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-8xl grayscale opacity-10 group-hover:opacity-100 transition-all duration-700">
+                    {product.image_emoji || "📦"}
                   </div>
-                  <textarea
-                    value={shippingAddress}
-                    onChange={(e) => setShippingAddress(e.target.value)}
-                    rows={3}
-                    placeholder={t("product.deliveryPlaceholder")}
-                    className="w-full bg-background border border-border rounded px-2 py-2 text-xs font-mono focus:outline-none focus:border-primary resize-none"
-                  />
-                  <textarea
-                    value={orderNotes}
-                    onChange={(e) => setOrderNotes(e.target.value)}
-                    rows={2}
-                    placeholder={t("product.notesPlaceholder")}
-                    className="w-full bg-background border border-border rounded px-2 py-2 text-xs font-mono focus:outline-none focus:border-primary resize-none"
-                  />
-                  {vendorPgp && (
-                    <p className="text-[10px] font-mono text-muted-foreground">
-                      İçerik tarayıcında satıcının public key'i ile şifrelenir, sunucu ham veriyi{" "}
-                      <span className="text-primary">göremez</span>.
-                    </p>
-                  )}
+                )}
+                
+                {/* Floating Tags */}
+                <div className="absolute top-6 left-6 z-20 flex gap-3">
+                   <div className="bg-black/80 backdrop-blur-xl border border-white/10 px-4 py-1.5 rounded-full text-[8px] font-black text-white uppercase tracking-widest">
+                      {product.category || "GENERAL"}
+                   </div>
+                   <div className={`px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest ${product.type === "digital" ? "bg-red-600 text-white" : "bg-white text-black"}`}>
+                      {product.type === "digital" ? "DIGITAL_DATA" : "PHYSICAL_ASSET"}
+                   </div>
                 </div>
-              </>
-            )}
+             </div>
 
-            {user?.id === product.vendor_id ? (
-              <div className="glass-card rounded-lg p-4 text-center text-xs font-mono text-muted-foreground border border-yellow-500/30">
-                {t("product.ownProduct")}
-              </div>
-            ) : (
-              <>
-                <div className="glass-card rounded-lg p-4 mb-3">
-                  <MathCaptcha onValidChange={setCaptchaOk} label={t("product.securityCheck")} />
-                </div>
-
-                {/* Add to Cart Button */}
-                <motion.button
-                  onClick={handleAddToCart}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full flex items-center justify-center gap-2 py-3 mb-2 bg-secondary text-foreground rounded-lg font-mono font-bold border border-primary/30 text-sm hover:bg-primary/10 transition-colors"
-                >
-{isAlreadyInCart ? (
-                    <>
-                      <CheckCircle className="w-4 h-4 text-green-400" />
-                      {t("product.inCart")}
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-4 h-4" />
-                      {t("product.addToCart")}
-                    </>
-                  )}
-                </motion.button>
-
-                {/* Buy Now Button */}
-                <motion.button
-                  onClick={handleStartPayment}
-                  whileTap={{ scale: 0.98 }}
-                  disabled={!captchaOk || creating}
-                  className="w-full flex items-center justify-center gap-2 py-3.5 bg-primary text-primary-foreground rounded-lg font-mono font-bold neon-glow-btn text-sm disabled:opacity-50"
-                >
-                  <ShoppingCart className="w-4 h-4" />
-                  {creating
-                    ? t("product.preparing")
-                    : `${t("product.buyBtn")} — ${totalPrice.toFixed(4)} LTC`}
-                </motion.button>
-              </>
-            )}
-          </>
-        )}
-
-        {orderId && (
-          <div className="glass-card rounded-lg p-4 border border-primary/30 bg-primary/5">
-            <div className="flex items-center gap-2 mb-2">
-              <Hash className="w-4 h-4 text-primary" />
-              <span className="text-xs font-mono text-muted-foreground">{t("product.orderLabel")}</span>
-              <span className="text-xs font-mono text-foreground font-bold">
-                {orderId.slice(0, 8).toUpperCase()}
-              </span>
-            </div>
-            <p className="text-xs font-mono text-muted-foreground">
-              {t("product.orderDesc")}
-            </p>
+             <div className="space-y-4">
+                <h1 className="text-3xl font-black italic tracking-tighter text-white uppercase leading-none group-hover:text-red-600">
+                  {product.name}
+                </h1>
+                <p className="text-[11px] text-zinc-700 font-bold uppercase tracking-widest leading-relaxed max-w-xl">
+                   {product.description || "NO_PRODUCT_SPECIFICATIONS_FOUND_IN_CENTRAL_LOGS."}
+                </p>
+             </div>
           </div>
-        )}
+
+          {/* Pricing & Checkout Column */}
+          <div className="lg:col-span-5 space-y-10">
+             
+             {/* Pricing Card */}
+             <div className="obsidian-card p-8 rounded-[40px] border-2 border-white/5 space-y-6 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-6">
+                   <Zap className="w-6 h-6 text-red-600 opacity-20" />
+                </div>
+                
+                <div className="space-y-1">
+                   <div className="text-[9px] text-zinc-800 font-black uppercase tracking-widest">AKTARIM_DEĞERİ</div>
+                   <div className="text-4xl font-black text-white italic tracking-tighter">
+                      {product.price.toFixed(4)} <span className="text-xs text-red-600 not-italic ml-1">LTC</span>
+                   </div>
+                   <div className="flex items-center gap-4 text-[8px] text-zinc-800 font-black uppercase tracking-widest pt-2">
+                      <span className="flex items-center gap-2"><Shield className="w-3 h-3 text-red-900" /> ESCROW_ACTIVE</span>
+                      <span className="flex items-center gap-2"><Activity className="w-3 h-3 text-red-900" /> STOCK: {product.stock}</span>
+                   </div>
+                </div>
+
+                <div className="h-[1px] bg-white/5" />
+
+                {/* Vendor HUD */}
+                <div className="flex items-center justify-between">
+                   <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                         <User className="w-5 h-5 text-zinc-700" />
+                      </div>
+                      <div className="space-y-0.5">
+                         <div className="text-[9px] font-black text-white uppercase tracking-widest">{vendorName}</div>
+                         <VendorRating vendorId={product.vendor_id} size="sm" />
+                      </div>
+                   </div>
+                   <PgpBadge userId={product.vendor_id} size="sm" />
+                </div>
+             </div>
+
+             {/* Order Configuration */}
+             <div className="space-y-8">
+                {product.type === "physical" && (
+                  <div className="space-y-6">
+                     <DeliveryMethodSelector value={deliveryMethod} onChange={setDeliveryMethod} productType="physical" />
+                     <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                           <label className="text-[9px] text-zinc-800 font-black tracking-widest uppercase">TESLİMAT_ADRESİ (PGP_ENCRYPTED)</label>
+                           {vendorPgp && <span className="text-[7px] text-red-600 font-black uppercase">SECURE_PGP_LINK</span>}
+                        </div>
+                        <textarea
+                          value={shippingAddress}
+                          onChange={(e) => setShippingAddress(e.target.value)}
+                          className="w-full bg-[#050505] border-2 border-white/5 rounded-[24px] p-5 text-[10px] text-white focus:border-red-600/50 outline-none font-black h-24 resize-none"
+                          placeholder="Şifreli veri girişi yapın..."
+                        />
+                     </div>
+                  </div>
+                )}
+
+                <div className="bg-white/[0.01] border border-white/5 rounded-[24px] p-6 scale-90 origin-left">
+                   <MathCaptcha onValidChange={setCaptchaOk} label="SİSTEM_DOĞRULAMASI" />
+                </div>
+
+                <div className="flex flex-col gap-3">
+                   <button
+                     onClick={handleStartPayment}
+                     disabled={!captchaOk || creating}
+                     className="w-full bg-red-600 text-white py-6 rounded-[32px] text-[10px] font-black uppercase tracking-[0.4em] hover:bg-red-700 transition-all shadow-[0_15px_30px_rgba(255,0,0,0.1)] active:scale-95 duration-500 disabled:opacity-50"
+                   >
+                     {creating ? "HAZIRLANIYOR..." : "HEMEN_SATIN_AL"}
+                   </button>
+                   <button 
+                     onClick={handleAddToCart}
+                     className="w-full bg-white/[0.02] border border-white/10 text-white py-4 rounded-[24px] text-[9px] font-black uppercase tracking-widest hover:bg-white/[0.05] transition-all"
+                   >
+                      SEPETE_EKLE
+                   </button>
+                </div>
+             </div>
+          </div>
+        </div>
+
       </div>
     </PageShell>
   );

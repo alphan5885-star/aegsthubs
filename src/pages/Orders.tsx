@@ -138,7 +138,7 @@ export default function Orders() {
                 </div>
                 <div className="flex items-center gap-2">
                   {["paid","shipped","delivered","completed"].includes(o.status) && (
-                    <OrderChatButton orderId={o.id} label="Satıcıyla Mesajlaş" />
+                    <OrderChatButton orderId={o.id} label={t("orders.chatBtn")} />
                   )}
                   {role === "buyer" && o.status === "pending" && (
                     <button onClick={(e) => { e.stopPropagation(); cancelOrder(o.id); }} className="flex items-center gap-1 px-2 py-1 bg-red-600/80 text-white text-[10px] font-mono rounded hover:bg-red-700">

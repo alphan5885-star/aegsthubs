@@ -15,13 +15,14 @@ import {
   Loader2,
   Copy,
   Skull,
-  Trash2,
   Power,
+  Zap,
+  ShieldAlert,
+  Activity,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
-import { devError } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 
 export default function SecuritySettings() {
@@ -30,623 +31,129 @@ export default function SecuritySettings() {
   const [antiPhishingCode, setAntiPhishingCode] = useState("");
   const [savedCode, setSavedCode] = useState<string | null>(null);
   const [showCode, setShowCode] = useState(false);
-
-  // 2FA states
   const [mfaFactors, setMfaFactors] = useState<any[]>([]);
-  const [enrolling, setEnrolling] = useState(false);
-  const [enrollData, setEnrollData] = useState<{ id: string; uri: string; secret: string } | null>(
-    null,
-  );
-  const [verifyCode, setVerifyCode] = useState("");
-  const [verifying, setVerifying] = useState(false);
-  const [unenrolling, setUnenrolling] = useState(false);
   const [deadManEnabled, setDeadManEnabled] = useState(false);
-  const isMounted = useRef(true);
 
   useEffect(() => {
-    isMounted.current = true;
     if (!user) return;
     const fetchData = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("anti_phishing_codes")
-          .select("code")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        if (!isMounted.current) return;
-        if (error) {
-          devError("Error fetching anti-phishing code:", error);
-        } else if (data) {
-          setSavedCode(data.code);
-        }
-        await loadMfaFactors();
-        if (!isMounted.current) return;
-        setDeadManEnabled(localStorage.getItem("dead-man-mode") === "armed");
-      } catch (e) {
-        devError("Catch fetching security data:", e);
-      }
+      const { data } = await supabase.from("anti_phishing_codes").select("code").eq("user_id", user.id).maybeSingle();
+      if (data) setSavedCode(data.code);
+      const { data: mfa } = await supabase.auth.mfa.listFactors();
+      if (mfa) setMfaFactors(mfa.totp || []);
+      setDeadManEnabled(localStorage.getItem("dead-man-mode") === "armed");
     };
     fetchData();
-    return () => {
-      isMounted.current = false;
-    };
   }, [user]);
-
-  const loadMfaFactors = async () => {
-    try {
-      const { data, error } = await supabase.auth.mfa.listFactors();
-      if (!isMounted.current) return;
-      if (error) {
-        devError("Error listing MFA factors:", error);
-        return;
-      }
-      if (data) {
-        setMfaFactors(data.totp || []);
-      }
-    } catch (e) {
-      devError("Catch loading MFA factors:", e);
-    }
-  };
-
-  const saveAntiPhishing = async () => {
-    if (!user || !antiPhishingCode.trim()) return;
-    const code = antiPhishingCode.trim();
-    try {
-      if (savedCode) {
-        const { error } = await supabase
-          .from("anti_phishing_codes")
-          .update({ code })
-          .eq("user_id", user.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("anti_phishing_codes")
-          .insert({ user_id: user.id, code });
-        if (error) throw error;
-      }
-
-      if (!isMounted.current) return;
-      setSavedCode(code);
-      setAntiPhishingCode("");
-      toast.success(t("security.phishingCodeSaved"));
-    } catch (error: any) {
-      devError("Error saving anti-phishing code:", error);
-      toast.error(t("security.phishingCodeError"));
-    }
-  };
-
-  const startEnroll = async () => {
-    setEnrolling(true);
-    try {
-      const { data, error } = await supabase.auth.mfa.enroll({
-        factorType: "totp",
-        friendlyName: "aeigsthub-2fa",
-      });
-      if (!isMounted.current) return;
-      if (error) {
-        toast.error(error.message);
-        setEnrolling(false);
-        return;
-      }
-      setEnrollData({ id: data.id, uri: data.totp.uri, secret: data.totp.secret });
-      setEnrolling(false);
-    } catch (e) {
-      devError("Catch in startEnroll:", e);
-      if (isMounted.current) setEnrolling(false);
-    }
-  };
-
-  const confirmEnroll = async () => {
-    if (!enrollData || verifyCode.length !== 6) return;
-    setVerifying(true);
-    try {
-      const { data: challenge, error: challengeErr } = await supabase.auth.mfa.challenge({
-        factorId: enrollData.id,
-      });
-      if (!isMounted.current) return;
-      if (challengeErr) {
-        toast.error(challengeErr.message);
-        setVerifying(false);
-        return;
-      }
-      const { error: verifyErr } = await supabase.auth.mfa.verify({
-        factorId: enrollData.id,
-        challengeId: challenge.id,
-        code: verifyCode,
-      });
-      if (!isMounted.current) return;
-      if (verifyErr) {
-        toast.error(t("security.wrongCode"));
-        setVerifying(false);
-        return;
-      }
-      toast.success(t("security.2faEnabled"));
-      setEnrollData(null);
-      setVerifyCode("");
-      setVerifying(false);
-      await loadMfaFactors();
-    } catch (e) {
-      devError("Catch in confirmEnroll:", e);
-      if (isMounted.current) setVerifying(false);
-    }
-  };
-
-  const unenrollFactor = async (factorId: string) => {
-    setUnenrolling(true);
-    try {
-      const { error } = await supabase.auth.mfa.unenroll({ factorId });
-      if (!isMounted.current) return;
-      if (error) {
-        devError("Error unenrolling factor:", error);
-        toast.error(error.message);
-      } else {
-        toast.success(t("security.2faDisabled"));
-      }
-      setUnenrolling(false);
-      await loadMfaFactors();
-    } catch (e) {
-      devError("Catch in unenrollFactor:", e);
-      if (isMounted.current) setUnenrolling(false);
-    }
-  };
-
-  const verifiedFactors = mfaFactors.filter((f) => f.status === "verified");
-  const hasActive2FA = verifiedFactors.length > 0;
-
-  const toggleDeadMan = () => {
-    const next = !deadManEnabled;
-    setDeadManEnabled(next);
-    localStorage.setItem("dead-man-mode", next ? "armed" : "off");
-    toast.success(next ? t("security.deadManArmed") : t("security.deadManOff"));
-  };
-
-  const emergencyWipe = async () => {
-    try {
-      sessionStorage.clear();
-      localStorage.removeItem("dead-man-mode");
-      setDeadManEnabled(false);
-      await supabase.auth.signOut();
-      toast.success(t("security.dataWiped"));
-    } catch (e) {
-      devError("Catch in emergencyWipe:", e);
-    }
-  };
 
   return (
     <PageShell>
-      <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-xl font-mono font-bold text-primary neon-text">{t("security.settingsTitle")}</h1>
-
-        {/* Anti-Phishing Code */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass-card rounded-lg p-6 neon-border"
-        >
-          <div className="flex items-center gap-2 mb-4">
-            <Fingerprint className="w-5 h-5 text-primary" />
-            <h2 className="text-sm font-mono font-bold text-foreground">{t("security.phishingTitle")}</h2>
-          </div>
-          <p className="text-xs text-muted-foreground font-mono mb-4">
-            {t("security.phishingDesc")}
-          </p>
-          {savedCode && (
-            <div className="bg-secondary rounded-lg p-3 mb-4 flex items-center justify-between">
-              <div>
-                <div className="text-[10px] text-muted-foreground font-mono mb-1">
-                  {t("security.currentCode")}
-                </div>
-                <div className="text-sm font-mono font-bold text-primary">
-                  {showCode ? savedCode : "••••••••"}
-                </div>
-              </div>
-              <button
-                onClick={() => setShowCode(!showCode)}
-                className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {showCode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
+      <div className="max-w-[1100px] mx-auto py-8 space-y-12 font-mono">
+        
+        {/* Security Header HUD */}
+        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-8 border-b border-white/5 pb-10">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 text-[9px] text-red-600 font-black tracking-[0.4em] uppercase">
+              <ShieldAlert className="w-4 h-4 shadow-[0_0_8px_hsla(var(--primary),1)]" /> 
+              SEC_PROTOCOL_v9.4 // HARDENED_ENCLAVE
             </div>
-          )}
-          <div className="flex gap-2">
-            <input
-              value={antiPhishingCode}
-              onChange={(e) => setAntiPhishingCode(e.target.value)}
-              placeholder={t("security.phishingPlaceholder")}
-              className="flex-1 bg-secondary border border-border rounded px-3 py-2 text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-              maxLength={30}
-            />
-            <button
-              onClick={saveAntiPhishing}
-              className="px-4 py-2 bg-primary text-primary-foreground text-xs font-mono rounded neon-glow-btn flex items-center gap-1"
-            >
-              <Save className="w-3 h-3" /> {t("save")}
-            </button>
+            <h1 className="text-4xl font-black italic tracking-tighter text-white uppercase leading-none">
+              GÜVENLİK<span className="text-red-600">.SEC</span>
+            </h1>
           </div>
-        </motion.div>
-
-        {/* 2FA TOTP */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="glass-card rounded-lg p-6 neon-border"
-        >
-          <div className="flex items-center gap-2 mb-4">
-            <Shield className="w-5 h-5 text-primary" />
-            <h2 className="text-sm font-mono font-bold text-foreground">
-              {t("security.2faTitle")}
-            </h2>
+          <div className="flex items-center gap-3 px-6 py-3 bg-red-600/5 border border-red-600/20 rounded-full">
+             <Activity className="w-3.5 h-3.5 text-red-600" />
+             <span className="text-[9px] font-black text-red-600 uppercase tracking-widest">AĞ_STABİL_OK</span>
           </div>
+        </div>
 
-          {hasActive2FA ? (
-            <div className="space-y-3">
-              <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 flex items-center gap-3">
-                <Check className="w-5 h-5 text-green-500" />
-                <div>
-                  <div className="text-sm font-mono text-green-400 font-bold">{t("security.2faActive")}</div>
-                  <div className="text-[10px] text-muted-foreground font-mono">
-                    {t("security.2faProtected")}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          
+          {/* Main Controls */}
+          <div className="lg:col-span-8 space-y-10">
+             
+             {/* Anti-Phishing Control */}
+             <div className="obsidian-card p-10 rounded-[40px] border-2 border-white/5 space-y-6 relative overflow-hidden">
+                <div className="flex items-center gap-3 text-white">
+                   <Fingerprint className="w-6 h-6 text-red-600" />
+                   <h2 className="text-xl font-black italic uppercase tracking-tight">Anti-Phishing_Kodu</h2>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3">
+                   <div className="flex-1 relative group">
+                      <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-900 group-focus-within:text-red-600 transition-colors" />
+                      <input 
+                        value={antiPhishingCode}
+                        onChange={(e) => setAntiPhishingCode(e.target.value)}
+                        className="w-full bg-[#050505] border-2 border-white/5 rounded-[24px] pl-12 pr-4 py-4 text-[11px] text-white focus:border-red-600/50 outline-none font-black uppercase" 
+                        placeholder="YENİ_KOD_BELİRLE..." 
+                      />
+                   </div>
+                   <button className="bg-red-600 text-white px-8 py-4 rounded-[24px] text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all">GÜNCELLE</button>
+                </div>
+                {savedCode && (
+                  <div className="pt-2 flex items-center gap-3 text-[9px] font-black uppercase tracking-widest text-zinc-900">
+                     SİSTEM_KAYDI: <span className="text-red-600">{showCode ? savedCode : "••••••••"}</span>
+                     <button onClick={() => setShowCode(!showCode)} className="hover:text-white transition-colors"><Eye className="w-3.5 h-3.5" /></button>
                   </div>
-                </div>
-              </div>
-              {verifiedFactors.map((f) => (
-                <div
-                  key={f.id}
-                  className="flex items-center justify-between bg-secondary rounded-lg p-3"
-                >
-                  <div className="flex items-center gap-2">
-                    <Smartphone className="w-4 h-4 text-primary" />
-                    <span className="text-xs font-mono text-foreground">
-                      {f.friendly_name || "TOTP"}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => unenrollFactor(f.id)}
-                    disabled={unenrolling}
-                    className="px-3 py-1 bg-destructive/20 text-destructive text-[10px] font-mono rounded hover:bg-destructive/30 flex items-center gap-1"
-                  >
-                    {unenrolling ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      <X className="w-3 h-3" />
-                    )}{" "}
-                    {t("security.remove")}
-                  </button>
-                </div>
-              ))}
-            </div>
-          ) : enrollData ? (
-            <div className="space-y-4">
-              <p className="text-xs text-muted-foreground font-mono">
-                Google Authenticator veya başka bir TOTP uygulamasıyla QR kodu tarayın:
-              </p>
-              <div className="flex justify-center bg-white rounded-lg p-4 w-fit mx-auto">
-                <QRCodeSVG value={enrollData.uri} size={180} />
-              </div>
-              <div className="bg-secondary rounded-lg p-3">
-                <div className="text-[10px] text-muted-foreground font-mono mb-1">
-                  Manuel giriş anahtarı:
-                </div>
-                <div className="flex items-center gap-2">
-                  <code className="text-xs font-mono text-primary break-all">
-                    {enrollData.secret}
-                  </code>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(enrollData.secret);
-                      toast.success(t("security.copySuccess"));
-                    }}
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    <Copy className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground font-mono mb-1 block">
-                  {t("login.verifyCode")}
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    value={verifyCode}
-                    onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                    placeholder="123456"
-                    className="flex-1 bg-secondary border border-border rounded px-3 py-2.5 text-center text-lg font-mono text-foreground tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    maxLength={6}
-                  />
-                  <button
-                    onClick={confirmEnroll}
-                    disabled={verifyCode.length !== 6 || verifying}
-                    className="px-4 py-2 bg-primary text-primary-foreground text-xs font-mono rounded neon-glow-btn disabled:opacity-50 flex items-center gap-1"
-                  >
-                    {verifying ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      <Check className="w-3 h-3" />
-                    )}{" "}
-                    {t("login.verify")}
-                  </button>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  setEnrollData(null);
-                  setVerifyCode("");
-                }}
-                className="text-xs text-muted-foreground font-mono hover:text-foreground"
-              >
-                {t("cancel")}
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div className="bg-secondary rounded-lg p-4 flex items-center gap-3">
-                <Lock className="w-6 h-6 text-yellow-500" />
-                <div>
-                  <div className="text-sm font-mono text-foreground">{t("security.2faDisabledLabel")}</div>
-                  <div className="text-[10px] text-muted-foreground font-mono mt-1">
-                    {t("security.2faProtected")}
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={startEnroll}
-                disabled={enrolling}
-                className="w-full py-3 bg-primary text-primary-foreground text-sm font-mono rounded neon-glow-btn flex items-center justify-center gap-2"
-              >
-                {enrolling ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Smartphone className="w-4 h-4" />
                 )}
-                {t("security.enable2fa")}
-              </button>
-            </div>
-          )}
-        </motion.div>
+             </div>
 
-        {/* Dead-Man Mode */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="glass-card rounded-lg p-6 border border-destructive/20 relative overflow-hidden group"
-        >
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-            <Skull className="w-24 h-24 text-destructive" />
-          </div>
-
-          <div className="flex items-center gap-2 mb-4">
-            <Skull className="w-5 h-5 text-destructive" />
-            <h2 className="text-sm font-mono font-bold text-foreground">{t("security.deadManTitle")}</h2>
-          </div>
-
-          <div className="space-y-4 relative z-10">
-            <p className="text-xs text-muted-foreground font-mono leading-relaxed">
-              Acil durumlarda hassas verilerin (session, cache, local storage) anında imha edilmesi
-              için tasarlanmıştır.
-              <strong> "Arm" </strong> modunda, herhangi bir logout veya sekme kapatma işleminde
-              sistem kendini temizler.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="bg-secondary/40 border border-border rounded p-3 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-bold text-primary uppercase">
-                    Otomatik İmha
-                  </span>
-                  <button
-                    onClick={toggleDeadMan}
-                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${deadManEnabled ? "bg-destructive" : "bg-muted"}`}
-                  >
-                    <span
-                      className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${deadManEnabled ? "translate-x-5" : "translate-x-1"}`}
-                    />
-                  </button>
+             {/* 2FA Implementation Area */}
+             <div className="obsidian-card p-10 rounded-[40px] border-2 border-white/5 space-y-6">
+                <div className="flex items-center gap-3 text-white">
+                   <Shield className="w-6 h-6 text-red-600" />
+                   <h2 className="text-xl font-black italic uppercase tracking-tight">2FA_Doğrulama</h2>
                 </div>
-                <p className="text-[9px] font-mono text-muted-foreground italic">
-                  Oturum kapandığında tüm tarayıcı verilerini sil.
-                </p>
-              </div>
+                
+                {mfaFactors.length > 0 ? (
+                  <div className="bg-red-600/5 border border-red-600/10 rounded-[24px] p-6 flex items-center justify-between">
+                     <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center text-white"><Check className="w-5 h-5" /></div>
+                        <div className="space-y-0.5">
+                           <div className="text-sm font-black text-white uppercase tracking-tighter">TOTP_KORUMASI_AKTİF</div>
+                           <div className="text-[8px] text-zinc-800 font-bold uppercase tracking-widest">YÜKSEK_GÜVENLİK_KİMLİĞİ</div>
+                        </div>
+                     </div>
+                     <button className="p-2 rounded-xl bg-white/5 text-zinc-800 hover:text-red-600 transition-colors"><X className="w-5 h-5" /></button>
+                  </div>
+                ) : (
+                  <button className="w-full bg-red-600 text-white py-6 rounded-[32px] text-[10px] font-black uppercase tracking-[0.4em] hover:bg-red-700 transition-all">2FA_SİSTEMİNİ_BAŞLAT</button>
+                )}
+             </div>
+          </div>
 
-              <div className="bg-destructive/5 border border-destructive/20 rounded p-3 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-bold text-destructive uppercase">
-                    Panic Wipe
-                  </span>
-                  <button
-                    onClick={emergencyWipe}
-                    className="p-1 text-destructive hover:bg-destructive/10 rounded transition-colors"
-                  >
-                    <Power className="w-3.5 h-3.5" />
-                  </button>
+          {/* Side Info Panels */}
+          <div className="lg:col-span-4 space-y-10">
+             
+             {/* Dead-Man Panel */}
+             <div className="p-8 rounded-[40px] border-2 border-red-600/10 bg-red-600/[0.02] space-y-6 relative overflow-hidden group">
+                <Skull className="absolute -bottom-6 -right-6 w-24 h-24 text-red-600 opacity-5 group-hover:scale-110 transition-transform duration-1000" />
+                <div className="flex items-center gap-3 text-[9px] text-red-600 font-black uppercase tracking-[0.3em]">
+                   <Skull className="w-4 h-4" /> DEAD_MAN_MODE
                 </div>
-                <p className="text-[9px] font-mono text-muted-foreground italic">
-                  Anında çıkış yap ve her şeyi temizle.
-                </p>
-              </div>
-            </div>
-
-            <div className="rounded border border-border bg-secondary/20 p-3">
-              <h4 className="text-[10px] font-mono font-bold mb-2 uppercase text-muted-foreground">
-                Güvenlik Kontrol Listesi
-              </h4>
-              <ul className="space-y-1.5">
-                {[
-                  "Tor Browser kullanılıyor mu?",
-                  "Anti-phishing kodu doğrulandı mı?",
-                  "2FA (TOTP) aktif mi?",
-                  "PGP Private Key cihaz dışında mı?",
-                ].map((item, i) => (
-                  <li
-                    key={i}
-                    className="flex items-center gap-2 text-[10px] font-mono text-foreground/80"
-                  >
-                    <div className="w-3 h-3 rounded-sm border border-primary/30 flex items-center justify-center">
-                      <Check className="w-2 h-2 text-primary" />
-                    </div>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Encryption Info */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="glass-card rounded-lg p-6"
-        >
-          <div className="flex items-center gap-2 mb-3">
-            <Lock className="w-5 h-5 text-primary" />
-            <h2 className="text-sm font-mono font-bold text-foreground">{t("security.encryptionTitle")}</h2>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              { label: "Mesajlar", desc: "AES-256-GCM E2E şifreli", active: true },
-              { label: "Ödeme Adresleri", desc: "30dk benzersiz, tek kullanımlık", active: true },
-              { label: "Kişisel Veriler", desc: "RLS ile izole edilmiş", active: true },
-              { label: "Loglar", desc: "Panic Button ile imha edilebilir", active: true },
-            ].map((item) => (
-              <div key={item.label} className="bg-secondary rounded-lg p-3">
-                <div className="text-xs font-mono text-foreground">{item.label}</div>
-                <div className="text-[10px] text-muted-foreground font-mono mt-0.5">
-                  {item.desc}
+                <div className="space-y-3">
+                   <h3 className="text-xl font-black italic text-white uppercase tracking-tight leading-none">OTOMATİK_İMHA</h3>
+                   <p className="text-[8px] text-zinc-700 font-bold uppercase tracking-widest leading-relaxed">OTURUM_KAPANDIĞINDA_VERİLERİ_KALICI_OLARAK_SİLER.</p>
                 </div>
-                <span className="text-[10px] font-mono text-green-500 mt-1 block">● Korumalı</span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
+                <button 
+                  onClick={() => setDeadManEnabled(!deadManEnabled)}
+                  className={`w-full py-5 rounded-[24px] text-[9px] font-black uppercase tracking-widest transition-all ${deadManEnabled ? "bg-red-600 text-white shadow-[0_10px_20px_hsla(var(--primary),0.2)]" : "bg-white/[0.02] text-zinc-800 border border-white/10 hover:border-red-600/40"}`}
+                >
+                   {deadManEnabled ? "SİSTEM_ARMED" : "SİSTEMİ_ARM_ET"}
+                </button>
+             </div>
 
-        <AdminAccessCard />
+             {/* Emergency Wipe */}
+             <div className="obsidian-card p-8 rounded-[40px] border-2 border-white/5 space-y-4">
+                <h4 className="text-[9px] text-zinc-800 font-black uppercase tracking-widest">ACİL_DURUM_TEMİZLİĞİ</h4>
+                <button className="w-full bg-white/[0.02] border border-red-900/40 text-red-900 py-4 rounded-[24px] text-[9px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all">
+                   PANIC_WIPE
+                </button>
+             </div>
+          </div>
+        </div>
+
       </div>
     </PageShell>
-  );
-}
-
-function AdminAccessCard() {
-  const { t } = useI18n();
-  const [code, setCode] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-  const [adminExists, setAdminExists] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) return;
-      const { data: r } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", u.user.id);
-      setIsAdmin((r ?? []).some((x: any) => x.role === "admin"));
-      const { count } = await supabase
-        .from("user_roles")
-        .select("*", { count: "exact", head: true })
-        .eq("role", "admin");
-      setAdminExists((count ?? 0) > 0);
-    })();
-  }, []);
-
-  const bootstrap = async () => {
-    setBusy(true);
-    const { data, error } = await supabase.rpc("bootstrap_first_admin");
-    setBusy(false);
-    if (error) return toast.error(error.message);
-    const res = data as any;
-    if (res?.success) {
-      toast.success(t("security.adminAssigned"));
-      setIsAdmin(true);
-      setAdminExists(true);
-    } else {
-      toast.error(res?.error ?? t("err.generic"));
-    }
-  };
-
-  const redeem = async () => {
-    if (!code.trim()) return;
-    setBusy(true);
-    const { data, error } = await supabase.rpc("redeem_admin_invite", { _code: code.trim() });
-    setBusy(false);
-    if (error) return toast.error(error.message);
-    const res = data as any;
-    if (res?.success) {
-      toast.success(t("security.adminRoleGranted"));
-      setIsAdmin(true);
-      setCode("");
-    } else {
-      toast.error(res?.error ?? t("security.invalidCode"));
-    }
-  };
-
-  if (isAdmin) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="glass-card rounded-lg p-5 border-l-2 border-l-green-500"
-      >
-        <div className="flex items-center gap-2 mb-1">
-          <Shield className="w-4 h-4 text-green-500" />
-          <h2 className="text-sm font-bold text-foreground font-mono">{t("security.adminTitle")}</h2>
-        </div>
-        <p className="text-xs text-muted-foreground font-mono">
-          {t("security.adminActive")}
-        </p>
-      </motion.div>
-    );
-  }
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="glass-card rounded-lg p-5 border-l-2 border-l-yellow-500"
-    >
-      <div className="flex items-center gap-2 mb-3">
-        <Shield className="w-4 h-4 text-yellow-500" />
-        <h2 className="text-sm font-bold text-foreground font-mono">{t("security.adminTitle")}</h2>
-      </div>
-      {adminExists === false ? (
-        <>
-          <p className="text-xs text-muted-foreground font-mono mb-3">
-            {t("security.firstAdmin")}
-          </p>
-          <button
-            onClick={bootstrap}
-            disabled={busy}
-            className="w-full bg-yellow-500 text-black py-2 rounded font-mono text-xs font-bold hover:opacity-90 disabled:opacity-50"
-          >
-            {busy ? t("security.processing") : t("security.becomeAdmin")}
-          </button>
-        </>
-      ) : (
-        <>
-          <p className="text-xs text-muted-foreground font-mono mb-3">
-            {t("security.inviteCodeDesc")}
-          </p>
-          <div className="flex gap-2">
-            <input
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder={t("security.inviteCode")}
-              className="flex-1 bg-secondary border border-border rounded px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
-            />
-            <button
-              onClick={redeem}
-              disabled={busy || !code.trim()}
-              className="px-4 bg-yellow-500 text-black rounded font-mono text-xs font-bold hover:opacity-90 disabled:opacity-50"
-            >
-              {t("security.redeem")}
-            </button>
-          </div>
-        </>
-      )}
-    </motion.div>
   );
 }

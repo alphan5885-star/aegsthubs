@@ -23,14 +23,14 @@ export default function SessionTimerBadge() {
 
   return (
     <div
-      className={`fixed top-4 right-4 z-50 flex items-center gap-2 px-3 py-1.5 rounded-md font-mono text-xs border backdrop-blur-md ${
+      className={`flex items-center gap-1.5 font-mono text-[8px] font-black uppercase tracking-wider ${
         critical
-          ? "bg-destructive/20 border-destructive text-destructive animate-pulse"
-          : "bg-card/80 border-border text-primary"
+          ? "text-red-500 animate-pulse"
+          : "text-zinc-400 hover:text-white transition-colors"
       }`}
-      title="Oturum süresi"
+      title="Kalan Oturum Süresi"
     >
-      <Clock className="w-3.5 h-3.5" />
+      <Clock className="w-3 h-3 text-red-600 shrink-0" />
       <span>{fmt(remainingMs)}</span>
     </div>
   );

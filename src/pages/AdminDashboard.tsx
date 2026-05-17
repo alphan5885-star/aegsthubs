@@ -65,6 +65,14 @@ export default function AdminDashboard() {
   const [auditLogs, setAuditLogs] = useState<AuditRow[]>([]);
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawing, setWithdrawing] = useState(false);
+  const [bondFeeUsd, setBondFeeUsd] = useState(() => {
+    return parseFloat(localStorage.getItem("vendor_bond_fee_usd") || "100");
+  });
+
+  const saveBondFee = () => {
+    localStorage.setItem("vendor_bond_fee_usd", bondFeeUsd.toString());
+    toast.success("Satıcı depozito bedeli güncellendi! 🛡️");
+  };
 
   const loadAll = async () => {
     if (!user) return;
@@ -486,6 +494,34 @@ export default function AdminDashboard() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Vendor Bond Configuration */}
+      <div className="glass-card rounded-lg p-4 mb-6 border border-white/5 bg-gradient-to-r from-red-950/10 via-[#010101] to-[#010101]">
+        <h2 className="text-xs font-mono font-bold text-foreground mb-3 flex items-center gap-2 tracking-widest uppercase">
+          <Shield className="w-4 h-4 text-red-600 animate-pulse" /> SATICI DEPOZİTO YAPILANDIRMASI (VENDOR BOND SETTINGS)
+        </h2>
+        <div className="flex flex-col sm:flex-row gap-4 items-end">
+          <div className="flex-1 space-y-1.5 w-full">
+            <label className="text-[9px] text-zinc-500 font-mono uppercase tracking-wider block">SATICI OLMAK İÇİN GEREKLİ TEMİNAT (USD)</label>
+            <input
+              type="number"
+              value={bondFeeUsd}
+              onChange={(e) => setBondFeeUsd(parseFloat(e.target.value) || 0)}
+              placeholder="E.g. 100"
+              className="w-full bg-[#050505] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono text-white focus:outline-none focus:border-red-600/50 transition-colors"
+            />
+          </div>
+          <button
+            onClick={saveBondFee}
+            className="w-full sm:w-auto px-6 py-3.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all active:scale-95 duration-200"
+          >
+            TEMİNATI GÜNCELLE
+          </button>
+        </div>
+        <p className="text-[8px] text-zinc-600 font-mono mt-3 uppercase leading-relaxed tracking-wider">
+          * BU BEDEL YENİ SATICILARDAN TALEP EDİLECEK GÜVEN TEMİNATIDIR. ALICILAR SAYFASINDA BU TUTARIN LITECOIN KARŞILIĞINI ANLIK OLARAK GÖRECEKLERDİR.
+        </p>
       </div>
 
       <div className="glass-card rounded-lg p-4 border border-destructive/30">

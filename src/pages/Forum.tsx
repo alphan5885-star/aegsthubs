@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import PageShell from "@/components/PageShell";
 import { useAuth } from "@/lib/authContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,12 +14,15 @@ import {
   ArrowLeft,
   Pin,
   Lock,
-  Tag,
   Search,
-  Filter,
   MessageCircle,
   Eye,
   Trash2,
+  Zap,
+  ShieldCheck,
+  EyeOff,
+  Flame,
+  Award
 } from "lucide-react";
 import {
   Dialog,
@@ -28,579 +31,738 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { format } from "date-fns";
-import { tr } from "date-fns/locale";
+import { toast } from "sonner";
 
-interface ForumThread {
+interface ForumPost {
   id: string;
   title: string;
   content: string;
   author_id: string;
-  author_name: string;
   category: string;
-  is_pinned: boolean;
-  is_locked: boolean;
+  pinned: boolean;
   created_at: string;
-  reply_count: number;
-  view_count: number;
-  last_reply_at: string | null;
 }
 
-interface ForumReply {
+interface ForumComment {
   id: string;
-  thread_id: string;
-  content: string;
+  post_id: string;
   author_id: string;
-  author_name: string;
+  content: string;
   created_at: string;
+}
+
+interface ProfileData {
+  id: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  bio: string | null;
 }
 
 const CATEGORIES = [
-  { id: "genel", label: "Genel", color: "text-blue-400" },
-  { id: "duyurular", label: "Duyurular", color: "text-yellow-400" },
-  { id: "yardim", label: "Yardim", color: "text-green-400" },
-  { id: "oneriler", label: "Oneriler", color: "text-purple-400" },
-  { id: "sikayet", label: "Sikayet", color: "text-red-400" },
+  { id: "genel", label: "💬 Genel Sohbet", desc: "Topluluk üyeleriyle genel muhabbet" },
+  { id: "duyurular", label: "📢 Duyurular", desc: "Sistem güncellemeleri ve resmi haberler" },
+  { id: "yardim", label: "🛡️ Destek & Yardım", desc: "PGP, Escrow ve sipariş yardımları" },
+  { id: "oneriler", label: "💡 Öneriler & Fikirler", desc: "Pazar yerini geliştirecek parlak fikirler" },
+  { id: "sikayet", label: "⚠️ Şikayet & Uyuşmazlık", desc: "Satıcı veya alıcı şikayet kayıtları" },
 ];
-
-// In-memory storage for forum data (simulating database)
-const forumStorage = {
-  threads: [] as ForumThread[],
-  replies: [] as ForumReply[],
-  initialized: false,
-};
 
 export default function Forum() {
   const { user, role } = useAuth();
   const { t } = useI18n();
-  const isMounted = useRef(true);
-  const [threads, setThreads] = useState<ForumThread[]>([]);
-  const [selectedThread, setSelectedThread] = useState<ForumThread | null>(null);
-  const [replies, setReplies] = useState<ForumReply[]>([]);
+
+  const [posts, setPosts] = useState<ForumPost[]>([]);
+  const [comments, setComments] = useState<ForumComment[]>([]);
+  const [profiles, setProfiles] = useState<Record<string, ProfileData>>({});
+  
+  const [selectedPost, setSelectedPost] = useState<ForumPost | null>(null);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [newThreadOpen, setNewThreadOpen] = useState(false);
-  const [newThread, setNewThread] = useState({ title: "", content: "", category: "genel" });
-  const [newReply, setNewReply] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [displayName, setDisplayName] = useState<string>("");
+  
+  const [newTitle, setNewTitle] = useState("");
+  const [newContent, setNewContent] = useState("");
+  const [newCategory, setNewCategory] = useState("genel");
+  const [postAnonymously, setPostAnonymously] = useState(false);
 
-  const loadThreads = useCallback(() => {
-    const sorted = [...forumStorage.threads].sort((a, b) => {
-      if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1;
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    });
-    setThreads(sorted);
-  }, []);
+  const [newComment, setNewComment] = useState("");
+  const [submittingComment, setSubmittingComment] = useState(false);
+  const [submittingPost, setSubmittingPost] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const loadUserProfile = useCallback(async () => {
-    if (!user) return;
+  const isMounted = useRef(true);
+
+  // Fetch Forum Posts, Profiles, and Comments
+  const fetchPosts = async () => {
     try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("display_name")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      setLoading(true);
+      const { data: postsData, error: postsError } = await supabase
+        .from("forum_posts")
+        .select("*")
+        .order("pinned", { ascending: false })
+        .order("created_at", { ascending: false });
 
-      if (!isMounted.current) return;
+      if (postsError) throw postsError;
 
-      if (error) {
-        if (import.meta.env.DEV) console.error("Error loading forum profile:", error);
-        return;
-      }
+      if (postsData && isMounted.current) {
+        // Correct boolean values from database schema
+        const mappedPosts: ForumPost[] = postsData.map((p: any) => ({
+          id: p.id,
+          title: p.title,
+          content: p.content,
+          author_id: p.author_id,
+          category: p.category || "genel",
+          pinned: !!p.pinned,
+          created_at: p.created_at,
+        }));
+        setPosts(mappedPosts);
 
-      if (data?.display_name) {
-        setDisplayName(data.display_name);
-      } else {
-        setDisplayName(user.email?.split("@")[0] || t("forum.anonymous"));
+        // Fetch profiles for authors
+        const authorIds = Array.from(new Set(mappedPosts.map((p) => p.author_id)));
+        if (authorIds.length > 0) {
+          const { data: profilesData, error: profilesError } = await supabase
+            .from("profiles")
+            .select("id, display_name, avatar_url, bio")
+            .in("id", authorIds);
+
+          if (!profilesError && profilesData) {
+            const profileMap: Record<string, ProfileData> = {};
+            profilesData.forEach((p) => {
+              profileMap[p.id] = p;
+            });
+            setProfiles((prev) => ({ ...prev, ...profileMap }));
+          }
+        }
       }
     } catch (e) {
-      if (import.meta.env.DEV) console.error("Catch error in loadUserProfile:", e);
+      toast.error("Forum verileri yüklenirken hata oluştu.");
+    } finally {
+      if (isMounted.current) setLoading(false);
     }
-  }, [user]);
+  };
+
+  // Fetch comments for a specific post
+  const fetchComments = async (postId: string) => {
+    try {
+      const { data: commentsData, error: commentsError } = await supabase
+        .from("forum_comments")
+        .select("*")
+        .eq("post_id", postId)
+        .order("created_at", { ascending: true });
+
+      if (commentsError) throw commentsError;
+
+      if (commentsData && isMounted.current) {
+        setComments(commentsData);
+
+        // Fetch profiles for comment authors
+        const authorIds = Array.from(
+          new Set(commentsData.map((c) => c.author_id).filter((id) => !profiles[id])),
+        );
+        if (authorIds.length > 0) {
+          const { data: profilesData, error: profilesError } = await supabase
+            .from("profiles")
+            .select("id, display_name, avatar_url, bio")
+            .in("id", authorIds);
+
+          if (!profilesError && profilesData) {
+            const profileMap: Record<string, ProfileData> = {};
+            profilesData.forEach((p) => {
+              profileMap[p.id] = p;
+            });
+            setProfiles((prev) => ({ ...prev, ...profileMap }));
+          }
+        }
+      }
+    } catch (e) {
+      toast.error("Yorumlar yüklenirken hata oluştu.");
+    }
+  };
 
   useEffect(() => {
     isMounted.current = true;
-    // Initialize with demo data if empty
-    if (!forumStorage.initialized) {
-      // ... (existing initialization code)
-      forumStorage.threads = [
-        {
-          id: "1",
-          title: "Platforma Hos Geldiniz",
-          content:
-            "Bu platform hakkinda sorularinizi buradan sorabilirsiniz. Kurallara uymayi unutmayin.",
-          author_id: "system",
-          author_name: "Admin",
-          category: "duyurular",
-          is_pinned: true,
-          is_locked: false,
-          created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
-          reply_count: 2,
-          view_count: 156,
-          last_reply_at: new Date(Date.now() - 86400000).toISOString(),
-        },
-        {
-          id: "2",
-          title: "Guvenlik Onerilerimiz",
-          content:
-            "Islemlerinizde dikkat etmeniz gereken guvenlik onlemleri:\n\n1. Sifrenizi kimseyle paylasmayiniz\n2. 2FA etkinlestirin\n3. Supheli mesajlara dikkat edin",
-          author_id: "system",
-          author_name: "Admin",
-          category: "duyurular",
-          is_pinned: true,
-          is_locked: true,
-          created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
-          reply_count: 0,
-          view_count: 89,
-          last_reply_at: null,
-        },
-        {
-          id: "3",
-          title: "Odeme islemi ne kadar suruyor?",
-          content:
-            "Merhaba, LTC ile odeme yaptim ama henuz onaylanmadi. Ne kadar beklemem gerekiyor?",
-          author_id: "user1",
-          author_name: "Kullanici42",
-          category: "yardim",
-          is_pinned: false,
-          is_locked: false,
-          created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
-          reply_count: 3,
-          view_count: 45,
-          last_reply_at: new Date(Date.now() - 3600000 * 5).toISOString(),
-        },
-      ];
-      forumStorage.replies = [
-        {
-          id: "r1",
-          thread_id: "1",
-          content: "Tesekkurler bilgilendirme icin!",
-          author_id: "user2",
-          author_name: "AnonymUser",
-          created_at: new Date(Date.now() - 86400000 * 3).toISOString(),
-        },
-        {
-          id: "r2",
-          thread_id: "1",
-          content: "Yeni uyeler icin cok faydali.",
-          author_id: "user3",
-          author_name: "Shadow99",
-          created_at: new Date(Date.now() - 86400000).toISOString(),
-        },
-        {
-          id: "r3",
-          thread_id: "3",
-          content:
-            "LTC islemleri genelde 10-30 dakika icinde onaylanir. Ag yogunluguna gore degisebilir.",
-          author_id: "user4",
-          author_name: "VendorX",
-          created_at: new Date(Date.now() - 86400000).toISOString(),
-        },
-      ];
-      forumStorage.initialized = true;
-    }
-
-    const load = async () => {
-      if (!isMounted.current) return;
-      loadThreads();
-      await loadUserProfile();
-    };
-
-    load();
+    fetchPosts();
     return () => {
       isMounted.current = false;
     };
-  }, [loadThreads, loadUserProfile]);
+  }, []);
 
-  const loadReplies = (threadId: string) => {
-    const threadReplies = forumStorage.replies
-      .filter((r) => r.thread_id === threadId)
-      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-    setReplies(threadReplies);
-  };
-
-  const openThread = (thread: ForumThread) => {
-    // Increment view count
-    const idx = forumStorage.threads.findIndex((t) => t.id === thread.id);
-    if (idx !== -1) {
-      forumStorage.threads[idx].view_count++;
+  // Handle Create Post
+  const handleCreatePost = async () => {
+    if (!newTitle.trim() || !newContent.trim()) {
+      toast.error("Lütfen tüm alanları doldurun.");
+      return;
     }
-    setSelectedThread(thread);
-    loadReplies(thread.id);
-  };
-
-  const createThread = () => {
-    if (!newThread.title.trim() || !newThread.content.trim() || !user) return;
-    setLoading(true);
-
-    const thread: ForumThread = {
-      id: `t-${Date.now()}`,
-      title: newThread.title,
-      content: newThread.content,
-      author_id: user.id,
-      author_name: displayName,
-      category: newThread.category,
-      is_pinned: false,
-      is_locked: false,
-      created_at: new Date().toISOString(),
-      reply_count: 0,
-      view_count: 0,
-      last_reply_at: null,
-    };
-
-    forumStorage.threads.unshift(thread);
-    loadThreads();
-    setNewThread({ title: "", content: "", category: "genel" });
-    setNewThreadOpen(false);
-    setLoading(false);
-  };
-
-  const createReply = () => {
-    if (!newReply.trim() || !selectedThread || !user || selectedThread.is_locked) return;
-    setLoading(true);
-
-    const reply: ForumReply = {
-      id: `r-${Date.now()}`,
-      thread_id: selectedThread.id,
-      content: newReply,
-      author_id: user.id,
-      author_name: displayName,
-      created_at: new Date().toISOString(),
-    };
-
-    forumStorage.replies.push(reply);
-
-    // Update thread stats
-    const idx = forumStorage.threads.findIndex((t) => t.id === selectedThread.id);
-    if (idx !== -1) {
-      forumStorage.threads[idx].reply_count++;
-      forumStorage.threads[idx].last_reply_at = new Date().toISOString();
+    if (!user) {
+      toast.error("Önce giriş yapmalısınız.");
+      return;
     }
 
-    loadReplies(selectedThread.id);
-    setNewReply("");
-    setLoading(false);
+    setSubmittingPost(true);
+    try {
+      const authorId = postAnonymously ? "sys" : user.id;
+
+      const { error } = await supabase.from("forum_posts").insert({
+        title: newTitle,
+        content: newContent,
+        category: newCategory,
+        author_id: authorId,
+        pinned: false,
+      });
+
+      if (error) throw error;
+
+      toast.success("Konu başarıyla yayınlandı! 📢");
+      setNewTitle("");
+      setNewContent("");
+      setNewThreadOpen(false);
+      fetchPosts();
+    } catch (e) {
+      toast.error("Konu yayınlanırken bir hata oluştu.");
+    } finally {
+      setSubmittingPost(false);
+    }
   };
 
-  const deleteThread = (threadId: string) => {
-    forumStorage.threads = forumStorage.threads.filter((t) => t.id !== threadId);
-    forumStorage.replies = forumStorage.replies.filter((r) => r.thread_id !== threadId);
-    loadThreads();
-    setSelectedThread(null);
+  // Handle Add Comment
+  const handleAddComment = async () => {
+    if (!selectedPost) return;
+    if (!newComment.trim()) {
+      toast.error("Yorum boş bırakılamaz.");
+      return;
+    }
+    if (!user) {
+      toast.error("Önce giriş yapmalısınız.");
+      return;
+    }
+
+    setSubmittingComment(true);
+    try {
+      const { error } = await supabase.from("forum_comments").insert({
+        post_id: selectedPost.id,
+        author_id: user.id,
+        content: newComment,
+      });
+
+      if (error) throw error;
+
+      toast.success("Yorumunuz başarıyla iletildi!");
+      setNewComment("");
+      fetchComments(selectedPost.id);
+    } catch (e) {
+      toast.error("Yorum iletilirken bir hata oluştu.");
+    } finally {
+      setSubmittingComment(false);
+    }
   };
 
-  const filteredThreads = threads.filter((t) => {
-    if (categoryFilter !== "all" && t.category !== categoryFilter) return false;
-    if (search && !t.title.toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
+  // Admin Tool: Toggle Pin Post
+  const handleTogglePin = async (post: ForumPost) => {
+    if (role !== "admin") return;
+    try {
+      const { error } = await supabase
+        .from("forum_posts")
+        .update({ pinned: !post.pinned })
+        .eq("id", post.id);
+
+      if (error) throw error;
+
+      toast.success(post.pinned ? "Konunun sabitlemesi kaldırıldı." : "Konu başarıyla sabitlendi!");
+      const updatedPost = { ...post, pinned: !post.pinned };
+      if (selectedPost?.id === post.id) {
+        setSelectedPost(updatedPost);
+      }
+      fetchPosts();
+    } catch (e) {
+      toast.error("İşlem başarısız oldu.");
+    }
+  };
+
+  // Admin Tool: Delete Post
+  const handleDeletePost = async (postId: string) => {
+    if (role !== "admin") return;
+    const confirm = window.confirm("Bu konuyu ve tüm alt yorumlarını tamamen silmek istiyor musunuz?");
+    if (!confirm) return;
+
+    try {
+      // Delete comments first
+      await supabase.from("forum_comments").delete().eq("post_id", postId);
+      
+      // Delete post
+      const { error } = await supabase.from("forum_posts").delete().eq("id", postId);
+
+      if (error) throw error;
+
+      toast.success("Konu başarıyla imha edildi.");
+      setSelectedPost(null);
+      fetchPosts();
+    } catch (e) {
+      toast.error("Silme işlemi başarısız.");
+    }
+  };
+
+  // Filter & Search computation
+  const filteredPosts = posts.filter((p) => {
+    const matchesSearch =
+      p.title.toLowerCase().includes(search.toLowerCase()) ||
+      p.content.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = categoryFilter === "all" || p.category === categoryFilter;
+    return matchesSearch && matchesCategory;
   });
 
-  const getCategoryInfo = (categoryId: string) => {
-    return CATEGORIES.find((c) => c.id === categoryId) || CATEGORIES[0];
+  const getAuthorDisplay = (authorId: string) => {
+    if (authorId === "sys") {
+      return {
+        name: "ANONİM_SİBER",
+        avatar: "",
+        badge: "SİSTEM",
+        badgeColor: "bg-red-500/10 text-red-500 border-red-500/20",
+      };
+    }
+    const profile = profiles[authorId];
+    const name = profile?.display_name || `Kullanıcı_${authorId.slice(0, 4)}`;
+    
+    // Determine badges based on names/ids for immersive fidelity
+    const isAdmin = name.toLowerCase().includes("admin") || authorId === "sys";
+    const isVendor = name.toLowerCase().includes("vendor") || name.toLowerCase().includes("satıcı");
+
+    return {
+      name,
+      avatar: profile?.avatar_url || "",
+      badge: isAdmin ? "ADMIN" : isVendor ? "SATICI" : "ALICI",
+      badgeColor: isAdmin 
+        ? "bg-red-500/10 text-red-500 border-red-500/20" 
+        : isVendor 
+          ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" 
+          : "bg-blue-500/10 text-blue-400 border-blue-500/20",
+    };
   };
 
-  // Thread Detail View
-  if (selectedThread) {
-    return (
-      <PageShell>
-        <div className="mb-6">
-          <button
-            onClick={() => setSelectedThread(null)}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Geri Don
-          </button>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass-card rounded-lg p-6 mb-4"
-        >
-          <div className="flex items-start justify-between gap-4 mb-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                {selectedThread.is_pinned && <Pin className="w-4 h-4 text-yellow-400" />}
-                {selectedThread.is_locked && <Lock className="w-4 h-4 text-red-400" />}
-                <span
-                  className={`text-xs font-mono ${getCategoryInfo(selectedThread.category).color}`}
-                >
-                  [{getCategoryInfo(selectedThread.category).label.toUpperCase()}]
-                </span>
-              </div>
-              <h1 className="text-xl font-bold text-foreground">{selectedThread.title}</h1>
-            </div>
-            {(role === "admin" || selectedThread.author_id === user?.id) && (
-              <button
-                onClick={() => deleteThread(selectedThread.id)}
-                className="p-2 text-destructive hover:bg-destructive/10 rounded transition-colors"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-
-          <div className="flex items-center gap-4 text-xs text-muted-foreground font-mono mb-4 pb-4 border-b border-border">
-            <span className="flex items-center gap-1">
-              <User className="w-3 h-3" />
-              {selectedThread.author_name}
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              {format(new Date(selectedThread.created_at), "dd MMM yyyy HH:mm", { locale: tr })}
-            </span>
-            <span className="flex items-center gap-1">
-              <Eye className="w-3 h-3" />
-              {selectedThread.view_count}
-            </span>
-          </div>
-
-          <div className="text-sm text-foreground/90 whitespace-pre-wrap">
-            {selectedThread.content}
-          </div>
-        </motion.div>
-
-        {/* Replies */}
-        <div className="space-y-3 mb-4">
-          <h2 className="text-sm font-mono text-muted-foreground flex items-center gap-2">
-            <MessageCircle className="w-4 h-4" />
-            Yanitlar ({replies.length})
-          </h2>
-
-          <AnimatePresence>
-            {replies.map((reply, idx) => (
-              <motion.div
-                key={reply.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                className="glass-card rounded-lg p-4"
-              >
-                <div className="flex items-center gap-3 text-xs text-muted-foreground font-mono mb-2">
-                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] text-primary">
-                    {reply.author_name[0].toUpperCase()}
-                  </div>
-                  <span>{reply.author_name}</span>
-                  <span className="opacity-50">|</span>
-                  <span>
-                    {format(new Date(reply.created_at), "dd MMM yyyy HH:mm", { locale: tr })}
-                  </span>
-                </div>
-                <div className="text-sm text-foreground/90 pl-9">{reply.content}</div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-
-          {replies.length === 0 && (
-            <div className="glass-card rounded-lg p-8 text-center">
-              <MessageSquare className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-40" />
-              <p className="text-sm text-muted-foreground">
-                Henuz yanit yok. Ilk yaniti siz yazin!
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Reply Form */}
-        {!selectedThread.is_locked ? (
-          <div className="glass-card rounded-lg p-4">
-            <textarea
-              value={newReply}
-              onChange={(e) => setNewReply(e.target.value)}
-              placeholder="Yanitinizi yazin..."
-              rows={3}
-              className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none mb-3"
-            />
-            <button
-              onClick={createReply}
-              disabled={loading || !newReply.trim()}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-mono hover:opacity-90 transition-all disabled:opacity-50"
-            >
-              <Send className="w-4 h-4" />
-              Yanit Gonder
-            </button>
-          </div>
-        ) : (
-          <div className="glass-card rounded-lg p-4 text-center">
-            <Lock className="w-5 h-5 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground font-mono">
-              Bu konu kilitlenmistir. Yanit yazilamaz.
-            </p>
-          </div>
-        )}
-      </PageShell>
-    );
-  }
-
-  // Thread List View
   return (
     <PageShell>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-mono font-bold text-primary neon-text flex items-center gap-2">
-          <MessageSquare className="w-5 h-5" />
-          Forum
-        </h1>
-        <Dialog open={newThreadOpen} onOpenChange={setNewThreadOpen}>
-          <DialogTrigger asChild>
-            <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-mono hover:opacity-90 transition-all neon-glow-btn">
-              <Plus className="w-4 h-4" />
-              Yeni Konu
-            </button>
-          </DialogTrigger>
-          <DialogContent className="bg-card border-border">
-            <DialogHeader>
-              <DialogTitle className="text-primary font-mono">Yeni Konu Olustur</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 mt-4">
-              <div>
-                <label className="text-xs font-mono text-muted-foreground mb-1 block">
-                  Kategori
-                </label>
-                <select
-                  value={newThread.category}
-                  onChange={(e) => setNewThread({ ...newThread, category: e.target.value })}
-                  className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                >
-                  {CATEGORIES.filter((c) => c.id !== "duyurular" || role === "admin").map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-mono text-muted-foreground mb-1 block">Baslik</label>
-                <input
-                  value={newThread.title}
-                  onChange={(e) => setNewThread({ ...newThread, title: e.target.value })}
-                  placeholder="Konu basligi..."
-                  className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-mono text-muted-foreground mb-1 block">Icerik</label>
-                <textarea
-                  value={newThread.content}
-                  onChange={(e) => setNewThread({ ...newThread, content: e.target.value })}
-                  placeholder="Konu icerigini yazin..."
-                  rows={5}
-                  className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none"
-                />
-              </div>
-              <button
-                onClick={createThread}
-                disabled={loading || !newThread.title.trim() || !newThread.content.trim()}
-                className="w-full py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-mono font-bold hover:opacity-90 transition-all disabled:opacity-50"
-              >
-                Konuyu Olustur
-              </button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
+      <div className="max-w-[1300px] mx-auto space-y-8 py-2 font-mono text-zinc-300 relative">
+        
+        {/* Ambient background glow */}
+        <div className="absolute -top-40 right-1/4 w-[450px] h-[450px] bg-red-600/5 rounded-full blur-[180px] pointer-events-none" />
 
-      {/* Search & Filter */}
-      <div className="flex gap-3 mb-6">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Konu ara..."
-            className="w-full pl-9 pr-3 py-2.5 bg-secondary border border-border rounded-lg text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-          />
-        </div>
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg border border-border overflow-x-auto">
-          <button
-            onClick={() => setCategoryFilter("all")}
-            className={`px-3 py-1.5 text-[10px] font-mono rounded-md transition-all whitespace-nowrap ${
-              categoryFilter === "all"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            TUMU
-          </button>
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setCategoryFilter(cat.id)}
-              className={`px-3 py-1.5 text-[10px] font-mono rounded-md transition-all whitespace-nowrap ${
-                categoryFilter === cat.id
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {cat.label.toUpperCase()}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Thread List */}
-      {filteredThreads.length === 0 ? (
-        <div className="glass-card rounded-lg p-12 text-center">
-          <MessageSquare className="w-10 h-10 text-muted-foreground mx-auto mb-3 opacity-40" />
-          <div className="text-muted-foreground font-mono text-sm">Konu bulunamadi.</div>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {filteredThreads.map((thread, idx) => (
+        <AnimatePresence mode="wait">
+          {!selectedPost ? (
+            // ================= FORUM LIST VIEW =================
             <motion.div
-              key={thread.id}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.03 }}
-              onClick={() => openThread(thread)}
-              className="glass-card rounded-lg p-4 cursor-pointer hover:neon-border transition-all group"
+              exit={{ opacity: 0, y: -15 }}
+              className="space-y-8"
             >
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <MessageSquare className="w-5 h-5 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    {thread.is_pinned && <Pin className="w-3 h-3 text-yellow-400" />}
-                    {thread.is_locked && <Lock className="w-3 h-3 text-red-400" />}
-                    <span
-                      className={`text-[10px] font-mono ${getCategoryInfo(thread.category).color}`}
-                    >
-                      [{getCategoryInfo(thread.category).label.toUpperCase()}]
-                    </span>
+              {/* Forum Header HUD */}
+              <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 border-b border-white/[0.04] pb-8">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-[9px] text-zinc-500 font-bold tracking-[0.3em] uppercase">
+                    <Zap className="w-4 h-4 text-primary animate-pulse" /> 
+                    UNDERGROUND_COMMUNITY // Forums & Encrypted Threads
                   </div>
-                  <h3 className="text-sm font-medium text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                    {thread.title}
-                  </h3>
-                  <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
-                    {thread.content}
-                  </p>
-                  <div className="flex items-center gap-4 mt-2 text-[10px] text-muted-foreground font-mono">
-                    <span className="flex items-center gap-1">
-                      <User className="w-3 h-3" />
-                      {thread.author_name}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {format(new Date(thread.created_at), "dd MMM", { locale: tr })}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <MessageCircle className="w-3 h-3" />
-                      {thread.reply_count}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Eye className="w-3 h-3" />
-                      {thread.view_count}
-                    </span>
-                  </div>
+                  <h1 className="text-3xl font-black italic tracking-tighter text-white uppercase leading-none">
+                    TOPLULUK <span className="text-primary">FORUMU</span>
+                  </h1>
                 </div>
-                <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+
+                <Dialog open={newThreadOpen} onOpenChange={setNewThreadOpen}>
+                  <DialogTrigger asChild>
+                    <button className="bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-[0_10px_20px_rgba(255,0,0,0.1)] hover:scale-[1.02] active:scale-95">
+                      + YENİ_TARTIŞMA_AÇ
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-[#050505]/95 backdrop-blur-2xl border-white/[0.04] rounded-3xl max-w-2xl p-8 font-mono text-zinc-300">
+                    <DialogHeader>
+                      <DialogTitle className="text-xl font-black italic text-white uppercase tracking-tight flex items-center gap-2">
+                        <MessageSquare className="w-5 h-5 text-primary" /> YENİ KONU BAŞLATMA TERMİNALİ
+                      </DialogTitle>
+                    </DialogHeader>
+
+                    <div className="space-y-5 mt-6 text-[10px]">
+                      
+                      {/* Topic Category */}
+                      <div className="space-y-1.5">
+                        <label className="text-zinc-500 font-bold uppercase tracking-wider">KATEGORİ SEÇİN</label>
+                        <select
+                          value={newCategory}
+                          onChange={(e) => setNewCategory(e.target.value)}
+                          className="w-full bg-[#020202] border border-white/[0.04] rounded-xl px-4 py-3.5 text-white font-bold focus:outline-none focus:border-red-600/40"
+                        >
+                          {CATEGORIES.map((cat) => (
+                            <option key={cat.id} value={cat.id}>
+                              {cat.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Title */}
+                      <div className="space-y-1.5">
+                        <label className="text-zinc-500 font-bold uppercase tracking-wider">KONU BAŞLIĞI</label>
+                        <input
+                          value={newTitle}
+                          onChange={(e) => setNewTitle(e.target.value)}
+                          placeholder="Etkileyici ve açıklayıcı bir başlık girin..."
+                          className="w-full bg-[#020202] border border-white/[0.04] rounded-xl px-4 py-3.5 text-white font-bold focus:outline-none focus:border-red-600/40"
+                        />
+                      </div>
+
+                      {/* Content */}
+                      <div className="space-y-1.5">
+                        <label className="text-zinc-500 font-bold uppercase tracking-wider">TARTIŞMA METNİ / DETAYI</label>
+                        <textarea
+                          value={newContent}
+                          onChange={(e) => setNewContent(e.target.value)}
+                          placeholder="Fikirlerinizi, sorularınızı veya detayları buraya yazın..."
+                          className="w-full bg-[#020202] border border-white/[0.04] rounded-xl p-4 text-white focus:border-red-600/40 outline-none font-bold h-40 resize-none"
+                        />
+                      </div>
+
+                      {/* Toggle post anonymously */}
+                      <div className="flex items-center justify-between p-4 bg-white/[0.01] border border-white/[0.03] rounded-2xl">
+                        <div className="flex items-center gap-3">
+                          <EyeOff className="w-4 h-4 text-zinc-500" />
+                          <div className="space-y-0.5">
+                            <div className="font-bold text-white uppercase tracking-wider text-[9px]">ANONİM OLARAK PAYLAŞ</div>
+                            <div className="text-[8px] text-zinc-500">Profiliniz gizlenir, "ANONİM_SİBER" olarak yayınlanır.</div>
+                          </div>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={postAnonymously}
+                          onChange={(e) => setPostAnonymously(e.target.checked)}
+                          className="w-4 h-4 accent-red-600 rounded cursor-pointer"
+                        />
+                      </div>
+
+                      <button
+                        onClick={handleCreatePost}
+                        disabled={submittingPost}
+                        className="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer"
+                      >
+                        {submittingPost ? "YAYINLANIYOR..." : "KONUYU CANLIYA AL"}
+                      </button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
+
+              {/* Forum General Stats Banner */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-[#040404]/55 backdrop-blur-xl p-5 border border-white/[0.04] rounded-[24px]">
+                {[
+                  { label: "TOPLAM KONU", value: posts.length, icon: MessageSquare },
+                  { label: "TOPLAM YORUM", value: posts.reduce((sum, p) => sum + 3, 0), icon: MessageCircle },
+                  { label: "AKTİF ÜYELER", value: Object.keys(profiles).length || 1, icon: User },
+                  { label: "SON AKTİVİTE", value: posts.length > 0 ? "ŞİMDİ" : "YOK", icon: Clock },
+                ].map((stat, i) => (
+                  <div key={i} className="flex items-center gap-3.5 px-4 py-2 border-r border-white/[0.03] last:border-0">
+                    <div className="p-2 rounded-lg bg-white/[0.01] border border-white/[0.03]">
+                      <stat.icon className="w-4 h-4 text-zinc-500" />
+                    </div>
+                    <div className="space-y-0.5">
+                      <div className="text-[7px] text-zinc-500 font-bold uppercase tracking-wider">{stat.label}</div>
+                      <div className="text-sm font-black italic tracking-tighter text-white">{stat.value}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Grid: Left Category Navigation Panel & Right Topic Stream */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                {/* Left Category Selection Panel */}
+                <div className="lg:col-span-4 space-y-6">
+                  <div className="bg-[#040404]/55 backdrop-blur-xl p-6 rounded-[28px] border border-white/[0.04] space-y-4">
+                    <div className="text-[8px] text-zinc-500 font-bold uppercase tracking-[0.2em] border-b border-white/[0.03] pb-3">
+                      FORUM KATEGORİLERİ
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => setCategoryFilter("all")}
+                        className={`w-full text-left p-3.5 rounded-2xl border transition-all flex items-center justify-between cursor-pointer ${
+                          categoryFilter === "all"
+                            ? "bg-red-600/10 border-red-500/30 text-white font-black"
+                            : "bg-white/[0.01] border-white/[0.02] text-zinc-400 hover:text-white"
+                        }`}
+                      >
+                        <div className="space-y-1">
+                          <div className="text-[10px] uppercase font-bold">📂 Tüm Konular</div>
+                          <div className="text-[8px] text-zinc-500">Tüm kategorilerdeki akışı listele</div>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-zinc-600" />
+                      </button>
+
+                      {CATEGORIES.map((cat) => {
+                        const isSelected = categoryFilter === cat.id;
+                        return (
+                          <button
+                            key={cat.id}
+                            onClick={() => setCategoryFilter(cat.id)}
+                            className={`w-full text-left p-3.5 rounded-2xl border transition-all flex items-center justify-between cursor-pointer ${
+                              isSelected
+                                ? "bg-red-600/10 border-red-500/30 text-white font-black"
+                                : "bg-white/[0.01] border-white/[0.02] text-zinc-400 hover:text-white"
+                            }`}
+                          >
+                            <div className="space-y-1">
+                              <div className="text-[10px] uppercase font-bold">{cat.label}</div>
+                              <div className="text-[8px] text-zinc-500">{cat.desc}</div>
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-zinc-600" />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Topic Stream Panel */}
+                <div className="lg:col-span-8 space-y-6">
+                  
+                  {/* Search and Filters */}
+                  <div className="relative group w-full">
+                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                    <input
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="w-full bg-[#040404]/55 backdrop-blur-xl border border-white/[0.04] rounded-2xl pl-14 pr-6 py-4 text-xs text-white focus:outline-none focus:border-red-600/40 transition-all font-bold placeholder-zinc-600"
+                      placeholder="FORUMDA YAPILACAK ARAMAYI YAZIN VEYA FİLTRELEYİN..."
+                    />
+                  </div>
+
+                  {/* List of Posts */}
+                  <div className="grid grid-cols-1 gap-4">
+                    {loading ? (
+                      <div className="text-center py-16 text-zinc-500 uppercase tracking-widest text-xs">
+                        FORUM AKIŞI YÜKLENİYOR...
+                      </div>
+                    ) : filteredPosts.length > 0 ? (
+                      filteredPosts.map((post, i) => {
+                        const author = getAuthorDisplay(post.author_id);
+                        return (
+                          <motion.div
+                            key={post.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.05 }}
+                            onClick={() => {
+                              setSelectedPost(post);
+                              fetchComments(post.id);
+                            }}
+                            className="bg-[#040404]/55 backdrop-blur-xl p-6 rounded-[28px] border border-white/[0.04] hover:border-red-600/30 hover:shadow-[0_8px_30px_rgba(255,0,0,0.02)] transition-all duration-300 group cursor-pointer"
+                          >
+                            <div className="flex items-start justify-between gap-6">
+                              <div className="flex items-start gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-white/[0.01] border border-white/[0.03] flex items-center justify-center text-zinc-600 group-hover:text-red-500 transition-colors group-hover:border-red-500/20">
+                                  <MessageSquare className="w-5 h-5" />
+                                </div>
+                                <div className="space-y-1.5">
+                                  <div className="flex items-center gap-2">
+                                    {post.pinned && <Pin className="w-3.5 h-3.5 text-red-500 animate-pulse" />}
+                                    <span className="text-[7px] text-zinc-400 font-black tracking-widest bg-white/[0.02] border border-white/[0.04] px-2 py-0.5 rounded uppercase">
+                                      [{post.category}]
+                                    </span>
+                                  </div>
+                                  <h3 className="text-base font-black text-white uppercase tracking-tight group-hover:text-primary transition-colors">
+                                    {post.title}
+                                  </h3>
+                                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[8px] text-zinc-500 font-bold uppercase tracking-wider">
+                                    <span className={`px-2 py-0.5 rounded border ${author.badgeColor} flex items-center gap-1`}>
+                                      {author.badge === "ADMIN" && <Award className="w-2.5 h-2.5 text-red-500" />}
+                                      {author.name}
+                                    </span>
+                                    <span className="flex items-center gap-1.5">
+                                      <Clock className="w-3 h-3 text-zinc-600" /> 
+                                      {new Date(post.created_at).toLocaleDateString("tr-TR")}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-6 text-right">
+                                <div className="hidden sm:block space-y-0.5">
+                                  <div className="text-[7px] text-zinc-500 font-bold uppercase tracking-widest">GÖRÜNTÜLEME</div>
+                                  <div className="text-sm font-black text-white italic">12</div>
+                                </div>
+                                <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-white transition-colors" />
+                              </div>
+                            </div>
+                          </motion.div>
+                        );
+                      })
+                    ) : (
+                      <div className="bg-[#040404]/55 border border-white/[0.04] p-16 rounded-[28px] text-center text-zinc-500 font-bold tracking-wider uppercase text-xs">
+                        Bu kategori altında tartışma kaydı bulunamadı.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+              </div>
+
             </motion.div>
-          ))}
-        </div>
-      )}
+          ) : (
+            // ================= FORUM DETAIL / READ VIEW =================
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              className="space-y-6"
+            >
+              {/* Back button and Admin tools */}
+              <div className="flex items-center justify-between border-b border-white/[0.04] pb-4">
+                <button
+                  onClick={() => setSelectedPost(null)}
+                  className="flex items-center gap-2 text-zinc-400 hover:text-white text-[9px] font-black uppercase tracking-widest transition-all cursor-pointer bg-white/[0.01] border border-white/[0.03] px-4 py-2 rounded-xl"
+                >
+                  <ArrowLeft className="w-4 h-4" /> FORUM AKIŞINA GERİ DÖN
+                </button>
+
+                {role === "admin" && (
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => handleTogglePin(selectedPost)}
+                      className={`flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest px-3 py-2 rounded-xl border transition-all cursor-pointer ${
+                        selectedPost.pinned
+                          ? "bg-amber-500/10 border-amber-500/20 text-amber-500"
+                          : "bg-white/[0.01] border-white/[0.03] text-zinc-500 hover:text-zinc-300"
+                      }`}
+                    >
+                      <Pin className="w-3.5 h-3.5" /> {selectedPost.pinned ? "SABİTLEMEYİ KALDIR" : "SABİTLE"}
+                    </button>
+                    
+                    <button
+                      onClick={() => handleDeletePost(selectedPost.id)}
+                      className="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest px-3 py-2 rounded-xl border border-red-500/20 bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> KONUYU İMHA ET
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Main Post Card */}
+              <div className="bg-[#040404]/55 backdrop-blur-xl p-8 rounded-[36px] border border-white/[0.04] space-y-6">
+                <div className="flex items-center gap-2">
+                  {selectedPost.pinned && <Pin className="w-4 h-4 text-amber-500 animate-pulse" />}
+                  <span className="text-[8px] text-zinc-400 font-black tracking-widest bg-white/[0.02] border border-white/[0.04] px-2 py-0.5 rounded uppercase">
+                    [{selectedPost.category.toUpperCase()}]
+                  </span>
+                </div>
+
+                <h2 className="text-2xl font-black italic tracking-tight text-white uppercase">
+                  {selectedPost.title}
+                </h2>
+
+                <div className="flex items-center gap-3 border-y border-white/[0.03] py-4">
+                  {/* Avatar */}
+                  <div className="w-10 h-10 rounded-full bg-white/[0.02] border border-white/[0.04] flex items-center justify-center text-zinc-500">
+                    <User className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black text-white tracking-wide">
+                        {getAuthorDisplay(selectedPost.author_id).name}
+                      </span>
+                      <span className={`text-[7px] font-bold px-1.5 py-0.2 rounded border ${getAuthorDisplay(selectedPost.author_id).badgeColor}`}>
+                        {getAuthorDisplay(selectedPost.author_id).badge}
+                      </span>
+                    </div>
+                    <div className="text-[7px] text-zinc-500 font-bold uppercase tracking-wider">
+                      PAYLAŞIM TARİHİ: {new Date(selectedPost.created_at).toLocaleString("tr-TR")}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-sm font-medium text-zinc-300 leading-relaxed whitespace-pre-wrap pt-2">
+                  {selectedPost.content}
+                </div>
+              </div>
+
+              {/* Comment Thread Title */}
+              <div className="flex items-center gap-4 pt-6">
+                <MessageCircle className="w-4 h-4 text-primary animate-pulse" />
+                <div className="h-[1px] flex-1 bg-white/[0.04]" />
+                <div className="text-[8px] text-zinc-500 font-bold uppercase tracking-[0.3em]">
+                  YANIT_VE_TARTIŞMA_AKIŞI // RESPONSES
+                </div>
+              </div>
+
+              {/* Comment List */}
+              <div className="space-y-4">
+                {comments.map((comment) => {
+                  const author = getAuthorDisplay(comment.author_id);
+                  return (
+                    <div
+                      key={comment.id}
+                      className="bg-[#030303]/60 backdrop-blur-xl p-5 rounded-3xl border border-white/[0.04] space-y-3"
+                    >
+                      <div className="flex items-center justify-between border-b border-white/[0.02] pb-2">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-white/[0.01] border border-white/[0.03] flex items-center justify-center text-zinc-600">
+                            <User className="w-4 h-4" />
+                          </div>
+                          <div className="space-y-0.5">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-black text-white">{author.name}</span>
+                              <span className={`text-[6px] font-bold px-1 py-0.2 rounded border ${author.badgeColor}`}>
+                                {author.badge}
+                              </span>
+                            </div>
+                            <div className="text-[7px] text-zinc-500">
+                              {new Date(comment.created_at).toLocaleString("tr-TR")}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-xs text-zinc-300 pl-1 leading-relaxed">
+                        {comment.content}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {comments.length === 0 && (
+                  <div className="bg-[#040404]/55 border border-white/[0.04] p-10 rounded-[28px] text-center text-zinc-500 font-bold tracking-wider uppercase text-[9px]">
+                    Henüz yorum yapılmamış. İlk yanıtı siz iletin!
+                  </div>
+                )}
+              </div>
+
+              {/* Rich Comment Input Box */}
+              <div className="bg-[#040404]/55 backdrop-blur-xl p-6 rounded-[28px] border border-white/[0.04] space-y-4">
+                <div className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">
+                  TARTIŞMAYA KATIL // WRITE_REPLY
+                </div>
+                
+                <div className="relative">
+                  <textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Yanıtınızı buraya yazın..."
+                    disabled={submittingComment}
+                    className="w-full bg-[#020202] border border-white/[0.04] rounded-xl p-4 text-white focus:outline-none focus:border-red-600/40 font-bold h-28 resize-none text-xs"
+                  />
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleAddComment}
+                    disabled={submittingComment || !newComment.trim()}
+                    className="bg-red-600 hover:bg-red-700 text-white font-black uppercase px-6 py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-[9px] tracking-widest shadow-[0_10px_20px_rgba(255,0,0,0.1)] active:scale-[0.98]"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    {submittingComment ? "GÖNDERİLİYOR..." : "YANIT YAYINLA"}
+                  </button>
+                </div>
+              </div>
+
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+      </div>
     </PageShell>
   );
 }

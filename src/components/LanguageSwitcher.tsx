@@ -9,9 +9,9 @@ export default function LanguageSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-8 px-2 font-mono text-xs gap-1">
+        <Button variant="ghost" size="sm" className="h-8 px-2 font-mono text-[10px] gap-1 hover:bg-white/5 hover:text-white transition-all text-zinc-500">
           <Globe className="w-3.5 h-3.5" />
-          <span>{current?.flag} {current?.value.toUpperCase()}</span>
+          <span>{current?.value.toUpperCase()}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[140px]">

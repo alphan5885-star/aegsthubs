@@ -13,6 +13,46 @@ type Update = {
 
 const updatesData: Update[] = [
   {
+    version: "4.0.0",
+    date: "2026-05-17",
+    title: "Triple Crypt Prominence (BTC, LTC, XMR)",
+    description: "Stripped the 'Litecoin-only' limitation across the marketplace. Bitcoin, Litecoin, and Monero are now promoted to equal status across all wallet structures, listing details, checkout forms, and seller dashboards.",
+    icon: "zap",
+    category: "new",
+  },
+  {
+    version: "4.0.0",
+    date: "2026-05-17",
+    title: "Holographic Cyber Console (Kimlik.sys)",
+    description: "Re-engineered user profiles into high-tech dashboards with glowing status rings, functional Base64 photo/banner uploaders, dynamic achievement rewards connected directly to database metrics, and live currency translation ledgers.",
+    icon: "sparkles",
+    category: "feature",
+  },
+  {
+    version: "4.0.0",
+    date: "2026-05-17",
+    title: "PGP Cryptographic Suite Redesign",
+    description: "Expanded PGP tools with a browser-native ECC Key Generator (Curve 25519) and a technical Public Key block metadata/fingerprint parser, next to robust verification and encryption modules.",
+    icon: "shield",
+    category: "security",
+  },
+  {
+    version: "4.0.0",
+    date: "2026-05-17",
+    title: "Split-Pane Siberian Forums Engine",
+    description: "Launched a fully-synchronized siberian-themed forum with real-time Supabase integrations. Features category filters, post-detail threads, an anonymous posting mode, and integrated administrative moderation tools.",
+    icon: "rocket",
+    category: "new",
+  },
+  {
+    version: "4.0.0",
+    date: "2026-05-17",
+    title: "Multi-Coin Vendor Withdrawals & PIN Setup",
+    description: "Empowered vendors to withdraw funds directly in BTC, LTC, or XMR with integrated PIN authorization keys and cold Exodus wallet synchronization systems.",
+    icon: "lock",
+    category: "security",
+  },
+  {
     version: "3.5.0",
     date: "2026-05-05",
     title: "Clearweb Anonymous Mode",

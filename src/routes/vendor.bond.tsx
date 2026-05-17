@@ -4,7 +4,7 @@ import { Protected } from "@/lib/Protected";
 
 export const Route = createFileRoute("/vendor/bond")({
   component: () => (
-    <Protected roles={["vendor", "admin"]}>
+    <Protected roles={["buyer", "vendor", "admin"]}>
       <VendorBond />
     </Protected>
   ),

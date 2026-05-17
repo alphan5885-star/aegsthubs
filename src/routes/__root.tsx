@@ -27,14 +27,14 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "aeigsthub" },
-      { name: "description", content: "aeigsthub — yeraltı pazarı operasyon paneli" },
+      { title: "AEIGSTHUB" },
+      { name: "description", content: "AEIGSTHUB — Secure & Premium Digital Exchange" },
       { name: "robots", content: "noindex, nofollow, noarchive, nosnippet" },
       { name: "referrer", content: "no-referrer" },
       {
         httpEquiv: "Content-Security-Policy",
         content:
-          "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://ai.gateway.lovable.dev; frame-src https://www.youtube.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests",
+          "default-src 'self'; script-src 'self' 'unsafe-inline' https://translate.google.com https://translate.googleapis.com; style-src 'self' 'unsafe-inline' https://translate.googleapis.com; img-src 'self' data: blob: https: http: https://translate.google.com https://translate.googleapis.com; font-src 'self' data:; connect-src 'self' https: wss: http: ws: https://*.supabase.co wss://*.supabase.co https://ai.gateway.lovable.dev https://translate.googleapis.com; frame-src 'self' https://www.youtube.com https://translate.google.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests",
       },
       { httpEquiv: "X-Frame-Options", content: "DENY" },
       { httpEquiv: "X-Content-Type-Options", content: "nosniff" },
@@ -42,10 +42,10 @@ export const Route = createRootRoute({
         httpEquiv: "Permissions-Policy",
         content: "geolocation=(), camera=(), microphone=(), interest-cohort=()",
       },
-      { property: "og:title", content: "aeigsthub" },
-      { name: "twitter:title", content: "aeigsthub" },
-      { property: "og:description", content: "aeigsthub — yeraltı pazarı operasyon paneli" },
-      { name: "twitter:description", content: "aeigsthub — yeraltı pazarı operasyon paneli" },
+      { property: "og:title", content: "AEIGSTHUB" },
+      { name: "twitter:title", content: "AEIGSTHUB" },
+      { property: "og:description", content: "AEIGSTHUB — Secure & Premium Digital Exchange" },
+      { name: "twitter:description", content: "AEIGSTHUB — Secure & Premium Digital Exchange" },
       { name: "twitter:card", content: "summary" },
       { property: "og:type", content: "website" },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/970580a7-4a13-4203-855d-d50d1b3b480b/id-preview-3eed7cfb--23f3e47d-ec59-41ea-9cee-92e52c817735.lovable.app-1777477846218.png" },
@@ -63,6 +63,21 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="tr" className="dark bg-background">
       <head>
         <HeadContent />
+        <style>{`
+          ::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+          }
+          html, body {
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+          }
+          * {
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+          }
+        `}</style>
       </head>
       <body>
         {children}
@@ -79,7 +94,7 @@ function AuthGuard({ children }: { children: ReactNode }) {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="glass-card neon-border rounded-lg p-6 w-full max-w-md text-center space-y-4">
           <div>
-            <h1 className="text-2xl font-mono font-bold text-primary neon-text">aeigsthub</h1>
+            <h1 className="text-2xl font-mono font-bold text-foreground drop-shadow-md">Nova<span className="text-primary neon-text">Market</span></h1>
             <p className="text-xs font-mono text-muted-foreground mt-2">
               Hesap yetkisi yüklenemedi.
             </p>

@@ -12,12 +12,13 @@ import {
   MessageSquare,
   ArrowRightLeft,
   User,
-  FileWarning,
-  ScrollText,
   LayoutDashboard,
-  Heart,
   Bot,
+  Terminal,
+  Activity,
+  Zap
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 type Item = {
   id: string;
@@ -35,6 +36,7 @@ export default function CommandPalette() {
   const [products, setProducts] = useState<{ id: string; name: string; price: number }[]>([]);
   const [vendors, setVendors] = useState<{ user_id: string; display_name: string }[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [analyzing, setAnalyzing] = useState(false);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -53,38 +55,23 @@ export default function CommandPalette() {
     };
   }, []);
 
-  const isMounted = useRef(true);
-
   useEffect(() => {
     if (!open) {
       setQuery("");
       setActiveIndex(0);
       return;
     }
-    isMounted.current = true;
     const fetchData = async () => {
-      try {
-        const [{ data: p, error: pErr }, { data: v, error: vErr }] = await Promise.all([
-          supabase.from("products").select("id, name, price").gt("stock", 0).limit(20),
-          supabase.from("profiles").select("user_id, display_name").limit(20),
-        ]);
-        if (!isMounted.current) return;
-        if (pErr) {
-          if (import.meta.env.DEV) console.error("Error fetching products for palette:", pErr);
-        }
-        if (vErr) {
-          if (import.meta.env.DEV) console.error("Error fetching profiles for palette:", vErr);
-        }
-        setProducts((p as any) || []);
-        setVendors((v as any) || []);
-      } catch (e) {
-        if (import.meta.env.DEV) console.error("Catch fetching palette data:", e);
-      }
+      setAnalyzing(true);
+      const [{ data: p }, { data: v }] = await Promise.all([
+        supabase.from("products").select("id, name, price").gt("stock", 0).limit(20),
+        supabase.from("profiles").select("user_id, display_name").limit(20),
+      ]);
+      setProducts((p as any) || []);
+      setVendors((v as any) || []);
+      setTimeout(() => setAnalyzing(false), 500);
     };
     fetchData();
-    return () => {
-      isMounted.current = false;
-    };
   }, [open]);
 
   const go = (path: string) => {
@@ -93,124 +80,51 @@ export default function CommandPalette() {
   };
 
   const pages: Item[] = [
-    {
-      id: "p1",
-      label: "Market",
-      icon: ShoppingCart,
-      action: () => go("/market"),
-      group: "Sayfalar",
-    },
-    {
-      id: "p2",
-      label: "Siparişlerim",
-      icon: Package,
-      action: () => go("/orders"),
-      group: "Sayfalar",
-    },
-    { id: "p3", label: "Cüzdan", icon: Wallet, action: () => go("/wallet"), group: "Sayfalar" },
-    {
-      id: "p4",
-      label: "İşlemler",
-      icon: ArrowRightLeft,
-      action: () => go("/transactions"),
-      group: "Sayfalar",
-    },
-    {
-      id: "p5",
-      label: "Forum",
-      icon: MessageSquare,
-      action: () => go("/forum"),
-      group: "Sayfalar",
-    },
-    { id: "p6", label: "Güvenlik", icon: Lock, action: () => go("/security"), group: "Sayfalar" },
-    { id: "p7", label: "Profil", icon: User, action: () => go("/profile"), group: "Sayfalar" },
-    {
-      id: "p8",
-      label: "Özelleştirme",
-      icon: Palette,
-      action: () => go("/customization"),
-      group: "Sayfalar",
-    },
-    {
-      id: "p9",
-      label: "Vendor Paneli",
-      icon: Store,
-      action: () => go("/vendor"),
-      group: "Sayfalar",
-    },
-    {
-      id: "p10",
-      label: "Admin Dashboard",
-      icon: LayoutDashboard,
-      action: () => go("/admin"),
-      group: "Sayfalar",
-    },
-    {
-      id: "p11",
-      label: "Disputes",
-      icon: FileWarning,
-      action: () => go("/admin/disputes"),
-      group: "Sayfalar",
-    },
-    {
-      id: "p12",
-      label: "Security Logs",
-      icon: ScrollText,
-      action: () => go("/admin/security-logs"),
-      group: "Sayfalar",
-    },
+    { id: "p1", label: "MARKET_HUB", icon: ShoppingCart, action: () => go("/market"), group: "SİSTEM_DİZİNİ" },
+    { id: "p2", label: "SİPARİŞ_LOGLARI", icon: Package, action: () => go("/orders"), group: "SİSTEM_DİZİNİ" },
+    { id: "p3", label: "HAZİNE_CÜZDANI", icon: Wallet, action: () => go("/wallet"), group: "SİSTEM_DİZİNİ" },
+    { id: "p4", label: "İŞLEM_GEÇMİŞİ", icon: ArrowRightLeft, action: () => go("/transactions"), group: "SİSTEM_DİZİNİ" },
+    { id: "p5", label: "TOPLULUK_FORUMU", icon: MessageSquare, action: () => go("/forum"), group: "SİSTEM_DİZİNİ" },
+    { id: "p6", label: "GÜVENLİK_MERKEZİ", icon: Lock, action: () => go("/security-settings"), group: "SİSTEM_DİZİNİ" },
+    { id: "p7", label: "KİMLİK_PROFİLİ", icon: User, action: () => go("/profile"), group: "SİSTEM_DİZİNİ" },
+    { id: "p9", label: "OPERASYON_PANELİ", icon: Store, action: () => go("/vendor-dashboard"), group: "SİSTEM_DİZİNİ" },
   ];
 
   const actions: Item[] = [
     {
       id: "a1",
-      label: "Kızılyürek AI Aç",
+      label: "KIZILYÜREK_AI_AKTİVE_ET",
       icon: Bot,
       action: () => {
         setOpen(false);
         window.dispatchEvent(new CustomEvent("kizilyurek:toggle"));
       },
-      group: "Eylemler",
+      group: "EYLEMLER",
     },
   ];
 
   const productItems: Item[] = products.map((p) => ({
     id: `prod-${p.id}`,
-    label: p.name,
-    sub: `${p.price.toFixed(4)} LTC`,
-    icon: Package,
+    label: p.name.toUpperCase(),
+    sub: `${p.price.toFixed(4)} LTC // ASSET_ID: ${p.id.slice(0,8)}`,
+    icon: Zap,
     action: () => go(`/product/${p.id}`),
-    group: "Ürünler",
+    group: "BULUNAN_VARLIKLAR",
   }));
 
-  const vendorItems: Item[] = vendors.map((v) => ({
-    id: `vendor-${v.user_id}`,
-    label: v.display_name || "Anonim",
-    sub: "Satıcı",
-    icon: Store,
-    action: () => go(`/vendor/${v.user_id}`),
-    group: "Satıcılar",
-  }));
-
-  const all = [...pages, ...actions, ...productItems, ...vendorItems];
+  const all = [...pages, ...actions, ...productItems];
   const q = query.toLowerCase().trim();
   const filtered = q
     ? all.filter((i) => i.label.toLowerCase().includes(q) || i.sub?.toLowerCase().includes(q))
     : all;
+
   const grouped: Record<string, Item[]> = {};
-  filtered.forEach((i) => {
-    (grouped[i.group] ||= []).push(i);
-  });
+  filtered.forEach((i) => { (grouped[i.group] ||= []).push(i); });
 
-  useEffect(() => {
-    setActiveIndex(0);
-  }, [query]);
-
-  const flat = filtered;
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setActiveIndex((i) => Math.min(i + 1, flat.length - 1));
+      setActiveIndex((i) => Math.min(i + 1, filtered.length - 1));
     }
     if (e.key === "ArrowUp") {
       e.preventDefault();
@@ -218,74 +132,97 @@ export default function CommandPalette() {
     }
     if (e.key === "Enter") {
       e.preventDefault();
-      flat[activeIndex]?.action();
+      filtered[activeIndex]?.action();
     }
   };
 
-  if (!open) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm flex items-start justify-center pt-[10vh] p-4"
-      onClick={() => setOpen(false)}
-    >
-      <div
-        className="w-full max-w-xl glass-card neon-border rounded-lg overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
-          <Search className="w-4 h-4 text-primary" />
-          <input
-            autoFocus
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={onKeyDown}
-            placeholder="Ürün, satıcı veya sayfa ara..."
-            className="flex-1 bg-transparent outline-none text-sm font-mono text-foreground placeholder:text-muted-foreground"
-          />
-          <kbd className="text-[10px] font-mono text-muted-foreground border border-border px-1.5 py-0.5 rounded">
-            ESC
-          </kbd>
-        </div>
-        <div className="max-h-[60vh] overflow-y-auto">
-          {Object.entries(grouped).map(([group, items]) => (
-            <div key={group}>
-              <div className="px-4 pt-3 pb-1 text-[10px] font-mono text-muted-foreground uppercase">
-                {group}
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[1000] bg-black/90 backdrop-blur-2xl flex items-start justify-center pt-[10vh] p-4"
+          onClick={() => setOpen(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0, y: -20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: -20 }}
+            className="w-full max-w-2xl bg-[#010101] border-2 border-white/5 rounded-[32px] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Search HUD Header */}
+            <div className="flex items-center gap-6 px-10 py-8 border-b border-white/5 bg-white/[0.02]">
+              <Search className={`w-6 h-6 ${analyzing ? "text-red-600 animate-pulse" : "text-zinc-700"}`} />
+              <input
+                autoFocus
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={onKeyDown}
+                placeholder="SİSTEMDE_ARAMA_YAPIN..."
+                className="flex-1 bg-transparent outline-none text-xl font-black text-white placeholder:text-zinc-900 tracking-tight"
+              />
+              <div className="flex items-center gap-3">
+                 <div className="text-[10px] text-zinc-800 font-black uppercase tracking-widest hidden md:block">RESOLVER_v4.2</div>
+                 <div className="w-[1px] h-4 bg-white/5 hidden md:block" />
+                 <kbd className="text-[10px] font-black text-zinc-700 border border-white/5 px-2 py-1 rounded-lg uppercase">ESC</kbd>
               </div>
-              {items.map((item) => {
-                const idx = flat.indexOf(item);
-                const active = idx === activeIndex;
-                return (
-                  <button
-                    key={item.id}
-                    onMouseEnter={() => setActiveIndex(idx)}
-                    onClick={item.action}
-                    className={`w-full flex items-center gap-3 px-4 py-2 text-left text-sm transition-all ${active ? "bg-primary/10 text-primary" : "text-foreground hover:bg-secondary/40"}`}
-                  >
-                    <item.icon className="w-4 h-4 shrink-0" />
-                    <span className="flex-1 truncate">{item.label}</span>
-                    {item.sub && (
-                      <span className="text-[10px] font-mono text-muted-foreground">
-                        {item.sub}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
             </div>
-          ))}
-          {flat.length === 0 && (
-            <div className="px-4 py-8 text-center text-sm font-mono text-muted-foreground">
-              Sonuç yok
+
+            <div className="max-h-[60vh] overflow-y-auto no-scrollbar py-6">
+              {Object.entries(grouped).map(([group, items]) => (
+                <div key={group} className="space-y-2 mb-8">
+                  <div className="px-10 flex items-center gap-4">
+                     <div className="text-[9px] font-black text-red-900 uppercase tracking-[0.4em]">[{group}]</div>
+                     <div className="h-[1px] flex-1 bg-white/5" />
+                  </div>
+                  {items.map((item) => {
+                    const idx = filtered.indexOf(item);
+                    const active = idx === activeIndex;
+                    return (
+                      <button
+                        key={item.id}
+                        onMouseEnter={() => setActiveIndex(idx)}
+                        onClick={item.action}
+                        className={`w-full flex items-center gap-6 px-10 py-4 text-left transition-all relative group ${active ? "bg-white/[0.03]" : "hover:bg-white/[0.01]"}`}
+                      >
+                        {active && <div className="absolute left-0 w-1.5 h-full bg-red-600 shadow-[0_0_15px_#ff0000]" />}
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center border transition-all ${active ? "bg-red-600 border-red-600 text-white shadow-[0_0_15px_rgba(255,0,0,0.3)]" : "bg-white/5 border-white/5 text-zinc-700 group-hover:text-white"}`}>
+                           <item.icon className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                           <div className={`text-sm font-black uppercase tracking-widest ${active ? "text-white" : "text-zinc-500 group-hover:text-zinc-300"}`}>{item.label}</div>
+                           {item.sub && <div className="text-[9px] font-bold text-zinc-800 uppercase tracking-widest mt-1">{item.sub}</div>}
+                        </div>
+                        {active && <Activity className="w-4 h-4 text-red-900 animate-pulse" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
+              {filtered.length === 0 && (
+                <div className="px-10 py-20 text-center space-y-4">
+                  <Terminal className="w-12 h-12 text-zinc-900 mx-auto" />
+                  <div className="text-xl font-black text-zinc-900 uppercase tracking-tighter">VERİ_BULUNAMADI</div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        <div className="px-4 py-2 border-t border-border flex items-center justify-between text-[10px] font-mono text-muted-foreground">
-          <span>↑↓ gez · ↵ aç</span>
-          <span>⌘K aç/kapat</span>
-        </div>
-      </div>
-    </div>
+
+            <div className="px-10 py-4 border-t border-white/5 flex items-center justify-between bg-black/40">
+               <div className="flex items-center gap-6 text-[8px] font-black text-zinc-800 uppercase tracking-widest">
+                  <span>↑↓ NAVİGASYON</span>
+                  <span>↵ SEÇİM</span>
+               </div>
+               <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-red-900 animate-pulse" />
+                  <span className="text-[8px] font-black text-zinc-800 uppercase tracking-widest">SYSTEM_IDLE</span>
+               </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
