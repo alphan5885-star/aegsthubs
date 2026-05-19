@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { useI18n } from "@/lib/i18n";
+import Setup2faDialog from "@/components/Setup2faDialog";
 
 export default function SecuritySettings() {
   const { user } = useAuth();
@@ -33,6 +34,10 @@ export default function SecuritySettings() {
   const [showCode, setShowCode] = useState(false);
   const [mfaFactors, setMfaFactors] = useState<any[]>([]);
   const [deadManEnabled, setDeadManEnabled] = useState(false);
+  
+  // Interactive 2FA state variables
+  const [show2faSetup, setShow2faSetup] = useState(false);
+  const [localMfaEnabled, setLocalMfaEnabled] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -42,6 +47,9 @@ export default function SecuritySettings() {
       const { data: mfa } = await supabase.auth.mfa.listFactors();
       if (mfa) setMfaFactors(mfa.totp || []);
       setDeadManEnabled(localStorage.getItem("dead-man-mode") === "armed");
+      
+      const localMfa = localStorage.getItem("aeigs_mfa_enabled") === "true";
+      setLocalMfaEnabled(localMfa);
     };
     fetchData();
   }, [user]);
@@ -104,21 +112,38 @@ export default function SecuritySettings() {
                    <Shield className="w-6 h-6 text-red-600" />
                    <h2 className="text-xl font-black italic uppercase tracking-tight">2FA_Doğrulama</h2>
                 </div>
-                
-                {mfaFactors.length > 0 ? (
-                  <div className="bg-red-600/5 border border-red-600/10 rounded-[24px] p-6 flex items-center justify-between">
-                     <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center text-white"><Check className="w-5 h-5" /></div>
-                        <div className="space-y-0.5">
-                           <div className="text-sm font-black text-white uppercase tracking-tighter">TOTP_KORUMASI_AKTİF</div>
-                           <div className="text-[8px] text-zinc-800 font-bold uppercase tracking-widest">YÜKSEK_GÜVENLİK_KİMLİĞİ</div>
-                        </div>
-                     </div>
-                     <button className="p-2 rounded-xl bg-white/5 text-zinc-800 hover:text-red-600 transition-colors"><X className="w-5 h-5" /></button>
-                  </div>
-                ) : (
-                  <button className="w-full bg-red-600 text-white py-6 rounded-[32px] text-[10px] font-black uppercase tracking-[0.4em] hover:bg-red-700 transition-all">2FA_SİSTEMİNİ_BAŞLAT</button>
-                )}
+                                {(mfaFactors.length > 0 || localMfaEnabled) ? (
+                   <div className="bg-green-600/5 border border-green-600/10 rounded-[24px] p-6 flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                         <div className="w-10 h-10 rounded-xl bg-green-600 flex items-center justify-center text-white"><Check className="w-5 h-5" /></div>
+                         <div className="space-y-0.5">
+                            <div className="text-sm font-black text-white uppercase tracking-tighter">TOTP_KORUMASI_AKTİF</div>
+                            <div className="text-[8px] text-green-500/70 font-bold uppercase tracking-widest">YÜKSEK_GÜVENLİK_KİMLİĞİ</div>
+                         </div>
+                      </div>
+                      <button 
+                        onClick={() => {
+                          if (window.confirm("2FA korumasını devre dışı bırakmak istediğinizden emin misiniz?")) {
+                            localStorage.removeItem("aeigs_mfa_enabled");
+                            localStorage.removeItem("aeigs_mfa_secret");
+                            localStorage.removeItem("aeigs_mfa_backups");
+                            setLocalMfaEnabled(false);
+                            toast.success("2FA başarıyla devre dışı bırakıldı.");
+                          }
+                        }}
+                        className="p-2 rounded-xl bg-white/5 text-zinc-400 hover:text-red-600 transition-colors cursor-pointer"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                   </div>
+                 ) : (
+                   <button 
+                     onClick={() => setShow2faSetup(true)}
+                     className="w-full bg-red-600 text-white py-6 rounded-[32px] text-[10px] font-black uppercase tracking-[0.4em] hover:bg-red-700 transition-all cursor-pointer"
+                   >
+                     2FA_SİSTEMİNİ_BAŞLAT
+                   </button>
+                 )}
              </div>
           </div>
 
@@ -154,6 +179,13 @@ export default function SecuritySettings() {
         </div>
 
       </div>
+      {show2faSetup && user && (
+        <Setup2faDialog
+          userEmail={user.email || ""}
+          onClose={() => setShow2faSetup(false)}
+          onCompleted={() => setLocalMfaEnabled(true)}
+        />
+      )}
     </PageShell>
   );
 }

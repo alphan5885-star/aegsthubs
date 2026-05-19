@@ -1,7 +1,5 @@
 import { ReactNode, useEffect, useState, useRef } from "react";
-import { ShieldCheck } from "lucide-react";
 import AppSidebar from "./AppSidebar";
-import SessionTimerBadge from "./SessionTimerBadge";
 import KizilyurekAssistant from "./KizilyurekAssistant";
 import CommandPalette from "./CommandPalette";
 import { useCustomization } from "@/lib/customizationContext";
@@ -77,41 +75,6 @@ export default function PageShell({ children }: { children: ReactNode }) {
       <DigitalRain />
       <div className="fixed inset-0 cyber-grid opacity-[0.05] pointer-events-none z-0" />
       
-      {/* GLOBAL HUD: Left Top Telemetry */}
-      <div className="fixed top-6 left-[300px] z-[100] hidden lg:block">
-         <div className="flex items-center gap-4 bg-black/40 backdrop-blur-xl border border-white/5 px-5 py-2 rounded-full shadow-2xl">
-            <div className="flex items-center gap-2">
-               <div className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse shadow-[0_0_8px_#ff0000]" />
-               <span className="text-[7px] font-black text-zinc-500 uppercase tracking-[0.4em]">
-                  NODE_CONNECTED
-               </span>
-            </div>
-            <div className="w-[1px] h-3.5 bg-white/10" />
-            <SessionTimerBadge />
-         </div>
-      </div>
-
-      {/* GLOBAL HUD: Right Top Telemetry */}
-      <div className="fixed top-6 right-8 z-[100] pointer-events-none hidden lg:block">
-         <div className="flex items-center gap-6">
-            <div className="flex flex-col items-end">
-               <span className="text-[6px] font-black text-zinc-700 uppercase tracking-[0.3em]">LATENCY</span>
-               <span className="text-[9px] font-black text-white italic">{latency}MS</span>
-            </div>
-            <div className="w-[1px] h-6 bg-white/5" />
-            <div className="flex flex-col items-end">
-               <span className="text-[6px] font-black text-zinc-700 uppercase tracking-[0.3em]">SECURITY</span>
-               <span className="text-[9px] font-black text-primary italic flex items-center gap-1">
-                  <ShieldCheck className="w-2.5 h-2.5" /> FINGERPRINT_MASK_ACTIVE
-               </span>
-            </div>
-            <div className="w-[1px] h-6 bg-white/5" />
-            <div className="flex flex-col items-end">
-               <span className="text-[6px] font-black text-zinc-700 uppercase tracking-[0.3em]">ENCRYPTION</span>
-               <span className="text-[9px] font-black text-primary italic">AES_256_GCM</span>
-            </div>
-         </div>
-      </div>
 
       <AppSidebar />
       

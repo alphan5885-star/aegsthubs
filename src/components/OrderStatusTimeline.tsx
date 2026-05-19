@@ -1,4 +1,4 @@
-import { CheckCircle2, Circle, Clock, Truck, Package, Award, XCircle } from "lucide-react";
+import { CheckCircle2, Circle, Clock, Truck, Package, Award, XCircle, ShieldAlert } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 const STEPS = ["pending", "paid", "shipped", "delivered", "completed"] as const;
@@ -20,6 +20,14 @@ export default function OrderStatusTimeline({ status }: { status: string }) {
     return (
       <div className="flex items-center gap-2 text-[11px] font-mono text-red-400 bg-red-500/10 rounded p-2">
         <XCircle className="w-4 h-4" /> {t("status.cancelled" as any)}
+      </div>
+    );
+  }
+
+  if (s === "disputed") {
+    return (
+      <div className="flex items-center gap-2 text-[11px] font-mono text-red-500 bg-red-950/20 border border-red-500/10 rounded-xl p-3 uppercase font-bold tracking-wide">
+        <ShieldAlert className="w-4 h-4 animate-pulse text-red-500" /> Uyuşmazlık Protokolü Aktif - Hakem Değerlendirmesi Bekleniyor
       </div>
     );
   }

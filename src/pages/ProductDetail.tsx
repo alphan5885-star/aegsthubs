@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "@/lib/router-shim";
 import PageShell from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
-import { ShoppingCart, Key, Package, User, Shield, Lock, Plus, CheckCircle, Zap, ArrowUpRight, Activity } from "lucide-react";
+import { ShoppingCart, Key, Package, User, Shield, Lock, Plus, CheckCircle, Zap, ArrowUpRight, Activity, Star, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import VendorRating from "@/components/VendorRating";
@@ -13,6 +13,7 @@ import MathCaptcha from "@/components/MathCaptcha";
 import { encryptForRecipient } from "@/lib/pgp";
 import { useI18n } from "@/lib/i18n";
 import { useCart } from "@/lib/cartContext";
+import { getProductReviews, addProductReview, getProductAverageRating } from "@/lib/productReviews";
 
 interface ProductRow {
   id: string;
@@ -40,6 +41,14 @@ export default function ProductDetail() {
   const [shippingAddress, setShippingAddress] = useState("");
   const [captchaOk, setCaptchaOk] = useState(false);
   const [creating, setCreating] = useState(false);
+  
+  // Product Reviews and Ratings State
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [avgRating, setAvgRating] = useState<number>(0);
+  const [userRating, setUserRating] = useState<number>(0);
+  const [userHoverRating, setUserHoverRating] = useState<number>(0);
+  const [userComment, setUserComment] = useState<string>("");
+  const [submittingReview, setSubmittingReview] = useState<boolean>(false);
 
   const { addItem, isInCart } = useCart();
 
@@ -54,10 +63,47 @@ export default function ProductDetail() {
         const { data: pgp } = await (supabase as any).from("user_pgp_keys").select("public_key").eq("user_id", data.vendor_id).maybeSingle();
         if (pgp) setVendorPgp(pgp.public_key);
       }
+      
+      // Load reviews
+      const productReviews = getProductReviews(id);
+      setReviews(productReviews);
+      const avgData = getProductAverageRating(id);
+      setAvgRating(avgData.avg);
+      
       setLoading(false);
     };
     load();
   }, [id]);
+
+  const handleSubmitReview = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id) return;
+    if (!user) {
+      toast.error("Yorum yapmak için giriş yapmalısınız.");
+      return;
+    }
+    if (userRating === 0) {
+      toast.error("Lütfen bir puan (yıldız) seçin.");
+      return;
+    }
+    
+    setSubmittingReview(true);
+    const reviewerName = user.email ? user.email.split("@")[0].toUpperCase() : "ANON_USER";
+    const newReview = addProductReview(id, userRating, userComment, reviewerName);
+    
+    // Update local state
+    const updatedReviews = [newReview, ...reviews];
+    setReviews(updatedReviews);
+    const avgData = getProductAverageRating(id);
+    setAvgRating(avgData.avg);
+    
+    // Reset form
+    setUserRating(0);
+    setUserComment("");
+    setSubmittingReview(false);
+    
+    toast.success("Yorumunuz başarıyla eklendi.");
+  };
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -146,6 +192,25 @@ export default function ProductDetail() {
                 <h1 className="text-3xl font-black italic tracking-tighter text-white uppercase leading-none group-hover:text-red-600">
                   {product.name}
                 </h1>
+                
+                {/* Rating display under product name */}
+                <div className="flex items-center gap-3">
+                   <div className="flex items-center gap-0.5">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                         <Star 
+                            key={s} 
+                            className={`w-3.5 h-3.5 ${s <= Math.round(avgRating) ? "text-yellow-500 fill-yellow-500" : "text-zinc-700"}`} 
+                         />
+                      ))}
+                   </div>
+                   <span className="text-[10px] font-black text-white bg-yellow-500/10 border border-yellow-500/20 px-2 py-0.5 rounded-md">
+                      {avgRating > 0 ? `${avgRating} / 5` : "PUAN_YOK"}
+                   </span>
+                   <span className="text-[9px] font-bold text-zinc-600 uppercase">
+                      ({reviews.length} GÖRÜŞ)
+                   </span>
+                </div>
+
                 <p className="text-[11px] text-zinc-700 font-bold uppercase tracking-widest leading-relaxed max-w-xl">
                    {product.description || "NO_PRODUCT_SPECIFICATIONS_FOUND_IN_CENTRAL_LOGS."}
                 </p>
@@ -229,6 +294,117 @@ export default function ProductDetail() {
                    </button>
                 </div>
              </div>
+          </div>
+        </div>
+
+        {/* Yorumlar ve Değerlendirmeler Section */}
+        <div className="border-t border-white/[0.04] pt-12 mt-12 space-y-8">
+          <div className="space-y-2">
+            <span className="text-[9px] text-zinc-500 font-bold tracking-[0.3em] uppercase">SYSTEM_FEEDBACK_LOGS</span>
+            <h2 className="text-xl font-black italic tracking-tighter text-white uppercase">
+              KULLANICI DEĞERLENDİRMELERİ & YORUMLAR
+            </h2>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Yorum Yapma Formu */}
+            <div className="lg:col-span-4 space-y-6">
+              <div className="bg-[#030303]/30 border border-white/[0.04] p-6 rounded-[28px] space-y-6 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4">
+                  <MessageSquare className="w-5 h-5 text-red-600 opacity-10" />
+                </div>
+                
+                <div className="space-y-1">
+                  <h3 className="text-xs font-black text-white uppercase tracking-wider">GERİ BİLDİRİM GÖNDER</h3>
+                  <p className="text-[9px] text-zinc-600 uppercase font-bold">Deneyiminizi diğer kullanıcılarla paylaşın.</p>
+                </div>
+                
+                <form onSubmit={handleSubmitReview} className="space-y-4">
+                  {/* Yıldız Derecelendirmesi */}
+                  <div className="space-y-2">
+                    <label className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest block">Ürün Puanı</label>
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <button
+                          type="button"
+                          key={s}
+                          onMouseEnter={() => setUserHoverRating(s)}
+                          onMouseLeave={() => setUserHoverRating(0)}
+                          onClick={() => setUserRating(s)}
+                          className="p-1 transition-transform hover:scale-110 cursor-pointer"
+                        >
+                          <Star
+                            className={`w-6 h-6 ${(userHoverRating || userRating) >= s ? "text-yellow-500 fill-yellow-500" : "text-zinc-700"}`}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Yorum Girişi */}
+                  <div className="space-y-2">
+                    <label className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest block">Yorumunuz</label>
+                    <textarea
+                      required
+                      value={userComment}
+                      onChange={(e) => setUserComment(e.target.value)}
+                      placeholder="Ürün hakkındaki geri bildiriminizi yazın..."
+                      rows={4}
+                      className="w-full bg-[#050505] border border-white/5 rounded-[18px] p-4 text-[10px] text-white focus:border-red-600/50 focus:outline-none font-bold resize-none"
+                    />
+                  </div>
+                  
+                  <button
+                    type="submit"
+                    disabled={submittingReview || userRating === 0}
+                    className="w-full bg-red-600 text-white py-3 rounded-[18px] text-[9px] font-black uppercase tracking-[0.3em] hover:bg-red-700 transition-all active:scale-95 duration-300 disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+                  >
+                    {submittingReview ? "GÖNDERİLİYOR..." : "YORUMU GÖNDER"}
+                  </button>
+                </form>
+              </div>
+            </div>
+            
+            {/* Yorumlar Listesi */}
+            <div className="lg:col-span-8 space-y-4 max-h-[500px] overflow-y-auto pr-2 no-scrollbar">
+              {reviews.length === 0 ? (
+                <div className="bg-[#030303]/20 border border-white/[0.02] p-12 rounded-[28px] text-center space-y-2">
+                  <div className="text-xs font-black text-zinc-600 uppercase tracking-widest">HENÜZ YORUM YAPILMAMIŞ</div>
+                  <p className="text-[9px] text-zinc-700 font-bold uppercase tracking-widest">İlk yorumu siz yazarak deneyiminizi paylaşabilirsiniz.</p>
+                </div>
+              ) : (
+                reviews.map((r) => (
+                  <div key={r.id} className="bg-[#020202]/30 border border-white/[0.03] rounded-[24px] p-6 space-y-4 hover:border-white/[0.08] transition-all duration-300">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-white/[0.02] border border-white/[0.05] flex items-center justify-center">
+                          <span className="text-[10px] font-black text-zinc-500 uppercase">{r.username.slice(0, 2)}</span>
+                        </div>
+                        <div>
+                          <div className="text-[10px] font-black text-white uppercase tracking-wider">{r.username}</div>
+                          <div className="text-[7px] text-zinc-600 font-bold uppercase tracking-widest">
+                            {new Date(r.created_at).toLocaleDateString("tr-TR", { hour: "2-digit", minute: "2-digit" })}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star
+                            key={s}
+                            className={`w-3 h-3 ${s <= r.rating ? "text-yellow-500 fill-yellow-500" : "text-zinc-800"}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wide leading-relaxed pl-1">
+                      {r.comment}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
 

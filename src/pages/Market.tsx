@@ -21,6 +21,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "@/lib/router-shim";
 import { ResponsiveContainer, AreaChart, Area } from "recharts";
 import { useAuth } from "@/lib/authContext";
+import { Star } from "lucide-react";
+import { getProductAverageRating } from "@/lib/productReviews";
 
 interface ProductRow {
   id: string;
@@ -834,6 +836,26 @@ export default function Market() {
                                      <span className="w-1 h-1 bg-zinc-800 rounded-full" />
                                      <span className="text-zinc-500">SECURE_ESCROW</span>
                                   </div>
+                                  
+                                  {/* 5-Star Rating display */}
+                                  {(() => {
+                                     const { avg, count } = getProductAverageRating(p.id);
+                                     return (
+                                        <div className="flex items-center gap-1.5 pt-1">
+                                           <div className="flex items-center gap-0.5">
+                                              {[1, 2, 3, 4, 5].map((s) => (
+                                                 <Star 
+                                                    key={s} 
+                                                    className={`w-2.5 h-2.5 ${s <= Math.round(avg) ? "text-yellow-500 fill-yellow-500" : "text-zinc-800"}`} 
+                                                 />
+                                              ))}
+                                           </div>
+                                           <span className="text-[7.5px] font-bold text-zinc-500 uppercase tracking-widest">
+                                              ({count > 0 ? avg : "PUAN_YOK"})
+                                           </span>
+                                        </div>
+                                     );
+                                  })()}
                                </div>
 
                                <p className="text-[9.5px] text-zinc-500 font-medium uppercase tracking-wide leading-relaxed line-clamp-2 pt-1 flex-1">
@@ -900,6 +922,24 @@ export default function Market() {
                                       <span className="px-1.5 py-0.2 bg-black/40 border border-white/[0.04] rounded text-[6px] font-bold text-zinc-500 uppercase tracking-widest max-w-[150px] truncate">
                                          {matchedItem ? getCatLabel(matchedItem.id, matchedItem.label) : p.subsubcategory || "UNCLASSIFIED"}
                                       </span>
+                                      
+                                      {/* 5-Star Rating display */}
+                                      {(() => {
+                                         const { avg, count } = getProductAverageRating(p.id);
+                                         return (
+                                            <div className="flex items-center gap-1 bg-black/40 border border-white/[0.04] rounded-md px-1.5 py-0.5 shrink-0">
+                                               {[1, 2, 3, 4, 5].map((s) => (
+                                                  <Star 
+                                                     key={s} 
+                                                     className={`w-2 h-2 ${s <= Math.round(avg) ? "text-yellow-500 fill-yellow-500" : "text-zinc-800"}`} 
+                                                  />
+                                               ))}
+                                               <span className="text-[6.5px] font-black text-zinc-500 uppercase ml-0.5">
+                                                  {count > 0 ? avg : "PUAN_YOK"}
+                                               </span>
+                                            </div>
+                                         );
+                                      })()}
                                    </div>
                                    <p className="text-[8.5px] text-zinc-500 font-bold uppercase tracking-wider leading-relaxed truncate max-w-lg mt-1">
                                       {p.description || "NO_PRODUCT_SPECIFICATIONS_FOUND_IN_LOGS"}

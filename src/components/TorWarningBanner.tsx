@@ -1,46 +1,87 @@
 import { useState, useEffect } from "react";
 import { useSecurity } from "@/lib/securityContext";
-import { ShieldAlert, X } from "lucide-react";
+import { ShieldCheck, X, Wifi, Terminal, EyeOff, ShieldAlert } from "lucide-react";
 
 /**
- * Clearnet üzerindeyken üstte "anonim mod" uyarısı gösterir.
- * Artık .onion'a yönlendirme yapmaz — clearweb odaklı, dalgacı bir ton kullanır.
+ * Redesigned Top HUD Bar: Replaces the flat yellow banner with an ultra-premium 
+ * cyber security glassmorphic status monitor.
  */
 export default function TorWarningBanner() {
   const { isTor } = useSecurity();
   const [dismissed, setDismissed] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [latency, setLatency] = useState(42);
 
   useEffect(() => {
     setIsMounted(true);
+    const interval = setInterval(() => {
+      setLatency(Math.floor(Math.random() * 15) + 30);
+    }, 4000);
+    return () => clearInterval(interval);
   }, []);
 
-  if (!isMounted || isTor || dismissed) return null;
-  if (typeof window === "undefined") return null;
-  if (window.location.hostname.endsWith(".onion")) return null;
+  if (!isMounted || dismissed) return null;
 
   return (
-    <div className="fixed top-0 inset-x-0 z-[60] bg-gradient-to-r from-primary/10 via-yellow-500/10 to-primary/10 border-b border-yellow-500/40 backdrop-blur-md animate-fade-in">
-      <div className="max-w-6xl mx-auto px-3 py-2 flex items-center gap-2 text-[11px] font-mono text-yellow-500">
-        <ShieldAlert className="w-3.5 h-3.5 shrink-0 animate-pulse" />
-        <span className="flex-1 flex items-center gap-1.5 flex-wrap">
-          <span className="inline-block animate-bounce" style={{ animationDuration: "1.6s" }}>
-            😈
+    <div className="fixed top-0 inset-x-0 z-[60] bg-[#020202]/85 backdrop-blur-xl border-b border-white/[0.04] shadow-[0_4px_30px_rgba(0,0,0,0.5)] animate-fade-in font-mono text-[9px] select-none">
+      <div className="max-w-[1400px] mx-auto px-4 py-2.5 flex items-center justify-between gap-4 text-zinc-400">
+        
+        {/* Left Side: Connection Status HUD */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="text-emerald-500 font-black tracking-widest uppercase text-[8px]">
+              SİNYAL_OK // GÜVENLİ
+            </span>
+          </div>
+
+          <span className="hidden md:inline-block text-zinc-800">|</span>
+
+          {/* Network Mode */}
+          <div className="hidden sm:flex items-center gap-1.5">
+            <Wifi className="w-3.5 h-3.5 text-red-500" />
+            <span>AĞ: <strong className="text-white">CLEARWEB (ZIRHLI)</strong></span>
+          </div>
+
+          <span className="hidden sm:inline-block text-zinc-800">|</span>
+
+          {/* Trace Level */}
+          <div className="flex items-center gap-1.5">
+            <EyeOff className="w-3.5 h-3.5 text-zinc-500" />
+            <span className="text-zinc-400">
+              İZ KORUMASI: <strong className="text-zinc-200">AKTİF (VPN+PGP)</strong>
+            </span>
+          </div>
+        </div>
+
+        {/* Center Banner: Interactive Cyber Advice */}
+        <div className="hidden lg:flex items-center gap-2 text-zinc-500 truncate max-w-[500px]">
+          <Terminal className="w-3 h-3 text-red-500 shrink-0" />
+          <span className="truncate">
+            <span className="text-zinc-400">Öneri:</span> Ağzını sıkı tut, VPN kullan, gerisini sisteme bırak.
           </span>
-          <strong>ANONIM MOD</strong>
-          <span className="opacity-90">
-            — clearweb'desin ama izini sürmek o kadar da kolay değil. VPN + temiz tarayıcı + ağzını
-            sıkı tut, gerisini biz hallederiz.
-          </span>
-          <span className="inline-block animate-pulse">🕵️</span>
-        </span>
-        <button
-          onClick={() => setDismissed(true)}
-          className="text-yellow-500/70 hover:text-yellow-500 transition-colors"
-          aria-label="Kapat"
-        >
-          <X className="w-3.5 h-3.5" />
-        </button>
+        </div>
+
+        {/* Right Side: Latency + Dismiss */}
+        <div className="flex items-center gap-4 shrink-0">
+          {/* Latency Indicator */}
+          <div className="flex items-center gap-1 text-[8px] text-zinc-500">
+            <span>PING:</span>
+            <span className="text-emerald-500 font-bold">{latency}ms</span>
+          </div>
+
+          <button
+            onClick={() => setDismissed(true)}
+            className="p-1 rounded-md bg-white/[0.02] border border-white/5 hover:border-red-500/20 text-zinc-500 hover:text-white transition-colors cursor-pointer"
+            aria-label="Kapat"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
       </div>
     </div>
   );

@@ -28,10 +28,12 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Activity,
+  HelpCircle,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import TorBadge from "@/components/TorBadge";
+import SessionTimerBadge from "./SessionTimerBadge";
 
 type LinkDef = { to: string; labelKey: string; icon: any };
 
@@ -47,6 +49,7 @@ const groupedLinks = {
   ],
   community: [
     { to: "/forum", labelKey: "forum", icon: MessageSquare },
+    { to: "/help", labelKey: "help", icon: HelpCircle },
     { to: "/pgp-tool", labelKey: "pgpTool", icon: Shield },
   ],
   account: [
@@ -199,6 +202,7 @@ export default function AppSidebar() {
             <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]" />
             {!collapsed && <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">TOR</span>}
           </div>
+          {!collapsed && <SessionTimerBadge />}
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse shadow-[0_0_8px_#ff0000]" />
             {!collapsed && <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">AI_CORE</span>}
@@ -238,13 +242,13 @@ export default function AppSidebar() {
         {/* Actions */}
         {!collapsed && (
           <div className="flex items-center justify-between border-t border-white/5 pt-3">
-            <button className="flex items-center gap-2 text-zinc-500 hover:text-white font-black text-[8px] uppercase tracking-wider transition-colors relative group">
+            <Link to="/notifications" className="flex items-center gap-2 text-zinc-500 hover:text-white font-black text-[8px] uppercase tracking-wider transition-colors relative group">
               <div className="relative">
                 <Bell className="w-3.5 h-3.5" />
-                <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-red-600 rounded-full" />
+                <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse" />
               </div>
               <span>BİLDİRİMLER</span>
-            </button>
+            </Link>
 
             <button
               onClick={async () => { await logout(); navigate("/"); }}

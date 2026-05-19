@@ -117,7 +117,7 @@ const tr = {
   pgpTool: "PGP Araçları",
   cipherNotes: "Şifreli Notlar",
   stealthMode: "Gizlenme Modu",
-  
+  help: "Yardım Masası",
   notifications: "Bildirimler",
   noNotifications: "Bildirim yok",
   markAllRead: "Tümünü okundu işaretle",
@@ -763,7 +763,7 @@ const en: Partial<typeof tr> = {
   "login.escrow": "Escrow",
   "login.active": "Active",
 
-  dashboard: "Dashboard", securityLogs: "Security Logs", disputes: "Disputes", transactions: "Transactions", forum: "Forum", security: "Security", customize: "Customize", myProducts: "My Products", wallet: "Wallet", deposit: "Bond", profile: "Profile", market: "Market", myOrders: "My Orders", store: "Store", watchlist: "Watchlist", pgpTool: "PGP Tools", cipherNotes: "Cipher Notes", stealthMode: "Stealth Mode",
+  dashboard: "Dashboard", securityLogs: "Security Logs", disputes: "Disputes", transactions: "Transactions", forum: "Forum", security: "Security", customize: "Customize", myProducts: "My Products", wallet: "Wallet", deposit: "Bond", profile: "Profile", market: "Market", myOrders: "My Orders", store: "Store", watchlist: "Watchlist", pgpTool: "PGP Tools", cipherNotes: "Cipher Notes", stealthMode: "Stealth Mode", help: "Help Desk",
   notifications: "Notifications", noNotifications: "No notifications", markAllRead: "Mark all read",
 
   customization: "Customization", themeColor: "Theme Color", font: "Font", fontFamily: "Font", fontSize: "Size", small: "Small", normal: "Normal", large: "Large", animations: "Animation Settings", neonEffects: "Neon effects", animationsToggle: "Animations", sidebarLayout: "Sidebar Layout", position: "Position", left: "Left", right: "Right", collapseSidebar: "Collapse sidebar", backgroundImage: "Background", changeImage: "Change", selectImage: "Select Image", removeImage: "Remove", opacity: "Opacity", customHue: "Custom Hue", resetSettings: "Settings reset", themeApplied: "theme applied", bgUpdated: "Background updated! 🎨", bgRemoved: "Background removed", language: "Language", selectLanguage: "Language", systemFont: "System Font",

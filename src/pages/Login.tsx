@@ -80,18 +80,24 @@ export default function Login() {
       >
         {/* Branding HUD */}
         <div className="flex flex-col items-center mb-8">
-          <div className="mb-4 relative">
-             <div className="w-16 h-16 bg-red-600 rounded-[20px] flex items-center justify-center text-white shadow-[0_0_30px_#ff0000]">
-                <Shield className="w-8 h-8 animate-pulse" />
-             </div>
-             <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-white rounded-full border-4 border-red-600" />
+          <div className="mb-4 relative group cursor-pointer">
+            <svg width="56" height="56" viewBox="0 0 100 100" className="animate-pulse drop-shadow-[0_0_20px_rgba(255,0,0,0.55)] group-hover:scale-110 transition-transform duration-300">
+              <rect x="10" y="15" width="12" height="70" fill="#FF0000" />
+              <rect x="78" y="15" width="12" height="70" fill="#FF0000" />
+              <path d="M22 50 L50 20 L78 50 L50 80 Z" stroke="#FF0000" strokeWidth="12" strokeLinejoin="miter" fill="none" />
+            </svg>
           </div>
           <h1 className="text-3xl font-black italic tracking-tighter text-white uppercase leading-none">
             AEIGST<span className="text-red-600">HUB</span>
           </h1>
-          <p className="text-[8px] text-zinc-800 font-black uppercase tracking-[0.4em] mt-2">
-            SECURE_ACCESS_NODE_v4
-          </p>
+          <div className="mt-4 text-center max-w-[340px] space-y-1.5 cursor-default select-none">
+            <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest leading-relaxed">
+              "POLİSTE <span className="text-white drop-shadow-md">'BEN SADECE PAZAR YORUMU YAPIYORDUM HAKİM BEY'</span> DEMEK YOK KARDEŞ! 🤫"
+            </p>
+            <p className="text-[10px] text-red-500 font-black uppercase tracking-[0.2em] drop-shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse" style={{ animationDuration: '3s' }}>
+              AĞZINI SIKI TUT, 2FA KUR, RAHATINA BAK!
+            </p>
+          </div>
         </div>
 
         {/* Auth Mode Toggle */}

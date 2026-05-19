@@ -24,7 +24,7 @@ export default function Wallet() {
   const [balance, setBalance] = useState<Balance>({ available: 0, pending: 0, total: 0 });
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
-  
+
   // Withdrawal Form States
   const [withdrawAddr, setWithdrawAddr] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
@@ -48,7 +48,7 @@ export default function Wallet() {
         .select("address")
         .eq("network", "LTC")
         .maybeSingle();
-      
+
       if (!fetchError && existing?.address) {
         setLtcAddress(existing.address);
         return;
@@ -118,9 +118,9 @@ export default function Wallet() {
       return;
     }
     const amt = parseFloat(withdrawAmount);
-    if (isNaN(amt) || amt <= 0) { 
-      toast.error("Geçersiz miktar girdin."); 
-      return; 
+    if (isNaN(amt) || amt <= 0) {
+      toast.error("Geçersiz miktar girdin.");
+      return;
     }
 
     if (amt > activeBalance) {
@@ -259,7 +259,7 @@ export default function Wallet() {
   return (
     <PageShell>
       <div className="max-w-[1300px] mx-auto space-y-10 py-6 font-mono text-zinc-300 relative select-none">
-        
+
         {/* Page Header matching other pages */}
         <div className="flex items-center gap-3 border-b border-white/[0.04] pb-4">
           <svg className="w-6 h-6 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -275,24 +275,23 @@ export default function Wallet() {
 
         {/* Top 3 Cryptocurrency Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
+
           {/* Card 1: Bitcoin */}
-          <div 
+          <div
             onClick={() => {
               setActiveNetwork("BTC");
               setWithdrawAmount("");
             }}
-            className={`cursor-pointer rounded-3xl p-6 flex flex-col justify-between h-[180px] relative transition-all duration-500 ease-out transform ${
-              activeNetwork === "BTC" 
-                ? `${colorMap.BTC.border} scale-[1.03] -translate-y-1.5 bg-[#050505]` 
+            className={`cursor-pointer rounded-3xl p-6 flex flex-col justify-between h-[180px] relative transition-all duration-500 ease-out transform ${activeNetwork === "BTC"
+                ? `${colorMap.BTC.border} scale-[1.03] -translate-y-1.5 bg-[#050505]`
                 : "bg-[#050505]/40 border border-white/[0.03] hover:border-amber-500/20 hover:scale-[1.01] hover:-translate-y-0.5"
-            }`}
+              }`}
           >
             <div>
               <div className="text-[8px] text-zinc-600 font-bold uppercase tracking-wider">COIN_NETWORK</div>
               <h3 className="text-xl font-bold italic tracking-tighter text-white mt-1 uppercase">BITCOIN</h3>
             </div>
-            
+
             {/* Active Indicator or Brand Icon */}
             <div className="absolute top-6 right-6 flex items-center gap-2">
               {activeNetwork === "BTC" && (
@@ -321,22 +320,21 @@ export default function Wallet() {
           </div>
 
           {/* Card 2: Litecoin */}
-          <div 
+          <div
             onClick={() => {
               setActiveNetwork("LTC");
               setWithdrawAmount("");
             }}
-            className={`cursor-pointer rounded-3xl p-6 flex flex-col justify-between h-[180px] relative transition-all duration-500 ease-out transform ${
-              activeNetwork === "LTC" 
-                ? `${colorMap.LTC.border} scale-[1.03] -translate-y-1.5 bg-[#050505]` 
+            className={`cursor-pointer rounded-3xl p-6 flex flex-col justify-between h-[180px] relative transition-all duration-500 ease-out transform ${activeNetwork === "LTC"
+                ? `${colorMap.LTC.border} scale-[1.03] -translate-y-1.5 bg-[#050505]`
                 : "bg-[#050505]/40 border border-white/[0.03] hover:border-red-600/20 hover:scale-[1.01] hover:-translate-y-0.5"
-            }`}
+              }`}
           >
             <div>
               <div className="text-[8px] text-zinc-600 font-bold uppercase tracking-wider">COIN_NETWORK</div>
               <h3 className="text-xl font-bold italic tracking-tighter text-white mt-1 uppercase">LITECOIN</h3>
             </div>
-            
+
             {/* Active Indicator or Brand Icon */}
             <div className="absolute top-6 right-6 flex items-center gap-2">
               {activeNetwork === "LTC" && (
@@ -361,22 +359,21 @@ export default function Wallet() {
           </div>
 
           {/* Card 3: Monero */}
-          <div 
+          <div
             onClick={() => {
               setActiveNetwork("XMR");
               setWithdrawAmount("");
             }}
-            className={`cursor-pointer rounded-3xl p-6 flex flex-col justify-between h-[180px] relative transition-all duration-500 ease-out transform ${
-              activeNetwork === "XMR" 
-                ? `${colorMap.XMR.border} scale-[1.03] -translate-y-1.5 bg-[#050505]` 
+            className={`cursor-pointer rounded-3xl p-6 flex flex-col justify-between h-[180px] relative transition-all duration-500 ease-out transform ${activeNetwork === "XMR"
+                ? `${colorMap.XMR.border} scale-[1.03] -translate-y-1.5 bg-[#050505]`
                 : "bg-[#050505]/40 border border-white/[0.03] hover:border-teal-500/20 hover:scale-[1.01] hover:-translate-y-0.5"
-            }`}
+              }`}
           >
             <div>
               <div className="text-[8px] text-zinc-600 font-bold uppercase tracking-wider">COIN_NETWORK</div>
               <h3 className="text-xl font-bold italic tracking-tighter text-white mt-1 uppercase">MONERO</h3>
             </div>
-            
+
             {/* Active Indicator or Brand Icon */}
             <div className="absolute top-6 right-6 flex items-center gap-2">
               {activeNetwork === "XMR" && (
@@ -404,11 +401,11 @@ export default function Wallet() {
 
         {/* Dual Main Content Columns - Dynamic Transition wrapped by key */}
         <div key={activeNetwork} className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-[fadeIn_0.5s_ease-out] transform">
-          
+
           {/* Left Column: PARA_YATIR */}
           <div className="bg-[#050505]/60 backdrop-blur-xl border border-white/[0.03] rounded-[36px] p-8 space-y-6 flex flex-col justify-between hover:border-white/[0.06] transition-all duration-500">
             <div className="space-y-6">
-              
+
               {/* Header */}
               <div className="flex items-center justify-between border-b border-white/[0.03] pb-4">
                 <div className="flex items-center gap-2">
@@ -419,14 +416,14 @@ export default function Wallet() {
                   SECURED_INGRESS
                 </span>
               </div>
-              
+
               <div className="text-[8px] text-zinc-600 font-bold uppercase tracking-wider">
                 AĞ: {activeNetworkLabel}
               </div>
 
               {/* QR and Details Side-by-Side */}
               <div className="flex flex-col sm:flex-row items-stretch gap-6 pt-2">
-                
+
                 {/* Clean white background QR Code box */}
                 <div className="bg-white p-4 rounded-[28px] shadow-lg shrink-0 flex items-center justify-center h-[180px] w-[180px] transform hover:scale-[1.02] transition-transform duration-300">
                   <QRCodeCanvas value={activeAddress} size={148} />
@@ -478,7 +475,7 @@ export default function Wallet() {
           {/* Right Column: PARA_ÇEK */}
           <div className="bg-[#050505]/60 backdrop-blur-xl border border-white/[0.03] rounded-[36px] p-8 space-y-5 flex flex-col justify-between hover:border-white/[0.06] transition-all duration-500">
             <div className="space-y-5">
-              
+
               {/* Header */}
               <div className="flex items-center justify-between border-b border-white/[0.03] pb-4">
                 <div className="flex items-center gap-2">
@@ -489,14 +486,14 @@ export default function Wallet() {
                   SECURED_EGRESS
                 </span>
               </div>
-              
+
               <div className="text-[8px] text-zinc-600 font-bold uppercase tracking-wider">
                 AĞ: {activeNetworkLabel}
               </div>
 
               {/* Form Controls */}
               <div className="space-y-4 text-[9px]">
-                
+
                 {/* Destination Address Input */}
                 <div className="space-y-1.5">
                   <label className="text-zinc-500 font-bold uppercase tracking-wider">ALICI_CÜZDAN_ADRESİ (DESTINATION)</label>
@@ -537,13 +534,12 @@ export default function Wallet() {
                     <button
                       key={pct}
                       onClick={() => setPercentAmount(pct)}
-                      className={`py-2.5 bg-[#020202]/60 border border-white/[0.03] text-zinc-500 rounded-xl font-bold tracking-tighter text-[9px] transition-all cursor-pointer uppercase hover:-translate-y-0.5 hover:shadow-md ${
-                        activeNetwork === "BTC" 
-                          ? "hover:text-amber-500 hover:border-amber-500/20" 
-                          : activeNetwork === "LTC" 
-                            ? "hover:text-red-500 hover:border-red-600/20" 
+                      className={`py-2.5 bg-[#020202]/60 border border-white/[0.03] text-zinc-500 rounded-xl font-bold tracking-tighter text-[9px] transition-all cursor-pointer uppercase hover:-translate-y-0.5 hover:shadow-md ${activeNetwork === "BTC"
+                          ? "hover:text-amber-500 hover:border-amber-500/20"
+                          : activeNetwork === "LTC"
+                            ? "hover:text-red-500 hover:border-red-600/20"
                             : "hover:text-teal-400 hover:border-teal-500/20"
-                      }`}
+                        }`}
                     >
                       {pct === 100 ? "MAX" : `%${pct}`}
                     </button>

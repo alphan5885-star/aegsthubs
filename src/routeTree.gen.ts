@@ -17,7 +17,9 @@ import { Route as SecurityRouteImport } from './routes/security'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PgpToolRouteImport } from './routes/pgp-tool'
 import { Route as OrdersRouteImport } from './routes/orders'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as MarketRouteImport } from './routes/market'
+import { Route as HelpRouteImport } from './routes/help'
 import { Route as ForumRouteImport } from './routes/forum'
 import { Route as CustomizationRouteImport } from './routes/customization'
 import { Route as CheckoutRouteImport } from './routes/checkout'
@@ -71,9 +73,19 @@ const OrdersRoute = OrdersRouteImport.update({
   path: '/orders',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketRoute = MarketRouteImport.update({
   id: '/market',
   path: '/market',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForumRoute = ForumRouteImport.update({
@@ -143,7 +155,9 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/customization': typeof CustomizationRoute
   '/forum': typeof ForumRoute
+  '/help': typeof HelpRoute
   '/market': typeof MarketRoute
+  '/notifications': typeof NotificationsRoute
   '/orders': typeof OrdersRoute
   '/pgp-tool': typeof PgpToolRoute
   '/profile': typeof ProfileRoute
@@ -166,7 +180,9 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/customization': typeof CustomizationRoute
   '/forum': typeof ForumRoute
+  '/help': typeof HelpRoute
   '/market': typeof MarketRoute
+  '/notifications': typeof NotificationsRoute
   '/orders': typeof OrdersRoute
   '/pgp-tool': typeof PgpToolRoute
   '/profile': typeof ProfileRoute
@@ -190,7 +206,9 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/customization': typeof CustomizationRoute
   '/forum': typeof ForumRoute
+  '/help': typeof HelpRoute
   '/market': typeof MarketRoute
+  '/notifications': typeof NotificationsRoute
   '/orders': typeof OrdersRoute
   '/pgp-tool': typeof PgpToolRoute
   '/profile': typeof ProfileRoute
@@ -215,7 +233,9 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/customization'
     | '/forum'
+    | '/help'
     | '/market'
+    | '/notifications'
     | '/orders'
     | '/pgp-tool'
     | '/profile'
@@ -238,7 +258,9 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/customization'
     | '/forum'
+    | '/help'
     | '/market'
+    | '/notifications'
     | '/orders'
     | '/pgp-tool'
     | '/profile'
@@ -261,7 +283,9 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/customization'
     | '/forum'
+    | '/help'
     | '/market'
+    | '/notifications'
     | '/orders'
     | '/pgp-tool'
     | '/profile'
@@ -285,7 +309,9 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   CustomizationRoute: typeof CustomizationRoute
   ForumRoute: typeof ForumRoute
+  HelpRoute: typeof HelpRoute
   MarketRoute: typeof MarketRoute
+  NotificationsRoute: typeof NotificationsRoute
   OrdersRoute: typeof OrdersRoute
   PgpToolRoute: typeof PgpToolRoute
   ProfileRoute: typeof ProfileRoute
@@ -355,11 +381,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrdersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/market': {
       id: '/market'
       path: '/market'
       fullPath: '/market'
       preLoaderRoute: typeof MarketRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forum': {
@@ -484,7 +524,9 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   CustomizationRoute: CustomizationRoute,
   ForumRoute: ForumRoute,
+  HelpRoute: HelpRoute,
   MarketRoute: MarketRoute,
+  NotificationsRoute: NotificationsRoute,
   OrdersRoute: OrdersRoute,
   PgpToolRoute: PgpToolRoute,
   ProfileRoute: ProfileRoute,

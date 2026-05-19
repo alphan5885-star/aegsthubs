@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import PageShell from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
-import { CheckCircle, Star, Truck, MapPin, Mail, X, Package as PackageIcon, ShoppingCart } from "lucide-react";
+import { CheckCircle, Star, Truck, MapPin, Mail, X, Package as PackageIcon, ShoppingCart, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Link } from "@/lib/router-shim";
@@ -11,6 +11,7 @@ import OrderDeliveryInfo from "@/components/OrderDeliveryInfo";
 import OrderStatusTimeline from "@/components/OrderStatusTimeline";
 import EmptyState from "@/components/EmptyState";
 import OrderChatButton from "@/components/OrderChatButton";
+import CreateDisputeDialog from "@/components/CreateDisputeDialog";
 import { useI18n } from "@/lib/i18n";
 
 interface OrderRow {
@@ -36,6 +37,11 @@ export default function Orders() {
   const [loading, setLoading] = useState(true);
   const [ratingOrder, setRatingOrder] = useState<{ id: string; vendorId: string; productName: string } | null>(null);
   const [ratedOrders, setRatedOrders] = useState<Set<string>>(new Set());
+  
+  // Dispute state variables
+  const [disputeOrder, setDisputeOrder] = useState<{ id: string; vendorId: string; productName: string; amount: number } | null>(null);
+  const [disputedOrders, setDisputedOrders] = useState<Set<string>>(new Set());
+  
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const isMounted = useRef(true);
 
@@ -47,7 +53,7 @@ export default function Orders() {
       try {
         const query = supabase
           .from("orders")
-          .select("id, amount, status, delivery_confirmed, delivery_method, created_at, products:product_id(name, image_url, image_emoji, type, vendor_id)")
+          .select("id, amount, status, delivery_method, created_at, products:product_id(name, image_url, image_emoji, type, vendor_id)")
           .order("created_at", { ascending: false }).limit(50);
         if (role === "buyer" || role === "vendor") query.eq("buyer_id", user.id);
         const { data } = await query;
@@ -57,6 +63,12 @@ export default function Orders() {
         const { data: ratings } = await supabase.from("vendor_ratings").select("order_id").eq("buyer_id", user.id);
         if (!isMounted.current) return;
         if (ratings) setRatedOrders(new Set(ratings.map((r: any) => r.order_id)));
+        
+        // Fetch existing disputes to set active locks
+        const { data: disputes } = await supabase.from("disputes").select("order_id").eq("buyer_id", user.id);
+        if (!isMounted.current) return;
+        if (disputes) setDisputedOrders(new Set(disputes.map((d: any) => d.order_id)));
+        
         setLoading(false);
       } catch {
         if (isMounted.current) setLoading(false);
@@ -71,7 +83,7 @@ export default function Orders() {
     if (error) { toast.error(t("err.generic")); return; }
     if (data && (data as any).success !== false) {
       toast.success(t("orders.confirmDelivery"));
-      setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, delivery_confirmed: true, status: "delivered" } : o));
+      setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, status: "delivered" } : o));
     }
   };
 
@@ -125,7 +137,7 @@ export default function Orders() {
                   )}
                   <div>
                     <div className="text-sm font-medium text-foreground">{o.products?.name || "—"}</div>
-                    <div className="text-[10px] text-muted-foreground font-mono flex items-center gap-2">
+                    <div className="text-[10px] text-muted-foreground font-mono flex items-center gap-2 flex-wrap">
                       {new Date(o.created_at).toLocaleDateString()} • {o.amount} LTC
                       {o.products?.type === "physical" && (
                         <span className="flex items-center gap-1 text-primary">
@@ -133,33 +145,59 @@ export default function Orders() {
                           {o.delivery_method === "dead_drop" ? t("delivery.deadDrop") : o.delivery_method === "mailbox" ? t("delivery.mailbox") : t("delivery.cargo")}
                         </span>
                       )}
+                      {disputedOrders.has(o.id) && (
+                        <span className="px-1.5 py-0.2 bg-red-600/10 border border-red-600/20 rounded text-[7.5px] font-black text-red-500 uppercase tracking-widest animate-pulse">
+                           UYUŞMAZLIK AÇIK
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   {["paid","shipped","delivered","completed"].includes(o.status) && (
                     <OrderChatButton orderId={o.id} label={t("orders.chatBtn")} />
                   )}
                   {role === "buyer" && o.status === "pending" && (
-                    <button onClick={(e) => { e.stopPropagation(); cancelOrder(o.id); }} className="flex items-center gap-1 px-2 py-1 bg-red-600/80 text-white text-[10px] font-mono rounded hover:bg-red-700">
+                    <button onClick={(e) => { e.stopPropagation(); cancelOrder(o.id); }} className="flex items-center gap-1 px-2 py-1 bg-red-600/80 text-white text-[10px] font-mono rounded hover:bg-red-700 cursor-pointer">
                       <X className="w-3 h-3" /> {t("orders.cancel")}
                     </button>
                   )}
-                  {role === "buyer" && o.status === "shipped" && !o.delivery_confirmed && (
-                    <button onClick={(e) => { e.stopPropagation(); confirmDelivery(o.id); }} className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white text-[10px] font-mono rounded hover:bg-green-700">
+                  {role === "buyer" && o.status === "shipped" && !disputedOrders.has(o.id) && (
+                    <button onClick={(e) => { e.stopPropagation(); confirmDelivery(o.id); }} className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white text-[10px] font-mono rounded hover:bg-green-700 cursor-pointer">
                       <CheckCircle className="w-3 h-3" /> {t("orders.confirmDelivery")}
                     </button>
                   )}
-                  {role === "buyer" && (o.status === "completed" || o.status === "delivered") && !ratedOrders.has(o.id) && o.products && (
-                    <button onClick={(e) => { e.stopPropagation(); setRatingOrder({ id: o.id, vendorId: o.products!.vendor_id, productName: o.products!.name }); }} className="flex items-center gap-1 px-2 py-1 bg-yellow-600 text-white text-[10px] font-mono rounded hover:bg-yellow-700">
+                  {role === "buyer" && (o.status === "completed" || o.status === "delivered") && !ratedOrders.has(o.id) && o.products && !disputedOrders.has(o.id) && (
+                    <button onClick={(e) => { e.stopPropagation(); setRatingOrder({ id: o.id, vendorId: o.products!.vendor_id, productName: o.products!.name }); }} className="flex items-center gap-1 px-2 py-1 bg-yellow-600 text-white text-[10px] font-mono rounded hover:bg-yellow-700 cursor-pointer">
                       <Star className="w-3 h-3" /> {t("orders.rateVendor")}
                     </button>
+                  )}
+                  {role === "buyer" && ["paid", "shipped", "delivered"].includes(o.status) && !disputedOrders.has(o.id) && o.products && (
+                    <button 
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        setDisputeOrder({ 
+                          id: o.id, 
+                          vendorId: o.products!.vendor_id, 
+                          productName: o.products!.name, 
+                          amount: o.amount 
+                        }); 
+                      }} 
+                      className="flex items-center gap-1 px-2 py-1 bg-red-950/40 border border-red-500/20 text-red-500 text-[10px] font-mono rounded hover:bg-red-900/40 cursor-pointer"
+                    >
+                      <ShieldAlert className="w-3 h-3 animate-pulse" /> Uyuşmazlık Başlat
+                    </button>
+                  )}
+                  {disputedOrders.has(o.id) && (
+                    <Link to="/disputes" className="flex items-center gap-1 px-2 py-1 bg-red-600/10 border border-red-600/20 text-red-500 text-[10px] font-mono rounded hover:bg-red-600 hover:text-white transition-all cursor-pointer font-bold">
+                      Uyuşmazlığa Git
+                    </Link>
                   )}
                 </div>
               </div>
 
               <div className="mt-3">
-                <OrderStatusTimeline status={o.status} />
+                <OrderStatusTimeline status={disputedOrders.has(o.id) ? "disputed" : o.status} />
               </div>
 
               {expandedOrder === o.id && o.products?.type === "physical" && (
@@ -178,6 +216,16 @@ export default function Orders() {
           productName={ratingOrder.productName}
           onClose={() => setRatingOrder(null)}
           onRated={() => setRatedOrders((prev) => new Set([...prev, ratingOrder.id]))}
+        />
+      )}
+      {disputeOrder && (
+        <CreateDisputeDialog
+          orderId={disputeOrder.id}
+          vendorId={disputeOrder.vendorId}
+          productName={disputeOrder.productName}
+          amount={disputeOrder.amount}
+          onClose={() => setDisputeOrder(null)}
+          onCreated={() => setDisputedOrders((prev) => new Set([...prev, disputeOrder.id]))}
         />
       )}
     </PageShell>
