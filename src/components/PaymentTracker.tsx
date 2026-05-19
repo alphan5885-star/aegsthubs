@@ -75,9 +75,9 @@ export default function PaymentTracker({ orderId, amount }: Props) {
       }
     };
     poll();
-    const t = setInterval(poll, 30_000);
+    const interval = setInterval(poll, 30_000);
     return () => {
-      clearInterval(t);
+      clearInterval(interval);
     };
   }, [address, orderId, status]);
 

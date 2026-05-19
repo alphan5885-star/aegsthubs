@@ -440,7 +440,7 @@ export default function Forum() {
                         disabled={submittingPost}
                         className="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer"
                       >
-                        {submittingPost ? {t("loading")} : {t("forum.publish")}}
+                        {submittingPost ? t("loading") : t("forum.publish")}
                       </button>
                     </div>
                   </DialogContent>
@@ -450,10 +450,10 @@ export default function Forum() {
               {/* Forum General Stats Banner */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-[#040404]/55 backdrop-blur-xl p-5 border border-white/[0.04] rounded-[24px]">
                 {[
-                  { label: {t("forum.totalTopics")}, value: posts.length, icon: MessageSquare },
-                  { label: {t("forum.totalComments")}, value: posts.reduce((sum, p) => sum + 3, 0), icon: MessageCircle },
-                  { label: {t("forum.activeMembers")}, value: Object.keys(profiles).length || 1, icon: User },
-                  { label: {t("forum.lastActivity")}, value: posts.length > 0 ? "ŞİMDİ" : "YOK", icon: Clock },
+                  { label: t("forum.totalTopics"), value: posts.length, icon: MessageSquare },
+                  { label: t("forum.totalComments"), value: posts.reduce((sum, p) => sum + 3, 0), icon: MessageCircle },
+                  { label: t("forum.activeMembers"), value: Object.keys(profiles).length || 1, icon: User },
+                  { label: t("forum.lastActivity"), value: posts.length > 0 ? "ŞİMDİ" : "YOK", icon: Clock },
                 ].map((stat, i) => (
                   <div key={i} className="flex items-center gap-3.5 px-4 py-2 border-r border-white/[0.03] last:border-0">
                     <div className="p-2 rounded-lg bg-white/[0.01] border border-white/[0.03]">
@@ -629,7 +629,7 @@ export default function Forum() {
                           : "bg-white/[0.01] border-white/[0.03] text-zinc-500 hover:text-zinc-300"
                       }`}
                     >
-                      <Pin className="w-3.5 h-3.5" /> {selectedPost.pinned ? {t("forum.unpinPost")} : {t("forum.pinPost")}}
+                      <Pin className="w-3.5 h-3.5" /> {selectedPost.pinned ? t("forum.unpinPost") : t("forum.pinPost")}
                     </button>
                     
                     <button
@@ -753,7 +753,7 @@ export default function Forum() {
                     className="bg-red-600 hover:bg-red-700 text-white font-black uppercase px-6 py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-[9px] tracking-widest shadow-[0_10px_20px_rgba(255,0,0,0.1)] active:scale-[0.98]"
                   >
                     <Send className="w-3.5 h-3.5" />
-                    {submittingComment ? {t("loading")} : {t("forum.publish")}}
+                    {submittingComment ? t("loading") : t("forum.publish")}
                   </button>
                 </div>
               </div>

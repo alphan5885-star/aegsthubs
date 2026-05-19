@@ -86,17 +86,17 @@ export default function SecurityLogs() {
           <div className="space-y-4">
             {[
               {
-                label: {t("security.last24hSuccess")},
+                label: t("security.last24hSuccess"),
                 value: logs.filter((l) => l.success).length,
                 color: "text-green-500",
               },
               {
-                label: {t("security.suspiciousAttempts")},
+                label: t("security.suspiciousAttempts"),
                 value: logs.filter((l) => !l.success).length,
                 color: "text-primary",
               },
               {
-                label: {t("security.differentDevices")},
+                label: t("security.differentDevices"),
                 value: new Set(logs.map((l) => l.device)).size,
                 color: "text-blue-500",
               },

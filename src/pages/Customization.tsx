@@ -23,7 +23,7 @@ import { useRef } from "react";
 export default function Customization() {
   const { settings, updateSettings, resetSettings } = useCustomization();
   const { backgroundUrl, setBackgroundUrl, backgroundOpacity, setBackgroundOpacity } = useBackground();
-  const { t, language, setLanguage } = useI18n(); const { t } = useI18n();
+  const { t, language, setLanguage } = useI18n();
   const bgRef = useRef<HTMLInputElement>(null);
 
   const handleBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
