@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
 import { Send, ShieldAlert } from "lucide-react";
-import TranslateButton from "@/components/TranslateButton";
-
 interface Msg {
   id: string;
   sender_id: string | null;
@@ -100,11 +98,6 @@ export default function OrderChatRoom({ roomId }: { roomId: string }) {
                   {m.content}
                 </div>
               </div>
-              {!mine && (
-                <div className="ml-1 mt-0.5">
-                  <TranslateButton text={m.content} variant="bubble" />
-                </div>
-              )}
             </div>
           );
         })}
