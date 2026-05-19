@@ -77,9 +77,53 @@ function RootShell({ children }: { children: ReactNode }) {
             scrollbar-width: none !important;
             -ms-overflow-style: none !important;
           }
+          /* Google Translate Hiding */
+          .goog-te-banner-frame.skiptranslate, .goog-te-gadget-icon {
+            display: none !important;
+          }
+          body {
+            top: 0 !important;
+          }
+          .goog-te-gadget-simple {
+            background-color: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+          }
+          .goog-te-gadget-simple span {
+            display: none !important;
+          }
+          #google_translate_element {
+            display: none !important;
+          }
+          .goog-tooltip {
+            display: none !important;
+          }
+          .goog-tooltip:hover {
+            display: none !important;
+          }
+          .goog-text-highlight {
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+          }
         `}</style>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              function googleTranslateElementInit() {
+                new google.translate.TranslateElement({
+                  pageLanguage: 'tr',
+                  includedLanguages: 'en,ru,tr',
+                  autoDisplay: false
+                }, 'google_translate_element');
+              }
+            `,
+          }}
+        />
+        <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" />
       </head>
       <body>
+        <div id="google_translate_element"></div>
         {children}
         <Scripts />
       </body>

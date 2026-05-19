@@ -170,7 +170,7 @@ export default function SecuritySettings() {
                   onClick={() => setDeadManEnabled(!deadManEnabled)}
                   className={`w-full py-5 rounded-[24px] text-[9px] font-black uppercase tracking-widest transition-all ${deadManEnabled ? "bg-red-600 text-white shadow-[0_10px_20px_hsla(var(--primary),0.2)]" : "bg-white/[0.02] text-zinc-800 border border-white/10 hover:border-red-600/40"}`}
                 >
-                   {deadManEnabled ? {t("sec.systemArmed")} : {t("sec.armSystem")}}
+                   {deadManEnabled ? t("sec.systemArmed") : t("sec.armSystem")}
                 </button>
              </div>
 
