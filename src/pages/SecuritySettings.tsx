@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import PageShell from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
@@ -66,7 +66,7 @@ export default function SecuritySettings() {
               SEC_PROTOCOL_v9.4 // HARDENED_ENCLAVE
             </div>
             <h1 className="text-4xl font-black italic tracking-tighter text-white uppercase leading-none">
-              GÜVENLİK<span className="text-red-600">.SEC</span>
+              {t("security")}<span className="text-red-600">.SEC</span>
             </h1>
           </div>
           <div className="flex items-center gap-3 px-6 py-3 bg-red-600/5 border border-red-600/20 rounded-full">
@@ -84,7 +84,7 @@ export default function SecuritySettings() {
              <div className="obsidian-card p-10 rounded-[40px] border-2 border-white/5 space-y-6 relative overflow-hidden">
                 <div className="flex items-center gap-3 text-white">
                    <Fingerprint className="w-6 h-6 text-red-600" />
-                   <h2 className="text-xl font-black italic uppercase tracking-tight">Anti-Phishing_Kodu</h2>
+                   <h2 className="text-xl font-black italic uppercase tracking-tight">{t("sec.antiPhishing")}</h2>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3">
                    <div className="flex-1 relative group">
@@ -110,7 +110,7 @@ export default function SecuritySettings() {
              <div className="obsidian-card p-10 rounded-[40px] border-2 border-white/5 space-y-6">
                 <div className="flex items-center gap-3 text-white">
                    <Shield className="w-6 h-6 text-red-600" />
-                   <h2 className="text-xl font-black italic uppercase tracking-tight">2FA_Doğrulama</h2>
+                   <h2 className="text-xl font-black italic uppercase tracking-tight">{t("sec.2fa")}</h2>
                 </div>
                                 {(mfaFactors.length > 0 || localMfaEnabled) ? (
                    <div className="bg-green-600/5 border border-green-600/10 rounded-[24px] p-6 flex items-center justify-between">
@@ -122,12 +122,18 @@ export default function SecuritySettings() {
                          </div>
                       </div>
                       <button 
-                        onClick={() => {
+                        onClick={async () => {
                           if (window.confirm("2FA korumasını devre dışı bırakmak istediğinizden emin misiniz?")) {
+                            try {
+                              for (const factor of mfaFactors) {
+                                await supabase.auth.mfa.unenroll({ factorId: factor.id });
+                              }
+                            } catch (e) {
+                              if (import.meta.env.DEV) console.error("MFA unenroll error:", e);
+                            }
                             localStorage.removeItem("aeigs_mfa_enabled");
-                            localStorage.removeItem("aeigs_mfa_secret");
-                            localStorage.removeItem("aeigs_mfa_backups");
                             setLocalMfaEnabled(false);
+                            setMfaFactors([]);
                             toast.success("2FA başarıyla devre dışı bırakıldı.");
                           }
                         }}
@@ -158,13 +164,13 @@ export default function SecuritySettings() {
                 </div>
                 <div className="space-y-3">
                    <h3 className="text-xl font-black italic text-white uppercase tracking-tight leading-none">OTOMATİK_İMHA</h3>
-                   <p className="text-[8px] text-zinc-700 font-bold uppercase tracking-widest leading-relaxed">OTURUM_KAPANDIĞINDA_VERİLERİ_KALICI_OLARAK_SİLER.</p>
+                   <p className="text-[8px] text-zinc-700 font-bold uppercase tracking-widest leading-relaxed">{t("sec.deadManDesc")}</p>
                 </div>
                 <button 
                   onClick={() => setDeadManEnabled(!deadManEnabled)}
                   className={`w-full py-5 rounded-[24px] text-[9px] font-black uppercase tracking-widest transition-all ${deadManEnabled ? "bg-red-600 text-white shadow-[0_10px_20px_hsla(var(--primary),0.2)]" : "bg-white/[0.02] text-zinc-800 border border-white/10 hover:border-red-600/40"}`}
                 >
-                   {deadManEnabled ? "SİSTEM_ARMED" : "SİSTEMİ_ARM_ET"}
+                   {deadManEnabled ? {t("sec.systemArmed")} : {t("sec.armSystem")}}
                 </button>
              </div>
 

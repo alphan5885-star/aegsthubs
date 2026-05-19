@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/authContext";
 import { useSessionTimer } from "@/lib/sessionTimerContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -61,7 +61,7 @@ export default function Login() {
       // Force registration to always be "buyer" for absolute protection against scammers
       const err = await signup(toAuthEmail(displayName), password, displayName.trim(), "buyer", withdrawPin || undefined);
       if (err) { setError(err); setSubmitting(false); }
-      else { setSuccess("KİMLİK_OLUŞTURULDU."); setMode("login"); setSubmitting(false); }
+      else { setSuccess(t("login.registerSuccess")); setMode("login"); setSubmitting(false); }
     }
   };
 
@@ -106,13 +106,12 @@ export default function Login() {
              onClick={() => setMode("login")}
              className={`flex-1 py-3 text-[9px] font-black uppercase tracking-widest transition-all rounded-xl ${mode === "login" ? "bg-red-600 text-white shadow-[0_10px_20px_hsla(var(--primary),0.2)]" : "text-zinc-700 hover:text-white"}`}
            >
-             GİRİŞ
+             {t("login.loginTab")}
            </button>
            <button 
              onClick={() => setMode("signup")}
              className={`flex-1 py-3 text-[9px] font-black uppercase tracking-widest transition-all rounded-xl ${mode === "signup" ? "bg-red-600 text-white shadow-[0_10px_20px_hsla(var(--primary),0.2)]" : "text-zinc-700 hover:text-white"}`}
-           >
-             KAYIT
+           >{t("login.signupTab")}
            </button>
         </div>
 
@@ -202,7 +201,7 @@ export default function Login() {
             className="w-full bg-red-600 text-white py-5 rounded-3xl text-[10px] font-black uppercase tracking-[0.4em] hover:bg-red-700 transition-all disabled:opacity-20 shadow-[0_15px_30px_hsla(var(--primary),0.2)] flex items-center justify-center gap-3 active:scale-95 duration-500"
           >
             {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
-            {mode === "login" ? "ERİŞİM_SAĞLA" : "KİMLİK_OLUŞTUR"}
+            {mode === "login" ? t("login.loginBtn") : t("login.registerBtn")}
           </button>
         </form>
 

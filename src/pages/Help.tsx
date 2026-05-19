@@ -1,5 +1,6 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import PageShell from "@/components/PageShell";
+import { useI18n } from "@/lib/i18n";
 import { HelpCircle, Search, BookOpen, Key, DollarSign, LifeBuoy, ChevronDown, ChevronUp, Send, CheckCircle2, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -51,6 +52,7 @@ const FAQ_DATA: FAQItem[] = [
 ];
 
 export default function Help() {
+  const { t } = useI18n();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [expandedFaq, setExpandedFaq] = useState<string | null>(null);

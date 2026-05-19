@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
+﻿import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 
 export type Language = "tr" | "en" | "ru";
 
@@ -707,7 +707,76 @@ const tr = {
   "err.invalidAmount": "Geçersiz miktar",
   "err.insufficientBalance": "Yetersiz bakiye",
 
-// Empty / general
+
+  // Forum extra
+  "forum.loadError": "Forum verileri yüklenirken hata oluştu",
+  "forum.commentsLoadError": "Yorumlar yüklenirken hata oluştu",
+  "forum.fillAll": "Lütfen tüm alanları doldurun",
+  "forum.postPublished": "Konu başarıyla yayınlandı!",
+  "forum.postError": "Konu yayınlanırken bir hata oluştu",
+  "forum.commentEmpty": "Yorum boş bırakılamaz",
+  "forum.commentSent": "Yorumunuz başarıyla iletildi!",
+  "forum.commentError": "Yorum iletilirken bir hata oluştu",
+  "forum.backToList": "Forum Akışına Geri Dön",
+  "forum.writeReply": "Yanıtınızı buraya yazın...",
+  "forum.sending": "Gönderiliyor...",
+  "forum.publishReply": "Yanıt Yayınla",
+  "forum.noComments": "Henüz yorum yapılmamış. İlk yanıtı siz iletin!",
+  "forum.noTopics": "Bu kategori altında tartışma kaydı bulunamadı",
+  "forum.totalTopics": "Toplam Konu",
+  "forum.totalComments": "Toplam Yorum",
+  "forum.activeMembers": "Aktif Üyeler",
+  "forum.lastActivity": "Son Aktivite",
+  "forum.allTopics": "Tüm Konular",
+  "forum.pinPost": "Sabitle",
+  "forum.unpinPost": "Sabitlemeyı Kaldır",
+  "forum.deletePost": "Konuyu İmha Et",
+  "forum.anonPost": "Anonim Olarak Paylaş",
+  "forum.anonDesc": "Profiliniz gizlenir, ANONİM_SİBER olarak yayınlanır",
+  "forum.loading": "Forum Akışı Yükleniyor...",
+  "forum.searchPlaceholder": "Forumda arama yapın veya filtreleyin...",
+  "forum.newThread": "+ Yeni Tartışma Aç",
+  "forum.categories": "Forum Kategorileri",
+  "forum.views": "Görüntüleme",
+  "forum.shareDate": "Paylaşım Tarihi",
+
+  // Notifications
+  "notif.title": "Bildirimler",
+  "notif.empty": "Bildirim yok",
+  "notif.markRead": "Okundu işaretle",
+  "notif.markAllRead": "Tümünü okundu işaretle",
+  "notif.loading": "Bildirimler yükleniyor...",
+  "notif.deleteAll": "Tümünü Sil",
+  "notif.new": "Yeni",
+  "notif.all": "Tümü",
+  "notif.unread": "Okunmamış",
+
+  // Help
+  "help.title": "Yardım Masası",
+  "help.faq": "Sık Sorulan Sorular",
+  "help.contact": "İletişim",
+  "help.guides": "Rehberler",
+  "help.security": "Güvenlik Rehberi",
+  "help.pgp": "PGP Kullanımı",
+  "help.escrow": "Escrow Sistemi",
+  "help.orders": "Sipariş Yönetimi",
+  "help.wallet": "Cüzdan Kullanımı",
+
+  // Security Settings extra
+  "sec.antiPhishing": "Anti-Phishing Kodu",
+  "sec.update": "Güncelle",
+  "sec.systemRecord": "Sistem Kaydı",
+  "sec.2fa": "2FA Doğrulama",
+  "sec.2faActive": "TOTP Koruması Aktif",
+  "sec.2faHighSec": "Yüksek Güvenlik Kimliği",
+  "sec.start2fa": "2FA Sistemini Başlat",
+  "sec.deadMan": "Otomatik İmha",
+  "sec.deadManDesc": "Oturum kapandığında verileri kalıcı olarak siler",
+  "sec.armSystem": "Sistemi Arm Et",
+  "sec.systemArmed": "Sistem Armed",
+  "sec.panicWipe": "Acil Durum Temizliği",
+  "sec.panicBtn": "Panic Wipe",
+  // Empty / general
   emptyTitle: "Hiçbir şey yok",
   comingSoon: "Yakında",
 
@@ -722,6 +791,136 @@ const tr = {
   "updates.security": "Güvenlik",
   "updates.improvement": "İyileştirme",
   "updates.news": "Yenilikler",
+
+  // Notifications page
+  "notif.center": "BİLDİRİM MERKEZİ",
+  "notif.subtitle": "Sistem güvenlik uyarıları ve sipariş akış güncellemeleri",
+  "notif.markAllReadBtn": "OKUNDU YAP",
+  "notif.clearBtn": "TEMİZLE",
+  "notif.filterAll": "TÜMÜ",
+  "notif.filterOrders": "📦 SİPARİŞLER",
+  "notif.filterSecurity": "🛡️ GÜVENLİK",
+  "notif.filterSystem": "💡 SİSTEM",
+  "notif.emptyBox": "Gelen kutunuz tamamen boş.",
+  "notif.confirmClear": "Tüm bildirimlerinizi silmek istediğinizden emin misiniz?",
+  "notif.allMarkedRead": "Tüm bildirimler okundu olarak işaretlendi.",
+  "notif.boxCleared": "Bildirim kutusu temizlendi.",
+  "notif.deleted": "Bildirim silindi.",
+
+  // Dispute dialog
+  "dispute.title": "UYUŞMAZLIK BAŞLATMA PROTOKOLÜ",
+  "dispute.reasonLabel": "İtiraz Nedeni",
+  "dispute.reason1": "Ürün Teslim Edilmedi / Kargo Ulaşmadı",
+  "dispute.reason2": "Ürün Açıklamadan Farklı / Kusurlu",
+  "dispute.reason3": "Satıcı Yanıt Vermiyor / İletişim Koptu",
+  "dispute.detailsLabel": "Detaylı Gerekçe & Kanıt Logları",
+  "dispute.detailsPlaceholder": "Ürünün neden ulaşmadığını veya kusurunu detaylıca açıklayın...",
+  "dispute.warningText": "UYARI: UYUŞMAZLIK BAŞLATILDIĞINDA ESCROW HAVUZUNDAKİ TUTAR DONDURULUR VE SİPARİŞ ANLAŞMAZLIK MODUNA GEÇER. ÇÖZÜM İÇİN YÖNETİCİLER HAKEMLİK EDECEKTİR.",
+  "dispute.submitBtn": "UYUŞMAZLIĞI RESMEN BAŞLAT",
+  "dispute.submitting": "TALEBİNİZ GÖNDERİLİYOR...",
+  "dispute.loginRequired": "Giriş yapmanız gerekmektedir.",
+  "dispute.detailRequired": "Lütfen itiraz gerekçenizi detaylıca açıklayın.",
+  "dispute.createError": "Uyuşmazlık başlatılırken hata oluştu.",
+  "dispute.systemError": "Sistem hatası oluştu.",
+  "dispute.createSuccess": "Uyuşmazlık kaydı başarıyla oluşturuldu.",
+
+  // Payment tracker
+  "payment.generating": "LTC escrow ekranı hazırlanıyor…",
+  "payment.confirmed": "Ödeme onaylandı (3/3)",
+  "payment.dmOpened": "Operasyon DM aşağıda açıldı. 24 saat sonra otomatik imha edilir.",
+  "payment.waiting": "LTC Escrow Bekleniyor",
+  "payment.autoEscrow": "Otomatik LTC escrow",
+  "payment.autoDesc": "LTC ödeme 3 onaydan sonra otomatik onaylanır ve operasyon DM açılır.",
+  "payment.addressLabel": "Ödeme Adresi (LTC)",
+  "payment.amountLabel": "Tutar:",
+  "payment.underpaid": "Eksik ödeme tespit edildi. Bakiye yansıtılmaz, sipariş onaylanmaz.",
+  "payment.confirmations": "Doğrulama:",
+  "payment.singleSend": "Tam tutarı tek seferde gönder. Eksik ödemeler escrow'a yansımaz.",
+  "payment.monitoring": "Zincir canlı izleniyor (30sn) • 3 konfirmasyon sonrası otomatik onay",
+  "payment.addressError": "Fallback ödeme adresi oluşturulamadı",
+  "payment.underpaidAlert": "Eksik ödeme algılandı. Lütfen tam tutarı gönder.",
+  "payment.addressCopied": "Adres kopyalandı",
+
+  // Security HUD
+  "hud.suspiciousActivity": "Şüpheli aktivite tespit edildi",
+  "hud.botDetected": "Çok hızlı tıklama / bot davranışı algılandı. Erişim 15 saniye boyunca kısıtlandı.",
+  "hud.imHuman": "İnsanım, devam et",
+  "hud.securityEvents": "Güvenlik Olayları",
+  "hud.stealthActive": "Stealth Aktif",
+  "hud.noEvents": "Olay yok — tüm sistemler nominal.",
+  "hud.frontendNote": "Not: Frontend tespitidir. Gerçek güvenlik sunucu tarafında (RLS + sunucu rate-limit) sağlanır.",
+  "hud.statusTitle": "Güvenlik durumu",
+
+  // Panic button
+  "panic.title": "PANİK MODU",
+  "panic.desc": "Tüm sohbet geçmişlerin silinir, bekleyen siparişlerin iptal edilir, bakiyen dondurulur ve oturumun anında kapatılır.",
+  "panic.irreversible": "Geri alınamaz.",
+  "panic.armBtn": "Panik Modunu Aktifleştir",
+  "panic.confirmBtn": "🔥 EVET, HER ŞEYİ SİL",
+  "panic.wiping": "İMHA EDİLİYOR…",
+  "panic.success": "İzler silindi. {rooms} oda imha, {orders} sipariş iptal. Çıkış yapılıyor…",
+  "panic.failed": "Panik modu başarısız",
+  "panic.unknownError": "Bilinmeyen hata",
+
+  // Order status timeline
+  "timeline.disputeActive": "Uyuşmazlık Protokolü Aktif - Hakem Değerlendirmesi Bekleniyor",
+
+  // Order chat button
+  "chat.openError": "Sohbet açılamadı",
+  "chat.orderChat": "Sipariş Sohbeti",
+  "chat.defaultLabel": "Mesaj",
+
+  // Quick view modal
+  "quickview.digital": "DİJİTAL",
+  "quickview.physical": "FİZİKSEL",
+  "quickview.outOfStock": "STOKTA YOK",
+  "quickview.noDesc": "Bu ürün için detaylı açıklama bulunmamaktadır.",
+  "quickview.secureEscrow": "Güvenli Escrow",
+  "quickview.serviceFee": "%5 Hizmet Bedeli Dahil",
+  "quickview.buyBtn": "SATIN AL",
+  "quickview.totalPrice": "Toplam Fiyat",
+
+  // News ticker
+  "ticker.label": "DUYURU",
+  "ticker.news1": "🛡️ aeigsthub v3.0 güvenliğiniz için optimize edildi.",
+  "ticker.news2": "🚀 Platform güncellemeleri için forumu takip edin.",
+
+  // Not found page
+  "notfound.message": "Sayfa bulunamadı.",
+  "notfound.path": "Aranan yol:",
+  "notfound.home": "Ana Sayfa",
+  "notfound.secure": "Güvenli bağlantı korunuyor",
+
+  // Login page hardcoded
+  "login.idLabel": "KİMLİK_KODU",
+  "login.keyLabel": "ERİŞİM_ANAHTARI",
+  "login.pinLabel": "GÜVENLİK PIN KODU (6 HANE)",
+  "login.pinNote": "* PARA ÇEKME VE HASSAS İŞLEMLERDE KULLANILACAKTIR.",
+  "login.securityWarning": "🛡️ GÜVENLİK UYARISI: TÜM YENİ HESAPLAR OTOMATİK OLARAK \"ALICI\" (BUYER) OLARAK AÇILIR. SATICI OLMAK İÇİN DAHA SONRA KİMLİK DOĞRULAMA VE SATICI TEMİNATI (BOND) BAŞVURUSU YAPILMALIDIR.",
+  "login.tagline1": "\"POLİSTE 'BEN SADECE PAZAR YORUMU YAPIYORDUM HAKİM BEY' DEMEK YOK KARDEŞ! 🤫\"",
+  "login.tagline2": "AĞZINI SIKI TUT, 2FA KUR, RAHATINA BAK!",
+
+  // TorWarningBanner
+  "tor.signalOk": "SİNYAL_OK // GÜVENLİ",
+  "tor.network": "AĞ:",
+  "tor.networkValue": "CLEARWEB (ZIRHLI)",
+  "tor.traceProtection": "İZ KORUMASI:",
+  "tor.traceValue": "AKTİF (VPN+PGP)",
+  "tor.advice": "Öneri: Ağzını sıkı tut, VPN kullan, gerisini sisteme bırak.",
+  "tor.ping": "PING:",
+  "tor.close": "Kapat",
+
+  // BackgroundMusic
+  "music.mute": "Müziği Kapat",
+  "music.unmute": "Müziği Aç",
+
+  // TorBadge
+  "torbadge.tor": "Tor üzerinden bağlısın",
+  "torbadge.clearweb": "Clearweb — anonim mod aktif",
+  "torbadge.anon": "ANONIM",
+
+  // SessionTimerBadge
+  "session.remaining": "Kalan Oturum Süresi",
 };
 
 const en: Partial<typeof tr> = {
@@ -1054,6 +1253,68 @@ const en: Partial<typeof tr> = {
 
   
 
+  
+  "forum.loadError": "Error loading forum data",
+  "forum.commentsLoadError": "Error loading comments",
+  "forum.fillAll": "Please fill in all fields",
+  "forum.postPublished": "Topic published successfully!",
+  "forum.postError": "Error publishing topic",
+  "forum.commentEmpty": "Comment cannot be empty",
+  "forum.commentSent": "Comment posted successfully!",
+  "forum.commentError": "Error posting comment",
+  "forum.backToList": "Back to Forum",
+  "forum.writeReply": "Write your reply...",
+  "forum.sending": "Sending...",
+  "forum.publishReply": "Post Reply",
+  "forum.noComments": "No comments yet. Be the first!",
+  "forum.noTopics": "No topics found in this category",
+  "forum.totalTopics": "Total Topics",
+  "forum.totalComments": "Total Comments",
+  "forum.activeMembers": "Active Members",
+  "forum.lastActivity": "Last Activity",
+  "forum.allTopics": "All Topics",
+  "forum.pinPost": "Pin",
+  "forum.unpinPost": "Unpin",
+  "forum.deletePost": "Delete Topic",
+  "forum.anonPost": "Post Anonymously",
+  "forum.anonDesc": "Your profile is hidden, posted as ANON_CYBER",
+  "forum.loading": "Loading Forum...",
+  "forum.searchPlaceholder": "Search or filter forum...",
+  "forum.newThread": "+ New Thread",
+  "forum.categories": "Forum Categories",
+  "forum.views": "Views",
+  "forum.shareDate": "Posted",
+  "notif.title": "Notifications",
+  "notif.empty": "No notifications",
+  "notif.markRead": "Mark as read",
+  "notif.markAllRead": "Mark all as read",
+  "notif.loading": "Loading notifications...",
+  "notif.deleteAll": "Delete All",
+  "notif.new": "New",
+  "notif.all": "All",
+  "notif.unread": "Unread",
+  "help.title": "Help Desk",
+  "help.faq": "FAQ",
+  "help.contact": "Contact",
+  "help.guides": "Guides",
+  "help.security": "Security Guide",
+  "help.pgp": "PGP Usage",
+  "help.escrow": "Escrow System",
+  "help.orders": "Order Management",
+  "help.wallet": "Wallet Usage",
+  "sec.antiPhishing": "Anti-Phishing Code",
+  "sec.update": "Update",
+  "sec.systemRecord": "System Record",
+  "sec.2fa": "2FA Verification",
+  "sec.2faActive": "TOTP Protection Active",
+  "sec.2faHighSec": "High Security Identity",
+  "sec.start2fa": "Start 2FA System",
+  "sec.deadMan": "Auto Wipe",
+  "sec.deadManDesc": "Permanently deletes data when session ends",
+  "sec.armSystem": "Arm System",
+  "sec.systemArmed": "System Armed",
+  "sec.panicWipe": "Emergency Wipe",
+  "sec.panicBtn": "Panic Wipe",
   "bond.title": "Trust Bond",
   "bond.required": "Vendor Bond Required",
   "bond.desc": "You must post a 0.5 LTC trust bond to list products.",
@@ -1191,6 +1452,136 @@ emptyTitle: "Nothing here", comingSoon: "Coming soon",
   "security.online": "Online",
   "security.offline": "Offline",
   "security.networkError": "Network error",
+
+  // Notifications page
+  "notif.center": "NOTIFICATION CENTER",
+  "notif.subtitle": "System security alerts and order flow updates",
+  "notif.markAllReadBtn": "MARK READ",
+  "notif.clearBtn": "CLEAR",
+  "notif.filterAll": "ALL",
+  "notif.filterOrders": "📦 ORDERS",
+  "notif.filterSecurity": "🛡️ SECURITY",
+  "notif.filterSystem": "💡 SYSTEM",
+  "notif.emptyBox": "Your inbox is completely empty.",
+  "notif.confirmClear": "Are you sure you want to delete all notifications?",
+  "notif.allMarkedRead": "All notifications marked as read.",
+  "notif.boxCleared": "Notification inbox cleared.",
+  "notif.deleted": "Notification deleted.",
+
+  // Dispute dialog
+  "dispute.title": "DISPUTE INITIATION PROTOCOL",
+  "dispute.reasonLabel": "Dispute Reason",
+  "dispute.reason1": "Item Not Delivered / Shipment Not Arrived",
+  "dispute.reason2": "Item Differs from Description / Defective",
+  "dispute.reason3": "Vendor Unresponsive / Communication Lost",
+  "dispute.detailsLabel": "Detailed Grounds & Evidence Logs",
+  "dispute.detailsPlaceholder": "Explain in detail why the item didn't arrive or describe the defect...",
+  "dispute.warningText": "WARNING: WHEN A DISPUTE IS OPENED, THE ESCROW AMOUNT IS FROZEN AND THE ORDER ENTERS DISPUTE MODE. ADMINS WILL ARBITRATE FOR RESOLUTION.",
+  "dispute.submitBtn": "OFFICIALLY OPEN DISPUTE",
+  "dispute.submitting": "SUBMITTING YOUR REQUEST...",
+  "dispute.loginRequired": "You must be logged in.",
+  "dispute.detailRequired": "Please explain your dispute reason in detail.",
+  "dispute.createError": "Error opening dispute.",
+  "dispute.systemError": "System error occurred.",
+  "dispute.createSuccess": "Dispute record created successfully.",
+
+  // Payment tracker
+  "payment.generating": "Preparing LTC escrow screen…",
+  "payment.confirmed": "Payment confirmed (3/3)",
+  "payment.dmOpened": "Operation DM opened below. Auto-destroyed after 24 hours.",
+  "payment.waiting": "Awaiting LTC Escrow",
+  "payment.autoEscrow": "Automatic LTC escrow",
+  "payment.autoDesc": "LTC payment auto-confirmed after 3 confirmations and operation DM opens.",
+  "payment.addressLabel": "Payment Address (LTC)",
+  "payment.amountLabel": "Amount:",
+  "payment.underpaid": "Underpayment detected. Balance not credited, order not confirmed.",
+  "payment.confirmations": "Confirmations:",
+  "payment.singleSend": "Send full amount in one transaction. Partial payments are not credited.",
+  "payment.monitoring": "Chain monitored live (30s) • Auto-confirmed after 3 confirmations",
+  "payment.addressError": "Could not create fallback payment address",
+  "payment.underpaidAlert": "Underpayment detected. Please send the full amount.",
+  "payment.addressCopied": "Address copied",
+
+  // Security HUD
+  "hud.suspiciousActivity": "Suspicious activity detected",
+  "hud.botDetected": "Rapid clicking / bot behavior detected. Access restricted for 15 seconds.",
+  "hud.imHuman": "I'm human, continue",
+  "hud.securityEvents": "Security Events",
+  "hud.stealthActive": "Stealth Active",
+  "hud.noEvents": "No events — all systems nominal.",
+  "hud.frontendNote": "Note: This is a frontend detection. Real security is enforced server-side (RLS + server rate-limit).",
+  "hud.statusTitle": "Security status",
+
+  // Panic button
+  "panic.title": "PANIC MODE",
+  "panic.desc": "All chat history deleted, pending orders cancelled, balance frozen and session immediately terminated.",
+  "panic.irreversible": "Irreversible.",
+  "panic.armBtn": "Activate Panic Mode",
+  "panic.confirmBtn": "🔥 YES, DELETE EVERYTHING",
+  "panic.wiping": "DESTROYING…",
+  "panic.success": "Traces deleted. {rooms} rooms destroyed, {orders} orders cancelled. Logging out…",
+  "panic.failed": "Panic mode failed",
+  "panic.unknownError": "Unknown error",
+
+  // Order status timeline
+  "timeline.disputeActive": "Dispute Protocol Active - Awaiting Arbitration",
+
+  // Order chat button
+  "chat.openError": "Could not open chat",
+  "chat.orderChat": "Order Chat",
+  "chat.defaultLabel": "Message",
+
+  // Quick view modal
+  "quickview.digital": "DIGITAL",
+  "quickview.physical": "PHYSICAL",
+  "quickview.outOfStock": "OUT OF STOCK",
+  "quickview.noDesc": "No detailed description available for this product.",
+  "quickview.secureEscrow": "Secure Escrow",
+  "quickview.serviceFee": "5% Service Fee Included",
+  "quickview.buyBtn": "BUY NOW",
+  "quickview.totalPrice": "Total Price",
+
+  // News ticker
+  "ticker.label": "ANNOUNCEMENT",
+  "ticker.news1": "🛡️ aeigsthub v3.0 optimized for your security.",
+  "ticker.news2": "🚀 Follow the forum for platform updates.",
+
+  // Not found page
+  "notfound.message": "Page not found.",
+  "notfound.path": "Requested path:",
+  "notfound.home": "Home",
+  "notfound.secure": "Secure connection maintained",
+
+  // Login page hardcoded
+  "login.idLabel": "IDENTITY_CODE",
+  "login.keyLabel": "ACCESS_KEY",
+  "login.pinLabel": "SECURITY PIN CODE (6 DIGITS)",
+  "login.pinNote": "* USED FOR WITHDRAWALS AND SENSITIVE OPERATIONS.",
+  "login.securityWarning": "🛡️ SECURITY NOTICE: ALL NEW ACCOUNTS ARE AUTOMATICALLY OPENED AS \"BUYER\". TO BECOME A VENDOR, YOU MUST COMPLETE IDENTITY VERIFICATION AND SUBMIT A VENDOR BOND APPLICATION.",
+  "login.tagline1": "\"NO SAYING 'I WAS JUST COMMENTING ON THE MARKET, YOUR HONOR' IN COURT! 🤫\"",
+  "login.tagline2": "KEEP YOUR MOUTH SHUT, SET UP 2FA, STAY SAFE!",
+
+  // TorWarningBanner
+  "tor.signalOk": "SIGNAL_OK // SECURE",
+  "tor.network": "NET:",
+  "tor.networkValue": "CLEARWEB (ARMORED)",
+  "tor.traceProtection": "TRACE PROTECTION:",
+  "tor.traceValue": "ACTIVE (VPN+PGP)",
+  "tor.advice": "Tip: Keep quiet, use VPN, let the system handle the rest.",
+  "tor.ping": "PING:",
+  "tor.close": "Close",
+
+  // BackgroundMusic
+  "music.mute": "Mute Music",
+  "music.unmute": "Unmute Music",
+
+  // TorBadge
+  "torbadge.tor": "Connected via Tor",
+  "torbadge.clearweb": "Clearweb — anonymous mode active",
+  "torbadge.anon": "ANON",
+
+  // SessionTimerBadge
+  "session.remaining": "Remaining Session Time",
 };
 
 const ru: Partial<typeof tr> = {
@@ -1593,7 +1984,199 @@ emptyTitle: "Пусто", comingSoon: "Скоро",
   "security.connectionStatus": "Соединение",
   "security.online": "Онлайн",
   "security.offline": "Оффлайн",
+  
+  "forum.loadError": "Ошибка загрузки форума",
+  "forum.commentsLoadError": "Ошибка загрузки комментариев",
+  "forum.fillAll": "Пожалуйста, заполните все поля",
+  "forum.postPublished": "Тема успешно опубликована!",
+  "forum.postError": "Ошибка публикации темы",
+  "forum.commentEmpty": "Комментарий не может быть пустым",
+  "forum.commentSent": "Комментарий успешно отправлен!",
+  "forum.commentError": "Ошибка отправки комментария",
+  "forum.backToList": "Назад к форуму",
+  "forum.writeReply": "Напишите ответ...",
+  "forum.sending": "Отправка...",
+  "forum.publishReply": "Опубликовать ответ",
+  "forum.noComments": "Комментариев пока нет. Будьте первым!",
+  "forum.noTopics": "Темы не найдены в этой категории",
+  "forum.totalTopics": "Всего тем",
+  "forum.totalComments": "Всего комментариев",
+  "forum.activeMembers": "Активных участников",
+  "forum.lastActivity": "Последняя активность",
+  "forum.allTopics": "Все темы",
+  "forum.pinPost": "Закрепить",
+  "forum.unpinPost": "Открепить",
+  "forum.deletePost": "Удалить тему",
+  "forum.anonPost": "Опубликовать анонимно",
+  "forum.anonDesc": "Ваш профиль скрыт, публикуется как АНОН",
+  "forum.loading": "Загрузка форума...",
+  "forum.searchPlaceholder": "Поиск по форуму...",
+  "forum.newThread": "+ Новая тема",
+  "forum.categories": "Категории форума",
+  "forum.views": "Просмотры",
+  "forum.shareDate": "Опубликовано",
+  "notif.title": "Уведомления",
+  "notif.empty": "Нет уведомлений",
+  "notif.markRead": "Отметить прочитанным",
+  "notif.markAllRead": "Отметить все прочитанными",
+  "notif.loading": "Загрузка уведомлений...",
+  "notif.deleteAll": "Удалить все",
+  "notif.new": "Новые",
+  "notif.all": "Все",
+  "notif.unread": "Непрочитанные",
+  "help.title": "Служба поддержки",
+  "help.faq": "FAQ",
+  "help.contact": "Контакты",
+  "help.guides": "Руководства",
+  "help.security": "Руководство по безопасности",
+  "help.pgp": "Использование PGP",
+  "help.escrow": "Система эскроу",
+  "help.orders": "Управление заказами",
+  "help.wallet": "Использование кошелька",
+  "sec.antiPhishing": "Антифишинговый код",
+  "sec.update": "Обновить",
+  "sec.systemRecord": "Системная запись",
+  "sec.2fa": "2FA верификация",
+  "sec.2faActive": "Защита TOTP активна",
+  "sec.2faHighSec": "Высокий уровень безопасности",
+  "sec.start2fa": "Запустить 2FA",
+  "sec.deadMan": "Автоуничтожение",
+  "sec.deadManDesc": "Удаляет данные при завершении сессии",
+  "sec.armSystem": "Активировать",
+  "sec.systemArmed": "Система активирована",
+  "sec.panicWipe": "Экстренная очистка",
+  "sec.panicBtn": "Panic Wipe",
   "security.networkError": "Ошибка сети",
+
+  // Notifications page
+  "notif.center": "ЦЕНТР УВЕДОМЛЕНИЙ",
+  "notif.subtitle": "Системные оповещения безопасности и обновления заказов",
+  "notif.markAllReadBtn": "ОТМЕТИТЬ ПРОЧИТАННЫМ",
+  "notif.clearBtn": "ОЧИСТИТЬ",
+  "notif.filterAll": "ВСЕ",
+  "notif.filterOrders": "📦 ЗАКАЗЫ",
+  "notif.filterSecurity": "🛡️ БЕЗОПАСНОСТЬ",
+  "notif.filterSystem": "💡 СИСТЕМА",
+  "notif.emptyBox": "Ваш почтовый ящик полностью пуст.",
+  "notif.confirmClear": "Вы уверены, что хотите удалить все уведомления?",
+  "notif.allMarkedRead": "Все уведомления отмечены как прочитанные.",
+  "notif.boxCleared": "Почтовый ящик очищен.",
+  "notif.deleted": "Уведомление удалено.",
+
+  // Dispute dialog
+  "dispute.title": "ПРОТОКОЛ ОТКРЫТИЯ СПОРА",
+  "dispute.reasonLabel": "Причина спора",
+  "dispute.reason1": "Товар не доставлен / Посылка не прибыла",
+  "dispute.reason2": "Товар отличается от описания / Дефектный",
+  "dispute.reason3": "Продавец не отвечает / Связь потеряна",
+  "dispute.detailsLabel": "Подробное обоснование и доказательства",
+  "dispute.detailsPlaceholder": "Подробно объясните, почему товар не прибыл или опишите дефект...",
+  "dispute.warningText": "ПРЕДУПРЕЖДЕНИЕ: ПРИ ОТКРЫТИИ СПОРА СУММА ЭСКРОУ ЗАМОРАЖИВАЕТСЯ И ЗАКАЗ ПЕРЕХОДИТ В РЕЖИМ СПОРА. АДМИНИСТРАТОРЫ ВЫСТУПЯТ АРБИТРАМИ.",
+  "dispute.submitBtn": "ОФИЦИАЛЬНО ОТКРЫТЬ СПОР",
+  "dispute.submitting": "ОТПРАВКА ЗАПРОСА...",
+  "dispute.loginRequired": "Необходимо войти в систему.",
+  "dispute.detailRequired": "Пожалуйста, подробно объясните причину спора.",
+  "dispute.createError": "Ошибка при открытии спора.",
+  "dispute.systemError": "Произошла системная ошибка.",
+  "dispute.createSuccess": "Запись о споре успешно создана.",
+
+  // Payment tracker
+  "payment.generating": "Подготовка экрана LTC эскроу…",
+  "payment.confirmed": "Платёж подтверждён (3/3)",
+  "payment.dmOpened": "Операционный DM открыт ниже. Автоматически уничтожается через 24 часа.",
+  "payment.waiting": "Ожидание LTC Эскроу",
+  "payment.autoEscrow": "Автоматический LTC эскроу",
+  "payment.autoDesc": "LTC платёж автоматически подтверждается после 3 подтверждений и открывается операционный DM.",
+  "payment.addressLabel": "Адрес платежа (LTC)",
+  "payment.amountLabel": "Сумма:",
+  "payment.underpaid": "Обнаружена недоплата. Баланс не зачислен, заказ не подтверждён.",
+  "payment.confirmations": "Подтверждения:",
+  "payment.singleSend": "Отправьте полную сумму за одну транзакцию. Частичные платежи не зачисляются.",
+  "payment.monitoring": "Цепочка отслеживается в реальном времени (30с) • Автоподтверждение после 3 подтверждений",
+  "payment.addressError": "Не удалось создать резервный адрес платежа",
+  "payment.underpaidAlert": "Обнаружена недоплата. Пожалуйста, отправьте полную сумму.",
+  "payment.addressCopied": "Адрес скопирован",
+
+  // Security HUD
+  "hud.suspiciousActivity": "Обнаружена подозрительная активность",
+  "hud.botDetected": "Обнаружено быстрое нажатие / поведение бота. Доступ ограничен на 15 секунд.",
+  "hud.imHuman": "Я человек, продолжить",
+  "hud.securityEvents": "События безопасности",
+  "hud.stealthActive": "Скрытый режим активен",
+  "hud.noEvents": "Нет событий — все системы в норме.",
+  "hud.frontendNote": "Примечание: Это обнаружение на стороне клиента. Реальная безопасность обеспечивается на сервере (RLS + ограничение запросов).",
+  "hud.statusTitle": "Статус безопасности",
+
+  // Panic button
+  "panic.title": "РЕЖИМ ПАНИКИ",
+  "panic.desc": "Вся история чатов удаляется, ожидающие заказы отменяются, баланс замораживается и сессия немедленно завершается.",
+  "panic.irreversible": "Необратимо.",
+  "panic.armBtn": "Активировать режим паники",
+  "panic.confirmBtn": "🔥 ДА, УДАЛИТЬ ВСЁ",
+  "panic.wiping": "УНИЧТОЖЕНИЕ…",
+  "panic.success": "Следы удалены. {rooms} комнат уничтожено, {orders} заказов отменено. Выход…",
+  "panic.failed": "Режим паники не удался",
+  "panic.unknownError": "Неизвестная ошибка",
+
+  // Order status timeline
+  "timeline.disputeActive": "Протокол спора активен - Ожидание арбитража",
+
+  // Order chat button
+  "chat.openError": "Не удалось открыть чат",
+  "chat.orderChat": "Чат заказа",
+  "chat.defaultLabel": "Сообщение",
+
+  // Quick view modal
+  "quickview.digital": "ЦИФРОВОЙ",
+  "quickview.physical": "ФИЗИЧЕСКИЙ",
+  "quickview.outOfStock": "НЕТ В НАЛИЧИИ",
+  "quickview.noDesc": "Подробное описание для этого товара отсутствует.",
+  "quickview.secureEscrow": "Безопасный эскроу",
+  "quickview.serviceFee": "Включая 5% сервисный сбор",
+  "quickview.buyBtn": "КУПИТЬ",
+  "quickview.totalPrice": "Итоговая цена",
+
+  // News ticker
+  "ticker.label": "ОБЪЯВЛЕНИЕ",
+  "ticker.news1": "🛡️ aeigsthub v3.0 оптимизирован для вашей безопасности.",
+  "ticker.news2": "🚀 Следите за обновлениями платформы на форуме.",
+
+  // Not found page
+  "notfound.message": "Страница не найдена.",
+  "notfound.path": "Запрошенный путь:",
+  "notfound.home": "Главная",
+  "notfound.secure": "Безопасное соединение поддерживается",
+
+  // Login page hardcoded
+  "login.idLabel": "КОД_ЛИЧНОСТИ",
+  "login.keyLabel": "КЛЮЧ_ДОСТУПА",
+  "login.pinLabel": "КОД БЕЗОПАСНОСТИ PIN (6 ЦИФР)",
+  "login.pinNote": "* ИСПОЛЬЗУЕТСЯ ДЛЯ ВЫВОДА СРЕДСТВ И ЧУВСТВИТЕЛЬНЫХ ОПЕРАЦИЙ.",
+  "login.securityWarning": "🛡️ УВЕДОМЛЕНИЕ БЕЗОПАСНОСТИ: ВСЕ НОВЫЕ АККАУНТЫ АВТОМАТИЧЕСКИ ОТКРЫВАЮТСЯ КАК \"ПОКУПАТЕЛЬ\". ЧТОБЫ СТАТЬ ПРОДАВЦОМ, НЕОБХОДИМО ПРОЙТИ ВЕРИФИКАЦИЮ И ПОДАТЬ ЗАЯВКУ НА ЗАЛОГ ПРОДАВЦА.",
+  "login.tagline1": "\"НЕ ГОВОРИ 'Я ПРОСТО КОММЕНТИРОВАЛ РЫНОК, ВАША ЧЕСТЬ' В СУДЕ! 🤫\"",
+  "login.tagline2": "ДЕРЖИ РОТ НА ЗАМКЕ, НАСТРОЙ 2FA, БУДЬ В БЕЗОПАСНОСТИ!",
+
+  // TorWarningBanner
+  "tor.signalOk": "СИГНАЛ_ОК // БЕЗОПАСНО",
+  "tor.network": "СЕТЬ:",
+  "tor.networkValue": "CLEARWEB (ЗАЩИЩЁННЫЙ)",
+  "tor.traceProtection": "ЗАЩИТА СЛЕДОВ:",
+  "tor.traceValue": "АКТИВНА (VPN+PGP)",
+  "tor.advice": "Совет: Держи рот на замке, используй VPN, остальное оставь системе.",
+  "tor.ping": "ПИНГ:",
+  "tor.close": "Закрыть",
+
+  // BackgroundMusic
+  "music.mute": "Выключить музыку",
+  "music.unmute": "Включить музыку",
+
+  // TorBadge
+  "torbadge.tor": "Подключено через Tor",
+  "torbadge.clearweb": "Clearweb — анонимный режим активен",
+  "torbadge.anon": "АНОН",
+
+  // SessionTimerBadge
+  "session.remaining": "Оставшееся время сессии",
 };
 
 const translations = { tr, en, ru } as const;

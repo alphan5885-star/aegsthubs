@@ -1,8 +1,9 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import PageShell from "@/components/PageShell";
 import { Bell, ShieldCheck, ShoppingBag, Info, X, Trash2, CheckSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { useI18n } from "@/lib/i18n";
 
 interface NotificationItem {
   id: string;
@@ -49,6 +50,7 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
 ];
 
 export default function Notifications() {
+  const { t } = useI18n();
   const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
   const [activeFilter, setActiveFilter] = useState<"all" | "order" | "security" | "system">("all");
 
@@ -56,13 +58,13 @@ export default function Notifications() {
 
   const handleMarkAllRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    toast.success("Tüm bildirimler okundu olarak işaretlendi.");
+    toast.success(t("notif.allMarkedRead" as any));
   };
 
   const handleClearAll = () => {
-    if (window.confirm("Tüm bildirimlerinizi silmek istediğinizden emin misiniz?")) {
+    if (window.confirm(t("notif.confirmClear" as any))) {
       setNotifications([]);
-      toast.success("Bildirim kutusu temizlendi.");
+      toast.success(t("notif.boxCleared" as any));
     }
   };
 
@@ -73,7 +75,7 @@ export default function Notifications() {
   const handleDelete = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setNotifications(prev => prev.filter(n => n.id !== id));
-    toast.success("Bildirim silindi.");
+    toast.success(t("notif.deleted" as any));
   };
 
   const getIcon = (type: string) => {
@@ -100,9 +102,9 @@ export default function Notifications() {
               <Bell className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <h1 className="text-sm font-black text-white uppercase tracking-[0.2em]">BİLDİRİM MERKEZİ</h1>
+              <h1 className="text-sm font-black text-white uppercase tracking-[0.2em]">{t("notif.center" as any)}</h1>
               <p className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">
-                Sistem güvenlik uyarıları ve sipariş akış güncellemeleri
+                {t("notif.subtitle" as any)}
               </p>
             </div>
           </div>
@@ -112,13 +114,13 @@ export default function Notifications() {
               onClick={handleMarkAllRead}
               className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-white/[0.02] border border-white/5 hover:border-red-600/30 text-zinc-400 hover:text-white rounded-xl text-[8px] font-black uppercase tracking-wider transition-all cursor-pointer"
             >
-              <CheckSquare className="w-3 h-3 text-red-500" /> OKUNDU YAP
+              <CheckSquare className="w-3 h-3 text-red-500" /> {t("notif.markAllReadBtn" as any)}
             </button>
             <button
               onClick={handleClearAll}
               className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-red-950/20 border border-red-500/10 hover:border-red-500/30 text-red-500 rounded-xl text-[8px] font-black uppercase tracking-wider transition-all cursor-pointer"
             >
-              <Trash2 className="w-3 h-3" /> TEMİZLE
+              <Trash2 className="w-3 h-3" /> {t("notif.clearBtn" as any)}
             </button>
           </div>
         </div>
@@ -126,10 +128,10 @@ export default function Notifications() {
         {/* Filter Navigation HUD */}
         <div className="flex flex-wrap gap-2 border-b border-white/[0.03] pb-3 text-[9px] font-black uppercase">
           {[
-            { id: "all", label: "TÜMÜ" },
-            { id: "order", label: "📦 SİPARİŞLER" },
-            { id: "security", label: "🛡️ GÜVENLİK" },
-            { id: "system", label: "💡 SİSTEM" }
+            { id: "all", label: t("notif.filterAll" as any) },
+            { id: "order", label: t("notif.filterOrders" as any) },
+            { id: "security", label: t("notif.filterSecurity" as any) },
+            { id: "system", label: t("notif.filterSystem" as any) }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -204,7 +206,7 @@ export default function Notifications() {
               <div className="bg-[#030303]/40 border border-white/5 rounded-3xl p-12 text-center space-y-3">
                 <Bell className="w-8 h-8 text-zinc-700 mx-auto" />
                 <div className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">
-                  Gelen kutunuz tamamen boş.
+                  {t("notif.emptyBox" as any)}
                 </div>
               </div>
             )}

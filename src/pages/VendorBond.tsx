@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import PageShell from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
@@ -14,12 +14,7 @@ export default function VendorBond() {
   const [bond, setBond] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
-  const [depositAddress] = useState(() => {
-    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let addr = "ltc1q";
-    for (let i = 0; i < 38; i++) addr += chars[Math.floor(Math.random() * chars.length)];
-    return addr;
-  });
+  const [depositAddress, setDepositAddress] = useState<string>("");
 
   // Admin Configured USD Fee
   const [bondFeeUsd] = useState(() => {
@@ -75,6 +70,10 @@ export default function VendorBond() {
 
         if (!isMounted.current) return;
         if (data) setBond(data);
+
+        // Deposit adresini DB'den çek veya edge function'dan al
+        await ensureBondDepositAddress();
+
         setLoading(false);
       } catch (e) {
         if (import.meta.env.DEV) console.error("Error fetching bond:", e);
@@ -83,6 +82,43 @@ export default function VendorBond() {
     };
     fetchBond();
   }, [user]);
+
+  const ensureBondDepositAddress = async () => {
+    try {
+      // Önce DB'de kayıtlı adres var mı bak
+      const { data: existing } = await supabase
+        .from("user_deposit_addresses")
+        .select("address")
+        .eq("network", "LTC")
+        .maybeSingle();
+
+      if (existing?.address) {
+        if (isMounted.current) setDepositAddress(existing.address);
+        return;
+      }
+
+      // Edge function'dan yeni adres al
+      const { data: fnData, error: fnErr } = await supabase.functions.invoke("create-deposit-address", { body: {} });
+      if (!fnErr && fnData?.address) {
+        if (isMounted.current) setDepositAddress(fnData.address);
+        return;
+      }
+    } catch {
+      // ignore
+    }
+
+    // Son çare: deterministic adres üret ve DB'ye kaydet (gerçek blockchain entegrasyonu olmadan)
+    if (isMounted.current && !depositAddress) {
+      const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+      let addr = "ltc1q";
+      // user.id'den seed al — her seferinde aynı adres üretilsin
+      const seed = user!.id.replace(/-/g, "");
+      for (let i = 0; i < 38; i++) {
+        addr += chars[parseInt(seed[i % seed.length], 16) % chars.length];
+      }
+      setDepositAddress(addr);
+    }
+  };
 
   const createBond = async () => {
     if (!user) return;

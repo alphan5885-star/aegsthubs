@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+﻿import { useEffect, useState, useRef } from "react";
 import PageShell from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
@@ -24,13 +24,13 @@ export default function Transactions() {
   useEffect(() => {
     if (!user) return;
     const fetchTransactions = async () => {
-      const query = supabase
+      // transactions tablosunda buyer_id/vendor_id yok — user_id kolonu kullanılıyor
+      const { data } = await supabase
         .from("transactions")
         .select("*")
-        .or(`buyer_id.eq.${user.id},vendor_id.eq.${user.id}`)
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(50);
-      const { data } = await query;
       if (data) setTxs(data as Transaction[]);
       setLoading(false);
     };

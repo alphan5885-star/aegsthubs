@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+﻿import { useEffect, useState, useRef } from "react";
 import PageShell from "@/components/PageShell";
 import { QRCodeCanvas } from "qrcode.react";
 import { toast } from "sonner";
@@ -7,10 +7,11 @@ import { useI18n } from "@/lib/i18n";
 
 type Balance = { available: number; pending: number; total: number };
 
-const RATES = {
-  BTC: 96500,  // BTC/USD
-  LTC: 84,     // LTC/USD
-  XMR: 180,    // XMR/USD
+// Fallback rates — overridden by live CoinGecko fetch
+const DEFAULT_RATES = {
+  BTC: 96500,
+  LTC: 84,
+  XMR: 180,
 };
 
 const FALLBACK_LTC_ADDRESS = "MQVJg8Rqy31LHQpy1rdHFgawh4dcErZEaR";
@@ -25,6 +26,10 @@ export default function Wallet() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
+  // Live exchange rates from CoinGecko
+  const [rates, setRates] = useState(DEFAULT_RATES);
+  const [ratesLoading, setRatesLoading] = useState(true);
+
   // Withdrawal Form States
   const [withdrawAddr, setWithdrawAddr] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
@@ -34,11 +39,33 @@ export default function Wallet() {
 
   const isMounted = useRef(true);
 
-  // Helper to convert LTC balance to BTC or XMR
+  // Fetch live rates from CoinGecko
+  const fetchLiveRates = async () => {
+    try {
+      const res = await fetch(
+        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,litecoin,monero&vs_currencies=usd"
+      );
+      if (!res.ok) throw new Error("rate fetch failed");
+      const json = await res.json();
+      if (isMounted.current) {
+        setRates({
+          BTC: json?.bitcoin?.usd ?? DEFAULT_RATES.BTC,
+          LTC: json?.litecoin?.usd ?? DEFAULT_RATES.LTC,
+          XMR: json?.monero?.usd ?? DEFAULT_RATES.XMR,
+        });
+      }
+    } catch {
+      // keep DEFAULT_RATES
+    } finally {
+      if (isMounted.current) setRatesLoading(false);
+    }
+  };
+
+  // Helper to convert LTC balance to BTC or XMR using live rates
   const convertPriceFromLTC = (ltcAmount: number, to: "LTC" | "BTC" | "XMR"): number => {
     if (to === "LTC") return ltcAmount;
-    const amountInUSD = ltcAmount * RATES.LTC;
-    return amountInUSD / RATES[to];
+    const amountInUSD = ltcAmount * rates.LTC;
+    return amountInUSD / rates[to];
   };
 
   const ensureDepositAddress = async () => {
@@ -67,22 +94,36 @@ export default function Wallet() {
 
   const refreshBalance = async () => {
     try {
+      // Önce sync-deposits edge function'ı dene
       const { data, error } = await supabase.functions.invoke("sync-deposits", { body: {} });
-      if (error) throw error;
-      if (data?.balance) {
+      if (!error && data?.balance) {
         setBalance({
           available: Number(data.balance.available || 0),
           pending: Number(data.balance.pending || 0),
           total: Number(data.balance.total || 0),
         });
+        return;
       }
     } catch {
-      // Offline fallback simulations for local dev environments
-      setBalance({
-        available: 0.01542 * (RATES.BTC / RATES.LTC), // Setting a beautiful default simulation balance
-        pending: 0,
-        total: 0.01542 * (RATES.BTC / RATES.LTC),
-      });
+      // edge function çalışmıyor, DB'den direkt oku
+    }
+
+    // Fallback: user_balances tablosundan direkt çek
+    try {
+      const { data: balData } = await supabase
+        .from("user_balances")
+        .select("available, pending, total")
+        .maybeSingle();
+      if (balData) {
+        setBalance({
+          available: Number(balData.available || 0),
+          pending: Number(balData.pending || 0),
+          total: Number(balData.total || 0),
+        });
+      }
+    } catch {
+      // DB de çalışmıyorsa 0 göster — hardcoded değil
+      setBalance({ available: 0, pending: 0, total: 0 });
     }
   };
 
@@ -90,8 +131,11 @@ export default function Wallet() {
     isMounted.current = true;
     const init = async () => {
       try {
-        await ensureDepositAddress();
-        await refreshBalance();
+        await Promise.all([
+          ensureDepositAddress(),
+          refreshBalance(),
+          fetchLiveRates(),
+        ]);
 
         const { data: profileData } = await supabase
           .from("profiles")
@@ -101,7 +145,7 @@ export default function Wallet() {
           setPinHash(profileData.withdraw_pin_hash);
         }
       } catch (e) {
-        console.error(e);
+        if (import.meta.env.DEV) console.error(e);
       } finally {
         if (isMounted.current) setLoading(false);
       }
@@ -135,46 +179,49 @@ export default function Wallet() {
 
     setWithdrawing(true);
     try {
+      // PIN'i hash'le ve RPC'ye gönder
+      const buf = new TextEncoder().encode(pinCode);
+      const hashBuf = await crypto.subtle.digest("SHA-256", buf);
+      const computedPinHash = Array.from(new Uint8Array(hashBuf))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+
+      const ltcAmount = activeNetwork === "LTC" ? amt : convertPriceFromLTC(amt, "LTC");
+
       const { data, error } = await supabase.rpc("user_withdraw_ltc", {
         _address: withdrawAddr,
-        _amount: activeNetwork === "LTC" ? amt : convertPriceFromLTC(amt, "LTC"),
-        _pin_hash: pinHash || "MOCK_PIN_HASH",
+        _amount: ltcAmount,
+        _pin_hash: computedPinHash,
       });
 
-      if (error || !(data as any)?.success) {
-        const errorMsg = (data as any)?.error || error?.message || "RPC_ERROR";
-        if (import.meta.env.DEV || errorMsg === "RPC_ERROR") {
-          simulateWithdrawal(amt);
-          return;
-        }
-        toast.error("Çekim talebi oluşturulamadı.");
+      if (error) {
+        toast.error(error.message || "Çekim talebi oluşturulamadı.");
+        return;
+      }
+
+      const result = data as any;
+      if (!result?.success) {
+        toast.error(result?.error || "Çekim talebi reddedildi.");
         return;
       }
 
       toast.success(`${amt} ${activeNetwork} çekim talebi başarıyla oluşturuldu.`);
-      clearForm(amt);
-    } catch {
-      simulateWithdrawal(amt);
+      setWithdrawAddr("");
+      setWithdrawAmount("");
+      setPinCode("");
+      // Bakiyeyi güncelle
+      if (activeNetwork === "LTC") {
+        setBalance((prev) => ({
+          available: Math.max(0, prev.available - ltcAmount),
+          pending: prev.pending,
+          total: Math.max(0, prev.total - ltcAmount),
+        }));
+      }
+    } catch (e) {
+      if (import.meta.env.DEV) console.error("Withdraw error:", e);
+      toast.error("Çekim işlemi sırasında bir hata oluştu.");
     } finally {
       setWithdrawing(false);
-    }
-  };
-
-  const simulateWithdrawal = (amt: number) => {
-    toast.success(`[SIMULATION] ${amt} ${activeNetwork} çekim talebi başarıyla oluşturuldu!`);
-    clearForm(amt);
-  };
-
-  const clearForm = (amt: number) => {
-    setWithdrawAddr("");
-    setWithdrawAmount("");
-    setPinCode("");
-    if (activeNetwork === "LTC") {
-      setBalance((prev) => ({
-        available: Math.max(0, prev.available - amt),
-        pending: prev.pending,
-        total: Math.max(0, prev.total - amt),
-      }));
     }
   };
 
@@ -203,14 +250,14 @@ export default function Wallet() {
     );
   }
 
-  // Derived balances for exact high-fidelity display match
-  const btcBalance = 0.01542;
+  // Tüm bakiyeler LTC cinsinden tutulur, diğer coinler dönüştürülür
   const ltcBalance = balance.available;
-  const xmrBalance = 4.8210;
+  const btcBalance = convertPriceFromLTC(ltcBalance, "BTC");
+  const xmrBalance = convertPriceFromLTC(ltcBalance, "XMR");
 
-  const btcUSD = btcBalance * RATES.BTC;
-  const ltcUSD = ltcBalance * RATES.LTC;
-  const xmrUSD = xmrBalance * RATES.XMR;
+  const btcUSD = btcBalance * rates.BTC;
+  const ltcUSD = ltcBalance * rates.LTC;
+  const xmrUSD = xmrBalance * rates.XMR;
 
   // Active Network Derived Values
   const activeBalance = activeNetwork === "LTC" ? ltcBalance : (activeNetwork === "BTC" ? btcBalance : xmrBalance);

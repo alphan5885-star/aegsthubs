@@ -1,4 +1,4 @@
-import { useCustomization, CustomizationSettings } from "@/lib/customizationContext";
+﻿import { useCustomization, CustomizationSettings } from "@/lib/customizationContext";
 import { useBackground } from "@/lib/backgroundContext";
 import { useI18n, languageOptions, TranslationKey } from "@/lib/i18n";
 import PageShell from "@/components/PageShell";
@@ -23,7 +23,7 @@ import { useRef } from "react";
 export default function Customization() {
   const { settings, updateSettings, resetSettings } = useCustomization();
   const { backgroundUrl, setBackgroundUrl, backgroundOpacity, setBackgroundOpacity } = useBackground();
-  const { t, language, setLanguage } = useI18n();
+  const { t, language, setLanguage } = useI18n(); const { t } = useI18n();
   const bgRef = useRef<HTMLInputElement>(null);
 
   const handleBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

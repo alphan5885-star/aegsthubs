@@ -27,7 +27,7 @@ export default function OrderStatusTimeline({ status }: { status: string }) {
   if (s === "disputed") {
     return (
       <div className="flex items-center gap-2 text-[11px] font-mono text-red-500 bg-red-950/20 border border-red-500/10 rounded-xl p-3 uppercase font-bold tracking-wide">
-        <ShieldAlert className="w-4 h-4 animate-pulse text-red-500" /> Uyuşmazlık Protokolü Aktif - Hakem Değerlendirmesi Bekleniyor
+        <ShieldAlert className="w-4 h-4 animate-pulse text-red-500" /> {t("timeline.disputeActive" as any)}
       </div>
     );
   }

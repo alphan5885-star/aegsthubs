@@ -13,16 +13,12 @@ interface Setup2faDialogProps {
 
 export default function Setup2faDialog({ userEmail, onClose, onCompleted }: Setup2faDialogProps) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [secretKey] = useState(() => {
-    // Generate a secure looking base32 secret
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-    let result = "";
-    for (let i = 0; i < 16; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-  });
-  
+  const [factorId, setFactorId] = useState<string>("");
+  const [otpUri, setOtpUri] = useState<string>("");
+  const [secretKey, setSecretKey] = useState<string>("");
+  const [enrolling, setEnrolling] = useState(true);
+  const [enrollError, setEnrollError] = useState<string | null>(null);
+
   const [copied, setCopied] = useState(false);
   const [verificationCode, setVerificationCode] = useState<string[]>(Array(6).fill(""));
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -35,7 +31,34 @@ export default function Setup2faDialog({ userEmail, onClose, onCompleted }: Setu
     });
   });
 
-  const otpUri = `otpauth://totp/AEIGSTHUB:${userEmail || "anonymous"}?secret=${secretKey}&issuer=AEIGSTHUB&algorithm=SHA1&digits=6&period=30`;
+  // Supabase MFA enroll — gerçek TOTP factor oluştur
+  useEffect(() => {
+    let cancelled = false;
+    const enroll = async () => {
+      setEnrolling(true);
+      setEnrollError(null);
+      try {
+        const { data, error } = await supabase.auth.mfa.enroll({
+          factorType: "totp",
+          friendlyName: `AEIGSTHUB-${Date.now()}`,
+        });
+        if (cancelled) return;
+        if (error) {
+          setEnrollError(error.message);
+          return;
+        }
+        setFactorId(data.id);
+        setOtpUri(data.totp.uri);
+        setSecretKey(data.totp.secret);
+      } catch (e: any) {
+        if (!cancelled) setEnrollError(e?.message || "Enroll hatası");
+      } finally {
+        if (!cancelled) setEnrolling(false);
+      }
+    };
+    enroll();
+    return () => { cancelled = true; };
+  }, []);
 
   const handleCopySecret = () => {
     navigator.clipboard.writeText(secretKey);
@@ -45,13 +68,10 @@ export default function Setup2faDialog({ userEmail, onClose, onCompleted }: Setu
   };
 
   const handleOtpChange = (value: string, idx: number) => {
-    if (!/^\d*$/.test(value)) return; // Only allow numbers
-    
+    if (!/^\d*$/.test(value)) return;
     const newCode = [...verificationCode];
     newCode[idx] = value.slice(-1);
     setVerificationCode(newCode);
-
-    // Auto-focus next input
     if (value && idx < 5) {
       inputRefs.current[idx + 1]?.focus();
     }
@@ -73,7 +93,6 @@ export default function Setup2faDialog({ userEmail, onClose, onCompleted }: Setu
       toast.error("Lütfen 6 haneli geçerli bir doğrulama kodu yapıştırın.");
       return;
     }
-
     const newCode = pastedData.split("");
     setVerificationCode(newCode);
     inputRefs.current[5]?.focus();
@@ -86,18 +105,43 @@ export default function Setup2faDialog({ userEmail, onClose, onCompleted }: Setu
       toast.error("Lütfen 6 haneli kodu eksiksiz girin.");
       return;
     }
+    if (!factorId) {
+      toast.error("Factor ID bulunamadı. Lütfen sayfayı yenileyin.");
+      return;
+    }
 
     setVerifying(true);
+    try {
+      // Önce challenge al
+      const { data: challengeData, error: challengeErr } = await supabase.auth.mfa.challenge({
+        factorId,
+      });
+      if (challengeErr) {
+        toast.error(challengeErr.message);
+        return;
+      }
 
-    // Simulate verification delay
-    setTimeout(() => {
-      setVerifying(false);
+      // Sonra verify et
+      const { error: verifyErr } = await supabase.auth.mfa.verify({
+        factorId,
+        challengeId: challengeData.id,
+        code: codeStr,
+      });
+
+      if (verifyErr) {
+        toast.error("Geçersiz kod. Authenticator uygulamanızı kontrol edin.");
+        return;
+      }
+
+      // Başarılı — localStorage'a da yaz (SecuritySettings için)
       localStorage.setItem("aeigs_mfa_enabled", "true");
-      localStorage.setItem("aeigs_mfa_secret", secretKey);
-      localStorage.setItem("aeigs_mfa_backups", JSON.stringify(backupCodes));
       setStep(3);
       toast.success("MFA Doğrulaması Başarılı!");
-    }, 1200);
+    } catch (e: any) {
+      toast.error(e?.message || "Doğrulama sırasında hata oluştu.");
+    } finally {
+      setVerifying(false);
+    }
   };
 
   return (
@@ -128,6 +172,25 @@ export default function Setup2faDialog({ userEmail, onClose, onCompleted }: Setu
           </div>
         </div>
 
+        {/* Enroll loading / error */}
+        {enrolling && (
+          <div className="flex flex-col items-center gap-4 py-10 text-[9px] font-black text-zinc-500 uppercase tracking-widest">
+            <div className="w-8 h-8 border-2 border-t-red-600 border-white/5 rounded-full animate-spin" />
+            SUPABASE MFA HAZIRLANIYÖR...
+          </div>
+        )}
+
+        {enrollError && !enrolling && (
+          <div className="py-6 text-center space-y-4">
+            <p className="text-[9px] text-red-500 font-black uppercase tracking-wider">{enrollError}</p>
+            <button onClick={onClose} className="px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-zinc-400 text-[9px] font-black uppercase">
+              KAPAT
+            </button>
+          </div>
+        )}
+
+        {!enrolling && !enrollError && (
+          <>
         {/* Step Indicator Header */}
         <div className="flex justify-between items-center gap-2 mb-6 text-[8px] font-black uppercase text-zinc-600 border border-white/[0.03] bg-white/[0.01] rounded-2xl p-2.5">
           <span className={step === 1 ? "text-red-500" : step > 1 ? "text-green-500" : ""}>1. QR TARAMA</span>
@@ -204,7 +267,7 @@ export default function Setup2faDialog({ userEmail, onClose, onCompleted }: Setu
                     type="text"
                     maxLength={1}
                     value={val}
-                    ref={(el) => (inputRefs.current[idx] = el)}
+                    ref={(el) => { inputRefs.current[idx] = el; }}
                     onChange={(e) => handleOtpChange(e.target.value, idx)}
                     onKeyDown={(e) => handleKeyDown(e, idx)}
                     onPaste={idx === 0 ? handlePaste : undefined}
@@ -282,7 +345,8 @@ export default function Setup2faDialog({ userEmail, onClose, onCompleted }: Setu
             </motion.div>
           )}
         </AnimatePresence>
-
+          </>
+        )}
       </div>
     </div>
   );

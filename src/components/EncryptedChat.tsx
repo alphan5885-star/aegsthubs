@@ -6,6 +6,7 @@ import { Lock, Send, Loader2, KeyRound, AlertTriangle, ShieldCheck } from "lucid
 import { motion } from "framer-motion";
 import { encryptForRecipients } from "@/lib/pgp";
 import { toast } from "sonner";
+import TranslateButton from "@/components/TranslateButton";
 
 interface MessageRow {
   id: string;
@@ -293,6 +294,11 @@ export default function EncryptedChat({ orderId, otherUserId }: Props) {
               >
                 {m.decrypted}
               </div>
+              {m.sender_id !== user?.id && m.decrypted && !m.decrypted.startsWith("[") && (
+                <div className="mt-0.5 ml-1">
+                  <TranslateButton text={m.decrypted} variant="bubble" />
+                </div>
+              )}
               <span className="text-[9px] font-mono text-muted-foreground mt-1 px-1">
                 {new Date(m.created_at).toLocaleTimeString("tr-TR", {
                   hour: "2-digit",

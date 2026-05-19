@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
 import { X, ShieldAlert, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { useI18n } from "@/lib/i18n";
 
 interface CreateDisputeDialogProps {
   orderId: string;
@@ -22,6 +23,7 @@ export default function CreateDisputeDialog({
   onCreated,
 }: CreateDisputeDialogProps) {
   const { user } = useAuth();
+  const { t } = useI18n();
   const [reason, setReason] = useState("item_not_received");
   const [details, setDetails] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -29,11 +31,11 @@ export default function CreateDisputeDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-      toast.error("Giriş yapmanız gerekmektedir.");
+      toast.error(t("dispute.loginRequired" as any));
       return;
     }
     if (!details.trim()) {
-      toast.error("Lütfen itiraz gerekçenizi detaylıca açıklayın.");
+      toast.error(t("dispute.detailRequired" as any));
       return;
     }
 
@@ -42,9 +44,9 @@ export default function CreateDisputeDialog({
     try {
       // Reason display map for user friendly string in product_name or details
       const reasonLabel = 
-        reason === "item_not_received" ? "Ürün Ulaşmadı / Teslim Edilmedi" :
-        reason === "wrong_item" ? "Ürün Açıklamadan / Görselden Farklı" :
-        "Satıcı Sinyali / İletişim Kesildi";
+        reason === "item_not_received" ? t("dispute.reason1" as any) :
+        reason === "wrong_item" ? t("dispute.reason2" as any) :
+        t("dispute.reason3" as any);
 
       const { error } = await supabase.from("disputes").insert({
         buyer_id: user.id,
@@ -57,18 +59,17 @@ export default function CreateDisputeDialog({
       });
 
       if (error) {
-        toast.error("Uyuşmazlık başlatılırken hata oluştu.");
+        toast.error(t("dispute.createError" as any));
         console.error("Dispute error:", error);
         setSubmitting(false);
         return;
       }
 
-      // Also trigger a system message inside the chat room if possible, or just notify
-      toast.success("Uyuşmazlık kaydı başarıyla oluşturuldu.");
+      toast.success(t("dispute.createSuccess" as any));
       onCreated();
       onClose();
     } catch (err) {
-      toast.error("Sistem hatası oluştu.");
+      toast.error(t("dispute.systemError" as any));
       console.error(err);
       setSubmitting(false);
     }
@@ -93,7 +94,7 @@ export default function CreateDisputeDialog({
           </div>
           <div>
             <span className="text-[6px] text-red-500 font-black tracking-[0.3em] uppercase">ESCROW_ARBITRATION</span>
-            <h2 className="text-sm font-black text-white uppercase tracking-wider">UYUŞMAZLIK BAŞLATMA PROTOKOLÜ</h2>
+            <h2 className="text-sm font-black text-white uppercase tracking-wider">{t("dispute.title" as any)}</h2>
           </div>
         </div>
 
@@ -112,12 +113,12 @@ export default function CreateDisputeDialog({
         <form onSubmit={handleSubmit} className="space-y-4 text-[10px]">
           {/* Dispute Reason Selection */}
           <div className="space-y-2">
-            <label className="text-zinc-500 font-black uppercase tracking-wider block">İtiraz Nedeni</label>
+            <label className="text-zinc-500 font-black uppercase tracking-wider block">{t("dispute.reasonLabel" as any)}</label>
             <div className="grid grid-cols-1 gap-2">
               {[
-                { id: "item_not_received", label: "Ürün Teslim Edilmedi / Kargo Ulaşmadı" },
-                { id: "wrong_item", label: "Ürün Açıklamadan Farklı / Kusurlu" },
-                { id: "seller_unresponsive", label: "Satıcı Yanıt Vermiyor / İletişim Koptu" }
+                { id: "item_not_received", label: t("dispute.reason1" as any) },
+                { id: "wrong_item", label: t("dispute.reason2" as any) },
+                { id: "seller_unresponsive", label: t("dispute.reason3" as any) }
               ].map((r) => (
                 <label
                   key={r.id}
@@ -142,22 +143,21 @@ export default function CreateDisputeDialog({
 
           {/* Description input */}
           <div className="space-y-2">
-            <label className="text-zinc-500 font-black uppercase tracking-wider block">Detaylı Gerekçe & Kanıt Logları</label>
+            <label className="text-zinc-500 font-black uppercase tracking-wider block">{t("dispute.detailsLabel" as any)}</label>
             <textarea
               required
               value={details}
               onChange={(e) => setDetails(e.target.value)}
-              placeholder="Ürünün neden ulaşmadığını veya kusurunu detaylıca açıklayın..."
+              placeholder={t("dispute.detailsPlaceholder" as any)}
               rows={4}
               className="w-full bg-[#050505] border border-white/5 rounded-[18px] p-4 text-white focus:border-red-600/50 focus:outline-none font-bold resize-none"
             />
           </div>
 
-          {/* Warning HUD banner */}
           <div className="flex items-start gap-3 p-4 bg-yellow-500/5 border border-yellow-500/10 rounded-2xl">
             <AlertTriangle className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
             <p className="text-[8px] text-yellow-500/80 font-bold uppercase tracking-wide leading-relaxed">
-              UYARI: UYUŞMAZLIK BAŞLATILDIĞINDA ESCROW HAVUZUNDAKİ TUTAR DONDURULUR VE SİPARİŞ ANLAŞMAZLIK MODUNA GEÇER. ÇÖZÜM İÇİN YÖNETİCİLER HAKEMLİK EDECEKTİR.
+              {t("dispute.warningText" as any)}
             </p>
           </div>
 
@@ -166,7 +166,7 @@ export default function CreateDisputeDialog({
             disabled={submitting}
             className="w-full bg-red-600 text-white py-4 rounded-[20px] text-[9.5px] font-black uppercase tracking-[0.3em] hover:bg-red-700 transition-all active:scale-95 duration-300 disabled:opacity-50 cursor-pointer"
           >
-            {submitting ? "TALEBİNİZ GÖNDERİLİYOR..." : "UYUŞMAZLIĞI RESMEN BAŞLAT"}
+            {submitting ? t("dispute.submitting" as any) : t("dispute.submitBtn" as any)}
           </button>
         </form>
 

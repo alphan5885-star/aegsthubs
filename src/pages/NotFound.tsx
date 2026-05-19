@@ -1,3 +1,4 @@
+﻿import { useI18n } from "@/lib/i18n";
 import { useLocation } from "@/lib/router-shim";
 import { useEffect } from "react";
 import { Shield, AlertTriangle, Home } from "lucide-react";

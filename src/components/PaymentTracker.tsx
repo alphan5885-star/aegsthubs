@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Copy, Loader2, CheckCircle2, AlertTriangle, ShieldCheck, Coins } from "lucide-react";
 import { toast } from "sonner";
 import OrderChatRoom from "./OrderChatRoom";
+import { useI18n } from "@/lib/i18n";
 
 interface Props {
   orderId: string;
@@ -12,6 +13,7 @@ interface Props {
 
 export default function PaymentTracker({ orderId, amount }: Props) {
   const isMounted = useRef(true);
+  const { t } = useI18n();
   const [address, setAddress] = useState<string | null>(null);
   const [confirmations, setConfirmations] = useState(0);
   const [status, setStatus] = useState<string>("loading");
@@ -29,7 +31,7 @@ export default function PaymentTracker({ orderId, amount }: Props) {
         });
         if (!isMounted.current) return;
         if (error || !data?.address) {
-          toast.error("Fallback ödeme adresi oluşturulamadı");
+          toast.error(t("payment.addressError" as any));
           setStatus("error");
         } else {
           setAddress(data.address);
@@ -65,7 +67,7 @@ export default function PaymentTracker({ orderId, amount }: Props) {
           setConfirmations(data.confirmations || 0);
           setStatus(data.status || "awaiting_payment");
           if (data.underpaid) {
-            toast.error("Eksik ödeme algılandı. Lütfen tam tutarı gönder.");
+            toast.error(t("payment.underpaidAlert" as any));
           }
         }
       } catch (e) {
@@ -105,7 +107,7 @@ export default function PaymentTracker({ orderId, amount }: Props) {
   const copy = () => {
     if (!address) return;
     navigator.clipboard.writeText(address);
-    toast.success("Adres kopyalandı");
+    toast.success(t("payment.addressCopied" as any));
   };
 
   if (generating) {
@@ -113,7 +115,7 @@ export default function PaymentTracker({ orderId, amount }: Props) {
       <div className="glass-card rounded-lg p-6 text-center">
         <Loader2 className="w-6 h-6 text-primary animate-spin mx-auto mb-2" />
         <p className="text-sm font-mono text-muted-foreground">
-          LTC escrow ekranı hazırlanıyor…
+          {t("payment.generating" as any)}
         </p>
       </div>
     );
@@ -125,10 +127,10 @@ export default function PaymentTracker({ orderId, amount }: Props) {
         <div className="glass-card rounded-lg p-4 border border-green-500/40 bg-green-500/10">
           <div className="flex items-center gap-2 text-green-500">
             <CheckCircle2 className="w-5 h-5" />
-            <span className="font-mono text-sm font-bold">Ödeme onaylandı (3/3)</span>
+            <span className="font-mono text-sm font-bold">{t("payment.confirmed" as any)}</span>
           </div>
           <p className="text-[11px] font-mono text-muted-foreground mt-1">
-            Operasyon DM aşağıda açıldı. 24 saat sonra otomatik imha edilir.
+            {t("payment.dmOpened" as any)}
           </p>
         </div>
         <OrderChatRoom roomId={roomId} />
@@ -139,7 +141,7 @@ export default function PaymentTracker({ orderId, amount }: Props) {
   return (
     <div className="glass-card rounded-lg p-4 space-y-3">
       <div className="flex items-center justify-between gap-3">
-        <h3 className="font-mono text-sm font-bold text-primary">LTC Escrow Bekleniyor</h3>
+        <h3 className="font-mono text-sm font-bold text-primary">{t("payment.waiting" as any)}</h3>
         <span className="inline-flex items-center gap-1 rounded border border-primary/30 bg-primary/10 px-2 py-1 text-[10px] font-mono text-primary">
           <Coins className="w-3 h-3" /> LTC
         </span>
@@ -147,10 +149,10 @@ export default function PaymentTracker({ orderId, amount }: Props) {
 
       <div className="rounded border border-primary/25 bg-primary/10 p-3 text-xs font-mono text-foreground">
         <div className="flex items-center gap-2 font-bold text-primary mb-1">
-          <ShieldCheck className="w-4 h-4" /> Otomatik LTC escrow
+          <ShieldCheck className="w-4 h-4" /> {t("payment.autoEscrow" as any)}
         </div>
         <p className="text-muted-foreground leading-relaxed">
-          LTC ödeme 3 onaydan sonra otomatik onaylanır ve operasyon DM açılır.
+          {t("payment.autoDesc" as any)}
         </p>
       </div>
 
@@ -167,7 +169,7 @@ export default function PaymentTracker({ orderId, amount }: Props) {
 
           <div className="space-y-1">
             <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
-              Ödeme Adresi (LTC)
+              {t("payment.addressLabel" as any)}
             </label>
             <div className="flex gap-2">
               <code className="flex-1 text-[11px] font-mono bg-background border border-border rounded px-2 py-1.5 break-all select-all">
@@ -184,21 +186,19 @@ export default function PaymentTracker({ orderId, amount }: Props) {
 
           <div className="bg-background/60 border border-border rounded p-2 text-xs font-mono">
             <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Tutar:</span>
+              <span className="text-muted-foreground">{t("payment.amountLabel" as any)}</span>
               <div className="text-right">
                 <div className="text-primary font-bold">{amount} LTC</div>
               </div>
             </div>
             {status === "underpaid" && (
               <div className="mt-1 border-t border-border/50 pt-1 text-[10px] text-destructive">
-                Eksik ödeme tespit edildi. Bakiye yansıtılmaz, sipariş onaylanmaz.
+                {t("payment.underpaid" as any)}
               </div>
             )}
             <div className="flex justify-between mt-1 border-t border-border/50 pt-1">
-              <span className="text-muted-foreground">Doğrulama:</span>
-              <span
-                className={`font-bold ${confirmations >= 3 ? "text-green-500" : "text-yellow-500"}`}
-              >
+              <span className="text-muted-foreground">{t("payment.confirmations" as any)}</span>
+              <span className={`font-bold ${confirmations >= 3 ? "text-green-500" : "text-yellow-500"}`}>
                 {Math.min(confirmations, 3)}/3
               </span>
             </div>
@@ -206,12 +206,12 @@ export default function PaymentTracker({ orderId, amount }: Props) {
 
           <div className="flex items-center gap-2 px-2 py-1.5 bg-destructive/10 border border-destructive/40 rounded text-[10px] font-mono text-destructive">
             <AlertTriangle className="w-3 h-3 shrink-0" />
-            Tam tutarı tek seferde gönder. Eksik ödemeler escrow'a yansımaz.
+            {t("payment.singleSend" as any)}
           </div>
 
           <p className="text-[10px] font-mono text-muted-foreground text-center">
             <Loader2 className="w-3 h-3 inline animate-spin mr-1" />
-            Zincir canlı izleniyor (30sn) • 3 konfirmasyon sonrası otomatik onay
+            {t("payment.monitoring" as any)}
           </p>
         </>
       )}

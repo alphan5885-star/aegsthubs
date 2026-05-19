@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import PageShell from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "@/lib/router-shim";
@@ -66,6 +66,7 @@ interface VendorInfo {
 }
 
 export default function AdminStore() {
+  const { t: tr } = useI18n();
   const navigate = useNavigate();
   const isMounted = useRef(true);
   const [tab, setTab] = useState<Tab>("products");
@@ -229,9 +230,9 @@ export default function AdminStore() {
   };
 
   const tabs: { key: Tab; label: string; icon: any; count: number }[] = [
-    { key: "products", label: "Ürünler", icon: Package, count: products.length },
-    { key: "orders", label: "Siparişler", icon: ShoppingCart, count: orders.length },
-    { key: "vendors", label: "Satıcılar", icon: Users, count: vendors.length },
+    { key: "products", label: {tr("adminStore.tabProducts")}, icon: Package, count: products.length },
+    { key: "orders", label: {tr("adminStore.tabOrders")}, icon: ShoppingCart, count: orders.length },
+    { key: "vendors", label: {tr("adminStore.tabVendors")}, icon: Users, count: vendors.length },
   ];
 
   if (loading) {
@@ -292,10 +293,10 @@ export default function AdminStore() {
             onChange={(e) => setSearch(e.target.value)}
             placeholder={
               tab === "products"
-                ? "Ürün ara..."
+                ? {tr("adminStore.searchProducts")}
                 : tab === "orders"
-                  ? "Sipariş ara..."
-                  : "Satıcı ara..."
+                  ? {tr("adminStore.searchOrders")}
+                  : {tr("adminStore.searchVendors")}
             }
             className="w-full pl-9 pr-3 py-2 bg-secondary border border-border rounded-lg text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
           />
@@ -428,7 +429,7 @@ export default function AdminStore() {
                           {p.name || p.title}
                         </div>
                         <div className="text-[10px] text-muted-foreground font-mono">
-                          {p.category || "Kategori yok"} • Komisyon: {p.commission_rate ?? 5}%
+                          {p.category || {tr("adminStore.noCategory")}} • Komisyon: {p.commission_rate ?? 5}%
                         </div>
                         <div className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
                           {p.description}

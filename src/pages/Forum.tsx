@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import PageShell from "@/components/PageShell";
 import { useAuth } from "@/lib/authContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -134,7 +134,7 @@ export default function Forum() {
         }
       }
     } catch (e) {
-      toast.error("Forum verileri yüklenirken hata oluştu.");
+      toast.error(t("forum.loadError") || "Forum verileri yüklenirken hata oluştu.");
     } finally {
       if (isMounted.current) setLoading(false);
     }
@@ -174,7 +174,7 @@ export default function Forum() {
         }
       }
     } catch (e) {
-      toast.error("Yorumlar yüklenirken hata oluştu.");
+      toast.error(t("forum.commentsLoadError") || "Yorumlar yüklenirken hata oluştu.");
     }
   };
 
@@ -189,11 +189,11 @@ export default function Forum() {
   // Handle Create Post
   const handleCreatePost = async () => {
     if (!newTitle.trim() || !newContent.trim()) {
-      toast.error("Lütfen tüm alanları doldurun.");
+      toast.error(t("forum.fillAll") || "Lütfen tüm alanları doldurun.");
       return;
     }
     if (!user) {
-      toast.error("Önce giriş yapmalısınız.");
+      toast.error(t("err.unauthorized"));
       return;
     }
 
@@ -211,13 +211,13 @@ export default function Forum() {
 
       if (error) throw error;
 
-      toast.success("Konu başarıyla yayınlandı! 📢");
+      toast.success(t("forum.postPublished") || "Konu başarıyla yayınlandı!");
       setNewTitle("");
       setNewContent("");
       setNewThreadOpen(false);
       fetchPosts();
     } catch (e) {
-      toast.error("Konu yayınlanırken bir hata oluştu.");
+      toast.error(t("forum.postError") || "Konu yayınlanırken bir hata oluştu.");
     } finally {
       setSubmittingPost(false);
     }
@@ -227,11 +227,11 @@ export default function Forum() {
   const handleAddComment = async () => {
     if (!selectedPost) return;
     if (!newComment.trim()) {
-      toast.error("Yorum boş bırakılamaz.");
+      toast.error(t("forum.commentEmpty") || "Yorum boş bırakılamaz.");
       return;
     }
     if (!user) {
-      toast.error("Önce giriş yapmalısınız.");
+      toast.error(t("err.unauthorized"));
       return;
     }
 
@@ -245,11 +245,11 @@ export default function Forum() {
 
       if (error) throw error;
 
-      toast.success("Yorumunuz başarıyla iletildi!");
+      toast.success(t("forum.commentSent") || "Yorumunuz başarıyla iletildi!");
       setNewComment("");
       fetchComments(selectedPost.id);
     } catch (e) {
-      toast.error("Yorum iletilirken bir hata oluştu.");
+      toast.error(t("forum.commentError") || "Yorum iletilirken bir hata oluştu.");
     } finally {
       setSubmittingComment(false);
     }
@@ -361,7 +361,7 @@ export default function Forum() {
                     UNDERGROUND_COMMUNITY // Forums & Encrypted Threads
                   </div>
                   <h1 className="text-3xl font-black italic tracking-tighter text-white uppercase leading-none">
-                    TOPLULUK <span className="text-primary">FORUMU</span>
+                    {t("forum.title")}
                   </h1>
                 </div>
 
@@ -374,7 +374,7 @@ export default function Forum() {
                   <DialogContent className="bg-[#050505]/95 backdrop-blur-2xl border-white/[0.04] rounded-3xl max-w-2xl p-8 font-mono text-zinc-300">
                     <DialogHeader>
                       <DialogTitle className="text-xl font-black italic text-white uppercase tracking-tight flex items-center gap-2">
-                        <MessageSquare className="w-5 h-5 text-primary" /> YENİ KONU BAŞLATMA TERMİNALİ
+                        <MessageSquare className="w-5 h-5 text-primary" /> {t("forum.newPost")}
                       </DialogTitle>
                     </DialogHeader>
 
@@ -424,7 +424,7 @@ export default function Forum() {
                           <EyeOff className="w-4 h-4 text-zinc-500" />
                           <div className="space-y-0.5">
                             <div className="font-bold text-white uppercase tracking-wider text-[9px]">ANONİM OLARAK PAYLAŞ</div>
-                            <div className="text-[8px] text-zinc-500">Profiliniz gizlenir, "ANONİM_SİBER" olarak yayınlanır.</div>
+                            <div className="text-[8px] text-zinc-500">{t("forum.anonDesc")}</div>
                           </div>
                         </div>
                         <input
@@ -440,7 +440,7 @@ export default function Forum() {
                         disabled={submittingPost}
                         className="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer"
                       >
-                        {submittingPost ? "YAYINLANIYOR..." : "KONUYU CANLIYA AL"}
+                        {submittingPost ? {t("loading")} : {t("forum.publish")}}
                       </button>
                     </div>
                   </DialogContent>
@@ -450,10 +450,10 @@ export default function Forum() {
               {/* Forum General Stats Banner */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-[#040404]/55 backdrop-blur-xl p-5 border border-white/[0.04] rounded-[24px]">
                 {[
-                  { label: "TOPLAM KONU", value: posts.length, icon: MessageSquare },
-                  { label: "TOPLAM YORUM", value: posts.reduce((sum, p) => sum + 3, 0), icon: MessageCircle },
-                  { label: "AKTİF ÜYELER", value: Object.keys(profiles).length || 1, icon: User },
-                  { label: "SON AKTİVİTE", value: posts.length > 0 ? "ŞİMDİ" : "YOK", icon: Clock },
+                  { label: {t("forum.totalTopics")}, value: posts.length, icon: MessageSquare },
+                  { label: {t("forum.totalComments")}, value: posts.reduce((sum, p) => sum + 3, 0), icon: MessageCircle },
+                  { label: {t("forum.activeMembers")}, value: Object.keys(profiles).length || 1, icon: User },
+                  { label: {t("forum.lastActivity")}, value: posts.length > 0 ? "ŞİMDİ" : "YOK", icon: Clock },
                 ].map((stat, i) => (
                   <div key={i} className="flex items-center gap-3.5 px-4 py-2 border-r border-white/[0.03] last:border-0">
                     <div className="p-2 rounded-lg bg-white/[0.01] border border-white/[0.03]">
@@ -488,7 +488,7 @@ export default function Forum() {
                       >
                         <div className="space-y-1">
                           <div className="text-[10px] uppercase font-bold">📂 Tüm Konular</div>
-                          <div className="text-[8px] text-zinc-500">Tüm kategorilerdeki akışı listele</div>
+                          <div className="text-[8px] text-zinc-500">{t("forum.allTopics")}</div>
                         </div>
                         <ChevronRight className="w-4 h-4 text-zinc-600" />
                       </button>
@@ -527,7 +527,7 @@ export default function Forum() {
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                       className="w-full bg-[#040404]/55 backdrop-blur-xl border border-white/[0.04] rounded-2xl pl-14 pr-6 py-4 text-xs text-white focus:outline-none focus:border-red-600/40 transition-all font-bold placeholder-zinc-600"
-                      placeholder="FORUMDA YAPILACAK ARAMAYI YAZIN VEYA FİLTRELEYİN..."
+                      placeholder={t("forum.searchPlaceholder")}
                     />
                   </div>
 
@@ -593,7 +593,7 @@ export default function Forum() {
                       })
                     ) : (
                       <div className="bg-[#040404]/55 border border-white/[0.04] p-16 rounded-[28px] text-center text-zinc-500 font-bold tracking-wider uppercase text-xs">
-                        Bu kategori altında tartışma kaydı bulunamadı.
+                        {t("forum.noTopics")}
                       </div>
                     )}
                   </div>
@@ -629,7 +629,7 @@ export default function Forum() {
                           : "bg-white/[0.01] border-white/[0.03] text-zinc-500 hover:text-zinc-300"
                       }`}
                     >
-                      <Pin className="w-3.5 h-3.5" /> {selectedPost.pinned ? "SABİTLEMEYİ KALDIR" : "SABİTLE"}
+                      <Pin className="w-3.5 h-3.5" /> {selectedPost.pinned ? {t("forum.unpinPost")} : {t("forum.pinPost")}}
                     </button>
                     
                     <button
@@ -725,7 +725,7 @@ export default function Forum() {
 
                 {comments.length === 0 && (
                   <div className="bg-[#040404]/55 border border-white/[0.04] p-10 rounded-[28px] text-center text-zinc-500 font-bold tracking-wider uppercase text-[9px]">
-                    Henüz yorum yapılmamış. İlk yanıtı siz iletin!
+                    {t("forum.noComments")}
                   </div>
                 )}
               </div>
@@ -740,7 +740,7 @@ export default function Forum() {
                   <textarea
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Yanıtınızı buraya yazın..."
+                    placeholder={t("forum.writeReply")}
                     disabled={submittingComment}
                     className="w-full bg-[#020202] border border-white/[0.04] rounded-xl p-4 text-white focus:outline-none focus:border-red-600/40 font-bold h-28 resize-none text-xs"
                   />
@@ -753,7 +753,7 @@ export default function Forum() {
                     className="bg-red-600 hover:bg-red-700 text-white font-black uppercase px-6 py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-[9px] tracking-widest shadow-[0_10px_20px_rgba(255,0,0,0.1)] active:scale-[0.98]"
                   >
                     <Send className="w-3.5 h-3.5" />
-                    {submittingComment ? "GÖNDERİLİYOR..." : "YANIT YAYINLA"}
+                    {submittingComment ? {t("loading")} : {t("forum.publish")}}
                   </button>
                 </div>
               </div>

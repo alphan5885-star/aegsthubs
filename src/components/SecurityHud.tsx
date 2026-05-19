@@ -3,10 +3,12 @@ import { useSecurity } from "@/lib/securityContext";
 import { useStealth } from "@/lib/stealthContext";
 import { checkConnectionStatus } from "@/lib/canvasNoise";
 import { Shield, ShieldAlert, ShieldCheck, X, EyeOff, Wifi, WifiOff, Signal } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 export default function SecurityHud() {
   const { threatLevel, events, blocked, unblock } = useSecurity();
   const { isStealth } = useStealth();
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [connection, setConnection] = useState({ online: true, type: "unknown", downlink: 0, rtt: 0 });
 
@@ -31,15 +33,15 @@ export default function SecurityHud() {
         <div className="fixed inset-0 bg-background/90 backdrop-blur z-[100] flex items-center justify-center p-4">
           <div className="glass-card neon-border rounded-lg p-6 max-w-sm text-center space-y-3">
             <ShieldAlert className="w-12 h-12 text-destructive mx-auto" />
-            <h2 className="font-mono font-bold text-destructive">Şüpheli aktivite tespit edildi</h2>
+            <h2 className="font-mono font-bold text-destructive">{t("hud.suspiciousActivity" as any)}</h2>
             <p className="text-xs font-mono text-muted-foreground">
-              Çok hızlı tıklama / bot davranışı algılandı. Erişim 15 saniye boyunca kısıtlandı.
+              {t("hud.botDetected" as any)}
             </p>
             <button
               onClick={unblock}
               className="px-4 py-2 bg-primary text-primary-foreground rounded font-mono text-xs hover:opacity-90"
             >
-              İnsanım, devam et
+              {t("hud.imHuman" as any)}
             </button>
           </div>
         </div>
@@ -47,7 +49,7 @@ export default function SecurityHud() {
 
       <button
         onClick={() => setOpen(true)}
-        title={`Güvenlik durumu: ${threatLevel}`}
+        title={`${t("hud.statusTitle" as any)}: ${threatLevel}`}
         className={`fixed bottom-4 left-4 z-40 w-10 h-10 rounded-full bg-card border ${color} flex items-center justify-center hover:scale-110 transition-transform`}
       >
         <Icon className="w-5 h-5" />
@@ -88,12 +90,12 @@ export default function SecurityHud() {
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-mono font-bold text-primary flex items-center gap-2">
                 <Shield className="w-4 h-4" />
-                Güvenlik Olayları
+                {t("hud.securityEvents" as any)}
               </h3>
               {isStealth && (
                 <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/30 text-[10px] font-mono text-blue-500 uppercase">
                   <EyeOff className="w-3 h-3" />
-                  Stealth Aktif
+                  {t("hud.stealthActive" as any)}
                 </div>
               )}
               <button
@@ -105,7 +107,7 @@ export default function SecurityHud() {
             </div>
             {events.length === 0 ? (
               <p className="text-xs font-mono text-muted-foreground text-center py-4">
-                Olay yok — tüm sistemler nominal.
+                {t("hud.noEvents" as any)}
               </p>
             ) : (
               <div className="space-y-1">
@@ -130,8 +132,7 @@ export default function SecurityHud() {
               </div>
             )}
             <p className="text-[10px] font-mono text-muted-foreground mt-3 pt-3 border-t border-border">
-              Not: Frontend tespitidir. Gerçek güvenlik sunucu tarafında (RLS + sunucu rate-limit)
-              sağlanır.
+              {t("hud.frontendNote" as any)}
             </p>
           </div>
         </div>

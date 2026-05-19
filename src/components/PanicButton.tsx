@@ -4,12 +4,14 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
 import { useNavigate } from "@/lib/router-shim";
+import { useI18n } from "@/lib/i18n";
 
 export default function PanicButton() {
   const [armed, setArmed] = useState(false);
   const [wiping, setWiping] = useState(false);
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   const execute = async () => {
     setWiping(true);
@@ -25,7 +27,7 @@ export default function PanicButton() {
       if (!res?.success) throw new Error(res?.error || "Panic failed");
 
       toast.success(
-        `🔥 İzler silindi. ${res.rooms_destroyed ?? 0} oda imha, ${res.orders_cancelled ?? 0} sipariş iptal. Çıkış yapılıyor…`,
+        `🔥 ${t("panic.success" as any).replace("{rooms}", String(res.rooms_destroyed ?? 0)).replace("{orders}", String(res.orders_cancelled ?? 0))}`,
       );
 
       // Nuke client-side state
@@ -43,8 +45,8 @@ export default function PanicButton() {
       await logout();
       navigate("/", { replace: true });
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Bilinmeyen hata";
-      toast.error(`Panik modu başarısız: ${msg}`);
+      const msg = e instanceof Error ? e.message : t("panic.unknownError" as any);
+      toast.error(`${t("panic.failed" as any)}: ${msg}`);
       setWiping(false);
       setArmed(false);
     }
@@ -55,10 +57,9 @@ export default function PanicButton() {
       <div className="flex items-start gap-3 mb-3">
         <Flame className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
         <div>
-          <div className="text-sm font-mono font-bold text-destructive">PANİK MODU</div>
+          <div className="text-sm font-mono font-bold text-destructive">{t("panic.title" as any)}</div>
           <div className="text-[11px] text-muted-foreground font-mono leading-relaxed mt-1">
-            Tüm sohbet geçmişlerin silinir, bekleyen siparişlerin iptal edilir, bakiyen dondurulur
-            ve oturumun anında kapatılır. <span className="text-destructive">Geri alınamaz.</span>
+            {t("panic.desc" as any)} <span className="text-destructive">{t("panic.irreversible" as any)}</span>
           </div>
         </div>
       </div>
@@ -68,7 +69,7 @@ export default function PanicButton() {
           onClick={() => setArmed(true)}
           className="w-full px-3 py-2 bg-destructive/15 text-destructive text-xs font-mono rounded hover:bg-destructive/25 transition-colors flex items-center justify-center gap-2"
         >
-          <AlertTriangle className="w-3.5 h-3.5" /> Panik Modunu Aktifleştir
+          <AlertTriangle className="w-3.5 h-3.5" /> {t("panic.armBtn" as any)}
         </button>
       ) : (
         <div className="flex items-center gap-2">
@@ -77,14 +78,14 @@ export default function PanicButton() {
             disabled={wiping}
             className="flex-1 px-3 py-2 bg-destructive text-destructive-foreground text-xs font-mono font-bold rounded animate-pulse disabled:opacity-50"
           >
-            {wiping ? "İMHA EDİLİYOR…" : "🔥 EVET, HER ŞEYİ SİL"}
+            {wiping ? t("panic.wiping" as any) : t("panic.confirmBtn" as any)}
           </button>
           <button
             onClick={() => setArmed(false)}
             disabled={wiping}
             className="px-3 py-2 bg-secondary text-muted-foreground text-xs font-mono rounded"
           >
-            İptal
+            {t("cancel")}
           </button>
         </div>
       )}

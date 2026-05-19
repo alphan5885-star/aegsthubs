@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+﻿import { useEffect, useState, useRef } from "react";
 import { useI18n } from "@/lib/i18n";
 import PageShell from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";

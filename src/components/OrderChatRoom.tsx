@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
 import { Send, ShieldAlert } from "lucide-react";
+import TranslateButton from "@/components/TranslateButton";
 
 interface Msg {
   id: string;
@@ -91,12 +92,19 @@ export default function OrderChatRoom({ roomId }: { roomId: string }) {
           }
           const mine = m.sender_id === user?.id;
           return (
-            <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-              <div
-                className={`max-w-[80%] px-2.5 py-1.5 rounded text-xs ${mine ? "bg-primary/20 text-primary" : "bg-secondary/60 text-foreground"}`}
-              >
-                {m.content}
+            <div key={m.id} className={`flex flex-col ${mine ? "items-end" : "items-start"}`}>
+              <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+                <div
+                  className={`max-w-[80%] px-2.5 py-1.5 rounded text-xs ${mine ? "bg-primary/20 text-primary" : "bg-secondary/60 text-foreground"}`}
+                >
+                  {m.content}
+                </div>
               </div>
+              {!mine && (
+                <div className="ml-1 mt-0.5">
+                  <TranslateButton text={m.content} variant="bubble" />
+                </div>
+              )}
             </div>
           );
         })}

@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import PageShell from "@/components/PageShell";
+import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle, XCircle, Terminal as TerminalIcon } from "lucide-react";
 import SecurityTerminal from "@/components/SecurityTerminal";
@@ -14,6 +15,7 @@ interface LogEntry {
 }
 
 export default function SecurityLogs() {
+  const { t } = useI18n();
   const isMounted = useRef(true);
   const [logs, setLogs] = useState<LogEntry[]>([]);
 
@@ -84,17 +86,17 @@ export default function SecurityLogs() {
           <div className="space-y-4">
             {[
               {
-                label: "Son 24s Başarılı",
+                label: {t("security.last24hSuccess")},
                 value: logs.filter((l) => l.success).length,
                 color: "text-green-500",
               },
               {
-                label: "Şüpheli Girişim",
+                label: {t("security.suspiciousAttempts")},
                 value: logs.filter((l) => !l.success).length,
                 color: "text-primary",
               },
               {
-                label: "Farklı Cihazlar",
+                label: {t("security.differentDevices")},
                 value: new Set(logs.map((l) => l.device)).size,
                 color: "text-blue-500",
               },

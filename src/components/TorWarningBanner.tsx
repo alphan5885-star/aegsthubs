@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSecurity } from "@/lib/securityContext";
 import { ShieldCheck, X, Wifi, Terminal, EyeOff, ShieldAlert } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 /**
  * Redesigned Top HUD Bar: Replaces the flat yellow banner with an ultra-premium 
@@ -8,6 +9,7 @@ import { ShieldCheck, X, Wifi, Terminal, EyeOff, ShieldAlert } from "lucide-reac
  */
 export default function TorWarningBanner() {
   const { isTor } = useSecurity();
+  const { t } = useI18n();
   const [dismissed, setDismissed] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [latency, setLatency] = useState(42);
@@ -34,25 +36,23 @@ export default function TorWarningBanner() {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
             <span className="text-emerald-500 font-black tracking-widest uppercase text-[8px]">
-              SİNYAL_OK // GÜVENLİ
+              {t("tor.signalOk" as any)}
             </span>
           </div>
 
           <span className="hidden md:inline-block text-zinc-800">|</span>
 
-          {/* Network Mode */}
           <div className="hidden sm:flex items-center gap-1.5">
             <Wifi className="w-3.5 h-3.5 text-red-500" />
-            <span>AĞ: <strong className="text-white">CLEARWEB (ZIRHLI)</strong></span>
+            <span>{t("tor.network" as any)} <strong className="text-white">{t("tor.networkValue" as any)}</strong></span>
           </div>
 
           <span className="hidden sm:inline-block text-zinc-800">|</span>
 
-          {/* Trace Level */}
           <div className="flex items-center gap-1.5">
             <EyeOff className="w-3.5 h-3.5 text-zinc-500" />
             <span className="text-zinc-400">
-              İZ KORUMASI: <strong className="text-zinc-200">AKTİF (VPN+PGP)</strong>
+              {t("tor.traceProtection" as any)} <strong className="text-zinc-200">{t("tor.traceValue" as any)}</strong>
             </span>
           </div>
         </div>
@@ -61,7 +61,7 @@ export default function TorWarningBanner() {
         <div className="hidden lg:flex items-center gap-2 text-zinc-500 truncate max-w-[500px]">
           <Terminal className="w-3 h-3 text-red-500 shrink-0" />
           <span className="truncate">
-            <span className="text-zinc-400">Öneri:</span> Ağzını sıkı tut, VPN kullan, gerisini sisteme bırak.
+            <span className="text-zinc-400">{t("tor.advice" as any).split(":")[0]}:</span> {t("tor.advice" as any).split(":").slice(1).join(":").trim()}
           </span>
         </div>
 
@@ -69,14 +69,14 @@ export default function TorWarningBanner() {
         <div className="flex items-center gap-4 shrink-0">
           {/* Latency Indicator */}
           <div className="flex items-center gap-1 text-[8px] text-zinc-500">
-            <span>PING:</span>
+            <span>{t("tor.ping" as any)}</span>
             <span className="text-emerald-500 font-bold">{latency}ms</span>
           </div>
 
           <button
             onClick={() => setDismissed(true)}
             className="p-1 rounded-md bg-white/[0.02] border border-white/5 hover:border-red-500/20 text-zinc-500 hover:text-white transition-colors cursor-pointer"
-            aria-label="Kapat"
+            aria-label={t("tor.close" as any)}
           >
             <X className="w-3.5 h-3.5" />
           </button>

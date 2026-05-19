@@ -9,6 +9,7 @@ import { MapPin, Key, Package, ShieldCheck, ShoppingCart, User, ExternalLink } f
 import { useNavigate } from "@/lib/router-shim";
 import VendorRating from "./VendorRating";
 import { useCustomization } from "@/lib/customizationContext";
+import { useI18n } from "@/lib/i18n";
 
 interface Product {
   id: string;
@@ -38,6 +39,7 @@ export default function QuickViewModal({
 }) {
   const navigate = useNavigate();
   const { settings } = useCustomization();
+  const { t } = useI18n();
   if (!product) return null;
 
   const commission = product.price * 0.05;
@@ -77,7 +79,7 @@ export default function QuickViewModal({
                 ) : (
                   <Package className="w-3 h-3" />
                 )}
-                {product.type === "digital" ? "DİJİTAL" : "FİZİKSEL"}
+                {product.type === "digital" ? t("quickview.digital" as any) : t("quickview.physical" as any)}
               </span>
             </div>
           </div>
@@ -92,7 +94,7 @@ export default function QuickViewModal({
                 <span
                   className={`text-[10px] font-mono ${product.stock > 0 ? "text-green-500" : "text-destructive"}`}
                 >
-                  {product.stock > 0 ? `STOK: ${product.stock}` : "STOKTA YOK"}
+                  {product.stock > 0 ? `STOK: ${product.stock}` : t("quickview.outOfStock" as any)}
                 </span>
               </div>
               <DialogTitle className="font-mono text-xl text-foreground mb-2">
@@ -109,7 +111,7 @@ export default function QuickViewModal({
 
             <div className="flex-1 space-y-4">
               <div className="text-sm text-muted-foreground font-mono leading-relaxed max-h-[120px] overflow-y-auto pr-2 custom-scrollbar">
-                {product.description || "Bu ürün için detaylı açıklama bulunmamaktadır."}
+                {product.description || t("quickview.noDesc" as any)}
               </div>
 
               {(product.origin || product.destination) && (
@@ -124,7 +126,7 @@ export default function QuickViewModal({
               <div className="flex items-end justify-between py-4 border-t border-border mt-auto">
                 <div className="flex flex-col">
                   <span className="text-[10px] font-mono text-muted-foreground uppercase">
-                    Toplam Fiyat ({currencyLabel})
+                    {t("quickview.totalPrice" as any)} ({currencyLabel})
                   </span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-mono font-bold text-primary">
@@ -139,9 +141,9 @@ export default function QuickViewModal({
                 <div className="flex flex-col items-end gap-1 text-[10px] font-mono text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <ShieldCheck className="w-3 h-3 text-green-500" />
-                    <span>Güvenli Escrow</span>
+                    <span>{t("quickview.secureEscrow" as any)}</span>
                   </div>
-                  <span>%5 Hizmet Bedeli Dahil</span>
+                  <span>{t("quickview.serviceFee" as any)}</span>
                 </div>
               </div>
             </div>
