@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+  useCallback,
+} from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "@/lib/router-shim";
 
@@ -76,7 +83,9 @@ export function SessionTimerProvider({ children }: { children: ReactNode }) {
   }, [expiresAt, navigate]);
 
   return (
-    <SessionTimerContext.Provider value={{ remainingMs, expiresAt, startSession, clearSession }}>
+    <SessionTimerContext.Provider
+      value={{ remainingMs, expiresAt, startSession, clearSession }}
+    >
       {children}
     </SessionTimerContext.Provider>
   );
@@ -84,6 +93,7 @@ export function SessionTimerProvider({ children }: { children: ReactNode }) {
 
 export const useSessionTimer = () => {
   const ctx = useContext(SessionTimerContext);
-  if (!ctx) throw new Error("useSessionTimer must be inside SessionTimerProvider");
+  if (!ctx)
+    throw new Error("useSessionTimer must be inside SessionTimerProvider");
   return ctx;
 };

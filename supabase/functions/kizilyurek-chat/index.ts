@@ -19,8 +19,14 @@ function getCorsHeaders(req: Request) {
   }
 
   const allowOrigin =
-    origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0] || "null";
-  return { ...corsHeadersBase, "Access-Control-Allow-Origin": allowOrigin, Vary: "Origin" };
+    origin && allowedOrigins.includes(origin)
+      ? origin
+      : allowedOrigins[0] || "null";
+  return {
+    ...corsHeadersBase,
+    "Access-Control-Allow-Origin": allowOrigin,
+    Vary: "Origin",
+  };
 }
 
 const SYSTEM_PROMPT = `Sen Kızılyürek'sin — aeigsthub yeraltı marketinin operasyonel destek asistanı.
@@ -37,16 +43,20 @@ Yasak: Gerçek illegal aktivite tavsiyesi VERMEZSİN. Sadece bu kurgusal platfor
 
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method === "OPTIONS")
+    return new Response(null, { headers: corsHeaders });
 
   try {
     const { messages } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
-      return new Response(JSON.stringify({ error: "LOVABLE_API_KEY missing" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "LOVABLE_API_KEY missing" }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     const authHeader = req.headers.get("Authorization");
@@ -86,11 +96,16 @@ Deno.serve(async (req) => {
       _max_count: 20,
       _window_seconds: 60,
     });
-    if (rl && (rl as { allowed?: boolean; retry_after_seconds?: number }).allowed === false) {
+    if (
+      rl &&
+      (rl as { allowed?: boolean; retry_after_seconds?: number }).allowed ===
+        false
+    ) {
       return new Response(
         JSON.stringify({
           error: "Çok fazla istek. Biraz sonra dene.",
-          retry_after: (rl as { retry_after_seconds?: number }).retry_after_seconds ?? 60,
+          retry_after:
+            (rl as { retry_after_seconds?: number }).retry_after_seconds ?? 60,
         }),
         {
           status: 429,
@@ -99,28 +114,39 @@ Deno.serve(async (req) => {
       );
     }
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
+    const response = await fetch(
+      "https://ai.gateway.lovable.dev/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            ...(messages || []),
+          ],
+          stream: true,
+        }),
       },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [{ role: "system", content: SYSTEM_PROMPT }, ...(messages || [])],
-        stream: true,
-      }),
-    });
+    );
 
     if (response.status === 429) {
-      return new Response(JSON.stringify({ error: "Çok fazla istek. Biraz sonra dene." }), {
-        status: 429,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "Çok fazla istek. Biraz sonra dene." }),
+        {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
     if (response.status === 402) {
       return new Response(
-        JSON.stringify({ error: "AI kredisi tükendi. Workspace'e kredi ekleyin." }),
+        JSON.stringify({
+          error: "AI kredisi tükendi. Workspace'e kredi ekleyin.",
+        }),
         {
           status: 402,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -141,9 +167,12 @@ Deno.serve(async (req) => {
     });
   } catch (e) {
     console.error("kizilyurek-chat error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown" }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   }
 });

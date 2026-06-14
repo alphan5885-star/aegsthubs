@@ -1,10 +1,10 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "@/lib/router-shim";
 import PageShell from "@/components/PageShell";
 import { useCart } from "@/lib/cartContext";
 import { useAuth } from "@/lib/authContext";
 import { useI18n } from "@/lib/i18n";
-import { supabase } from "@/integrations/supabase/client";
+import { createPendingOrderFn } from "@/lib/escrowFns";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import {
@@ -22,7 +22,14 @@ import {
 export default function Checkout() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { items, removeItem, updateQuantity, clearCart, totalPrice, itemCount } = useCart();
+  const {
+    items,
+    removeItem,
+    updateQuantity,
+    clearCart,
+    totalPrice,
+    itemCount,
+  } = useCart();
   const { t } = useI18n();
   const [processing, setProcessing] = useState(false);
 
@@ -54,20 +61,25 @@ export default function Checkout() {
 
     try {
       const results = [];
-      for (const item of items) {
-        const { data, error } = await (supabase as any).rpc("create_order_with_escrow", {
-          _product_id: item.productId,
-          _delivery_method: item.type === "digital" ? "cargo" : "cargo",
-          _shipping_address: null,
-          _notes: null,
-        });
+      let lastOrderId = null;
 
-        if (error || !(data as any)?.order_id) {
-          const errMsg = (data as any)?.error || error?.message || "Order failed";
+      for (const item of items) {
+        try {
+          const result = await createPendingOrderFn({
+            data: {
+              buyerId: user.id,
+              productId: item.productId,
+              vendorId: item.vendorId || "unknown", // assuming vendorId is in item, if not we need it
+              amount: item.price * item.quantity,
+              deliveryMethod: item.type === "digital" ? "digital" : "cargo",
+            }
+          });
+          results.push({ product: item.name, orderId: result.orderId });
+          lastOrderId = result.orderId;
+        } catch (error: any) {
+          const errMsg = error.message || "Order failed";
           if (import.meta.env.DEV) console.error("Order error:", errMsg);
           results.push({ product: item.name, error: errMsg });
-        } else {
-          results.push({ product: item.name, orderId: (data as any).order_id });
         }
       }
 
@@ -79,7 +91,13 @@ export default function Checkout() {
 
       toast.success(`${itemCount} ${t("cart.ordersCreated")}`);
       clearCart();
-      navigate("/orders");
+
+      // Redirect logic
+      if (results.length === 1 && lastOrderId) {
+        navigate(`/payment/${lastOrderId}`);
+      } else {
+        navigate("/orders");
+      }
     } catch (e) {
       if (import.meta.env.DEV) console.error("Checkout error:", e);
       toast.error(t("err.generic"));
@@ -133,7 +151,9 @@ export default function Checkout() {
                   </div>
                   <div className="flex items-center gap-2 mt-2">
                     <button
-                      onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                      onClick={() =>
+                        updateQuantity(item.productId, item.quantity - 1)
+                      }
                       className="p-1 bg-background rounded hover:bg-secondary"
                     >
                       <Minus className="w-3 h-3" />
@@ -142,7 +162,9 @@ export default function Checkout() {
                       {item.quantity}
                     </span>
                     <button
-                      onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                      onClick={() =>
+                        updateQuantity(item.productId, item.quantity + 1)
+                      }
                       className="p-1 bg-background rounded hover:bg-secondary"
                     >
                       <Plus className="w-3 h-3" />
@@ -167,13 +189,17 @@ export default function Checkout() {
 
         <div className="glass-card rounded-lg p-4 mb-6">
           <div className="flex items-center justify-between mb-4">
-            <span className="font-mono text-muted-foreground">{t("cart.subtotal")}</span>
+            <span className="font-mono text-muted-foreground">
+              {t("cart.subtotal")}
+            </span>
             <span className="text-lg font-mono font-bold text-foreground">
               {totalPrice.toFixed(4)} LTC
             </span>
           </div>
           <div className="flex items-center justify-between pt-4 border-t border-border">
-            <span className="font-mono font-bold text-foreground">{t("cart.total")}</span>
+            <span className="font-mono font-bold text-foreground">
+              {t("cart.total")}
+            </span>
             <span className="text-xl font-mono font-bold text-primary">
               {totalPrice.toFixed(4)} LTC
             </span>

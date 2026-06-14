@@ -41,7 +41,8 @@ export default function Disputes() {
           .order("created_at", { ascending: false });
         if (!isMounted.current) return;
         if (error) {
-          if (import.meta.env.DEV) console.error("Error fetching disputes:", error);
+          if (import.meta.env.DEV)
+            console.error("Error fetching disputes:", error);
           toast.error(t("disputes.loadError"));
           return;
         }
@@ -71,12 +72,14 @@ export default function Disputes() {
           .order("created_at", { ascending: true });
         if (!isMounted.current) return;
         if (error) {
-          if (import.meta.env.DEV) console.error("Error fetching dispute messages:", error);
+          if (import.meta.env.DEV)
+            console.error("Error fetching dispute messages:", error);
           return;
         }
         if (data) setMessages(data as any);
       } catch (e) {
-        if (import.meta.env.DEV) console.error("Catch fetching dispute messages:", e);
+        if (import.meta.env.DEV)
+          console.error("Catch fetching dispute messages:", e);
       }
     };
     fetchMessages();
@@ -97,20 +100,26 @@ export default function Disputes() {
       if (!isMounted.current) return;
 
       if (error) {
-        if (import.meta.env.DEV) console.error(`Error performing dispute action (${type}):`, error);
+        if (import.meta.env.DEV)
+          console.error(`Error performing dispute action (${type}):`, error);
         toast.error(t("disputes.actionError"));
         return;
       }
 
       toast.success(
-        type === "release" ? t("disputes.releaseSuccess") : t("disputes.refundSuccess"),
+        type === "release"
+          ? t("disputes.releaseSuccess")
+          : t("disputes.refundSuccess"),
       );
       setDisputes((prev) =>
-        prev.map((d) => (d.id === selected.id ? { ...d, status: newStatus } : d)),
+        prev.map((d) =>
+          d.id === selected.id ? { ...d, status: newStatus } : d,
+        ),
       );
       setSelected((prev) => (prev ? { ...prev, status: newStatus } : prev));
     } catch (e) {
-      if (import.meta.env.DEV) console.error(`Catch error in handleAction (${type}):`, e);
+      if (import.meta.env.DEV)
+        console.error(`Catch error in handleAction (${type}):`, e);
     }
   };
 
@@ -126,7 +135,8 @@ export default function Disputes() {
       if (!isMounted.current) return;
 
       if (error) {
-        if (import.meta.env.DEV) console.error("Error sending dispute message:", error);
+        if (import.meta.env.DEV)
+          console.error("Error sending dispute message:", error);
         toast.error(t("disputes.messageSendError"));
         return;
       }
@@ -168,7 +178,9 @@ export default function Disputes() {
                 }`}
               >
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-xs font-mono text-primary">{d.id.slice(0, 8)}</span>
+                  <span className="text-xs font-mono text-primary">
+                    {d.id.slice(0, 8)}
+                  </span>
                   <span
                     className={`text-[10px] font-mono px-2 py-0.5 rounded ${
                       d.status === "open"
@@ -182,7 +194,9 @@ export default function Disputes() {
                   </span>
                 </div>
                 <div className="text-sm text-foreground">{d.product_name}</div>
-                <div className="text-xs text-muted-foreground">{d.amount} LTC</div>
+                <div className="text-xs text-muted-foreground">
+                  {d.amount} LTC
+                </div>
               </button>
             ))}
           </div>
@@ -191,7 +205,8 @@ export default function Disputes() {
             <div className="col-span-2 glass-card rounded-lg p-4">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-xs text-muted-foreground font-mono">
-                  {t("disputes.disputeLabel")}{selected.product_name}
+                  {t("disputes.disputeLabel")}
+                  {selected.product_name}
                 </span>
                 {selected.status !== "resolved" && (
                   <div className="flex gap-2">

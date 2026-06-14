@@ -51,8 +51,12 @@ export function useSafeNavigate() {
   };
 }
 
-export function useParams<T extends Record<string, string> = Record<string, string>>() {
-  return (tsUseParams as unknown as (opts: { strict: false }) => T)({ strict: false });
+export function useParams<
+  T extends Record<string, string> = Record<string, string>,
+>() {
+  return (tsUseParams as unknown as (opts: { strict: false }) => T)({
+    strict: false,
+  });
 }
 
 export function useLocation() {
@@ -88,7 +92,14 @@ interface NavLinkProps extends AnyProps {
   activeClassName?: string;
 }
 
-export function NavLink({ to, children, className, end, activeClassName, ...rest }: NavLinkProps) {
+export function NavLink({
+  to,
+  children,
+  className,
+  end,
+  activeClassName,
+  ...rest
+}: NavLinkProps) {
   const Anchor = TSLink as unknown as React.FC<Record<string, unknown>>;
   return (
     <Anchor

@@ -53,8 +53,12 @@ export default function ProductDescriptionModal({
             {product.description || "Bu ürün için açıklama girilmemiş."}
           </div>
           <div className="pt-3 border-t border-border flex items-center justify-between">
-            <span className="text-xs font-mono text-muted-foreground">Fiyat</span>
-            <span className="text-primary font-mono font-bold">{product.price} LTC</span>
+            <span className="text-xs font-mono text-muted-foreground">
+              Fiyat
+            </span>
+            <span className="text-primary font-mono font-bold">
+              {product.price} LTC
+            </span>
           </div>
         </div>
       </DialogContent>

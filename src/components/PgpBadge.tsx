@@ -14,7 +14,11 @@ interface KeyRow {
   verified: boolean;
 }
 
-export default function PgpBadge({ userId, size = "sm", showFingerprint = false }: Props) {
+export default function PgpBadge({
+  userId,
+  size = "sm",
+  showFingerprint = false,
+}: Props) {
   const [key, setKey] = useState<KeyRow | null>(null);
 
   useEffect(() => {
@@ -46,7 +50,9 @@ export default function PgpBadge({ userId, size = "sm", showFingerprint = false 
         <Key className={isMd ? "w-3.5 h-3.5" : "w-3 h-3"} />
       )}
       PGP {key.verified ? "VERIFIED" : "READY"}
-      {showFingerprint && <span className="opacity-70">· {key.fingerprint.slice(-8)}</span>}
+      {showFingerprint && (
+        <span className="opacity-70">· {key.fingerprint.slice(-8)}</span>
+      )}
     </span>
   );
 }

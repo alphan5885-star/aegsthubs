@@ -42,7 +42,9 @@ export default function OrderDeliveryInfo({ orderId, deliveryMethod }: Props) {
       }
     };
     fetchData();
-    return () => { isMounted.current = false; };
+    return () => {
+      isMounted.current = false;
+    };
   }, [orderId, deliveryMethod]);
 
   const copy = (text: string) => {
@@ -60,9 +62,12 @@ export default function OrderDeliveryInfo({ orderId, deliveryMethod }: Props) {
     return (
       <div className="mt-2 bg-secondary/50 rounded p-2 space-y-1.5">
         <div className="flex items-center gap-2 text-[10px] font-mono text-orange-400">
-          <Truck className="w-3 h-3" /> {String(tracking.carrier || "").toUpperCase()}
+          <Truck className="w-3 h-3" />{" "}
+          {String(tracking.carrier || "").toUpperCase()}
           {tracking.country_from && tracking.country_to && (
-            <span className="text-muted-foreground">· {tracking.country_from} → {tracking.country_to}</span>
+            <span className="text-muted-foreground">
+              · {tracking.country_from} → {tracking.country_to}
+            </span>
           )}
         </div>
         {isEncrypted ? (
@@ -74,19 +79,30 @@ export default function OrderDeliveryInfo({ orderId, deliveryMethod }: Props) {
               {tracking.pgp_encrypted_tracking}
             </div>
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[8px] font-mono text-muted-foreground">{t("delivery.decryptHint")}</span>
-              <button onClick={() => copy(tracking.pgp_encrypted_tracking)} className="text-[9px] font-mono text-primary flex items-center gap-1">
+              <span className="text-[8px] font-mono text-muted-foreground">
+                {t("delivery.decryptHint")}
+              </span>
+              <button
+                onClick={() => copy(tracking.pgp_encrypted_tracking)}
+                className="text-[9px] font-mono text-primary flex items-center gap-1"
+              >
                 <Copy className="w-3 h-3" /> {t("copy")}
               </button>
             </div>
           </div>
         ) : (
-          <div className="text-[10px] font-mono text-foreground">{tracking.tracking_number}</div>
+          <div className="text-[10px] font-mono text-foreground">
+            {tracking.tracking_number}
+          </div>
         )}
         {tracking.notes && (
-          <div className="text-[9px] font-mono text-muted-foreground">{tracking.notes}</div>
+          <div className="text-[9px] font-mono text-muted-foreground">
+            {tracking.notes}
+          </div>
         )}
-        <div className="text-[9px] font-mono text-muted-foreground">{t("status")}: {tracking.status}</div>
+        <div className="text-[9px] font-mono text-muted-foreground">
+          {t("status")}: {tracking.status}
+        </div>
       </div>
     );
   }
@@ -104,7 +120,11 @@ export default function OrderDeliveryInfo({ orderId, deliveryMethod }: Props) {
           <MapPin className="w-3 h-3" /> {t("orders.deadDropInfo")}
         </div>
         {deadDrop.latitude && deadDrop.longitude && (
-          <DeadDropMap mode="view" latitude={Number(deadDrop.latitude)} longitude={Number(deadDrop.longitude)} />
+          <DeadDropMap
+            mode="view"
+            latitude={Number(deadDrop.latitude)}
+            longitude={Number(deadDrop.longitude)}
+          />
         )}
         {deadDrop.description && (
           <div className="text-[10px] font-mono text-muted-foreground bg-secondary/50 rounded p-2">
@@ -114,7 +134,8 @@ export default function OrderDeliveryInfo({ orderId, deliveryMethod }: Props) {
         )}
         {deadDrop.pgp_encrypted_data && (
           <div className="bg-background/50 rounded p-1.5 text-[8px] font-mono text-muted-foreground break-all max-h-24 overflow-y-auto">
-            <Lock className="w-3 h-3 inline mr-1" /> {deadDrop.pgp_encrypted_data}
+            <Lock className="w-3 h-3 inline mr-1" />{" "}
+            {deadDrop.pgp_encrypted_data}
           </div>
         )}
       </div>

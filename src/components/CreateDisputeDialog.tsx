@@ -43,10 +43,12 @@ export default function CreateDisputeDialog({
 
     try {
       // Reason display map for user friendly string in product_name or details
-      const reasonLabel = 
-        reason === "item_not_received" ? t("dispute.reason1" as any) :
-        reason === "wrong_item" ? t("dispute.reason2" as any) :
-        t("dispute.reason3" as any);
+      const reasonLabel =
+        reason === "item_not_received"
+          ? t("dispute.reason1" as any)
+          : reason === "wrong_item"
+            ? t("dispute.reason2" as any)
+            : t("dispute.reason3" as any);
 
       const { error } = await supabase.from("disputes").insert({
         buyer_id: user.id,
@@ -55,7 +57,7 @@ export default function CreateDisputeDialog({
         product_name: productName,
         amount: amount,
         reason: `${reasonLabel} - Detay: ${details.trim()}`,
-        status: "open"
+        status: "open",
       });
 
       if (error) {
@@ -78,7 +80,6 @@ export default function CreateDisputeDialog({
   return (
     <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 font-mono select-none">
       <div className="relative w-full max-w-[550px] bg-[#020202]/95 border-2 border-red-600/30 rounded-[32px] p-6 shadow-[0_0_50px_rgba(255,0,0,0.15)] space-y-6">
-        
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -93,38 +94,55 @@ export default function CreateDisputeDialog({
             <ShieldAlert className="w-5 h-5 animate-pulse" />
           </div>
           <div>
-            <span className="text-[6px] text-red-500 font-black tracking-[0.3em] uppercase">ESCROW_ARBITRATION</span>
-            <h2 className="text-sm font-black text-white uppercase tracking-wider">{t("dispute.title" as any)}</h2>
+            <span className="text-[6px] text-red-500 font-black tracking-[0.3em] uppercase">
+              ESCROW_ARBITRATION
+            </span>
+            <h2 className="text-sm font-black text-white uppercase tracking-wider">
+              {t("dispute.title" as any)}
+            </h2>
           </div>
         </div>
 
         {/* Order specs HUD */}
         <div className="grid grid-cols-2 gap-4 bg-white/[0.01] border border-white/[0.03] p-4 rounded-2xl text-[9px] uppercase font-bold text-zinc-400">
           <div>
-            <span className="text-zinc-600 block text-[7px] tracking-wider">SIPARIS_ID</span>
-            <span className="text-white truncate block">{orderId.slice(0, 18)}...</span>
+            <span className="text-zinc-600 block text-[7px] tracking-wider">
+              SIPARIS_ID
+            </span>
+            <span className="text-white truncate block">
+              {orderId.slice(0, 18)}...
+            </span>
           </div>
           <div>
-            <span className="text-zinc-600 block text-[7px] tracking-wider">URUN / DEGER</span>
-            <span className="text-white block truncate">{productName} ({amount} LTC)</span>
+            <span className="text-zinc-600 block text-[7px] tracking-wider">
+              URUN / DEGER
+            </span>
+            <span className="text-white block truncate">
+              {productName} ({amount} LTC)
+            </span>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-[10px]">
           {/* Dispute Reason Selection */}
           <div className="space-y-2">
-            <label className="text-zinc-500 font-black uppercase tracking-wider block">{t("dispute.reasonLabel" as any)}</label>
+            <label className="text-zinc-500 font-black uppercase tracking-wider block">
+              {t("dispute.reasonLabel" as any)}
+            </label>
             <div className="grid grid-cols-1 gap-2">
               {[
                 { id: "item_not_received", label: t("dispute.reason1" as any) },
                 { id: "wrong_item", label: t("dispute.reason2" as any) },
-                { id: "seller_unresponsive", label: t("dispute.reason3" as any) }
+                {
+                  id: "seller_unresponsive",
+                  label: t("dispute.reason3" as any),
+                },
               ].map((r) => (
                 <label
                   key={r.id}
                   className={`flex items-center gap-3 p-3.5 bg-black/40 border rounded-[18px] cursor-pointer transition-all ${
-                    reason === r.id 
-                      ? "border-red-600/40 text-white bg-red-600/[0.02]" 
+                    reason === r.id
+                      ? "border-red-600/40 text-white bg-red-600/[0.02]"
                       : "border-white/[0.04] text-zinc-500 hover:border-white/[0.08]"
                   }`}
                 >
@@ -143,7 +161,9 @@ export default function CreateDisputeDialog({
 
           {/* Description input */}
           <div className="space-y-2">
-            <label className="text-zinc-500 font-black uppercase tracking-wider block">{t("dispute.detailsLabel" as any)}</label>
+            <label className="text-zinc-500 font-black uppercase tracking-wider block">
+              {t("dispute.detailsLabel" as any)}
+            </label>
             <textarea
               required
               value={details}
@@ -166,10 +186,11 @@ export default function CreateDisputeDialog({
             disabled={submitting}
             className="w-full bg-red-600 text-white py-4 rounded-[20px] text-[9.5px] font-black uppercase tracking-[0.3em] hover:bg-red-700 transition-all active:scale-95 duration-300 disabled:opacity-50 cursor-pointer"
           >
-            {submitting ? t("dispute.submitting" as any) : t("dispute.submitBtn" as any)}
+            {submitting
+              ? t("dispute.submitting" as any)
+              : t("dispute.submitBtn" as any)}
           </button>
         </form>
-
       </div>
     </div>
   );

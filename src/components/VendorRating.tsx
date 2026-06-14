@@ -8,18 +8,24 @@ interface Props {
   showBadges?: boolean;
 }
 
-export default function VendorRating({ vendorId, size = "sm", showBadges = false }: Props) {
+export default function VendorRating({
+  vendorId,
+  size = "sm",
+  showBadges = false,
+}: Props) {
   const [avg, setAvg] = useState(0);
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    supabase.rpc("get_vendor_rating", { _vendor_id: vendorId }).then(({ data }) => {
-      if (data) {
-        const d = data as any;
-        setAvg(d.average || 0);
-        setCount(d.count || 0);
-      }
-    });
+    supabase
+      .rpc("get_vendor_rating", { _vendor_id: vendorId })
+      .then(({ data }: any) => {
+        if (data) {
+          const d = data as any;
+          setAvg(d.average || 0);
+          setCount(d.count || 0);
+        }
+      });
   }, [vendorId]);
 
   const stars = Math.round(avg);
@@ -34,7 +40,9 @@ export default function VendorRating({ vendorId, size = "sm", showBadges = false
             className={`${isSm ? "w-2.5 h-2.5" : "w-3.5 h-3.5"} ${s <= stars ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground"}`}
           />
         ))}
-        <span className={`font-mono text-muted-foreground ${isSm ? "text-[9px]" : "text-xs"}`}>
+        <span
+          className={`font-mono text-muted-foreground ${isSm ? "text-[9px]" : "text-xs"}`}
+        >
           {count > 0 ? `${avg} (${count})` : "Puan Yok"}
         </span>
       </div>

@@ -26,7 +26,13 @@ export default function NewsTicker() {
 
   const collapsed = settings.sidebarCollapsed;
   const isRight = settings.sidebarPosition === "right";
-  const margin = collapsed ? (isRight ? "mr-16" : "ml-16") : isRight ? "mr-60" : "ml-60";
+  const margin = collapsed
+    ? isRight
+      ? "mr-16"
+      : "ml-16"
+    : isRight
+      ? "mr-60"
+      : "ml-60";
 
   return (
     <div
@@ -35,7 +41,9 @@ export default function NewsTicker() {
       <div className="max-w-7xl mx-auto h-full flex items-center px-4">
         <div className="flex items-center gap-2 bg-primary/10 px-2 py-0.5 rounded text-primary shrink-0 border border-primary/20 mr-4">
           <Megaphone className="w-3 h-3" />
-          <span className="text-[10px] font-mono font-bold uppercase tracking-tighter">DUYURU</span>
+          <span className="text-[10px] font-mono font-bold uppercase tracking-tighter">
+            DUYURU
+          </span>
         </div>
 
         <div className="flex-1 relative h-full flex items-center overflow-hidden">

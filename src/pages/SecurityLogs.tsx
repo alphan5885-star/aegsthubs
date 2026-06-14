@@ -32,13 +32,15 @@ export default function SecurityLogs() {
         if (!isMounted.current) return;
 
         if (error) {
-          if (import.meta.env.DEV) console.error("Error fetching security logs:", error);
+          if (import.meta.env.DEV)
+            console.error("Error fetching security logs:", error);
           return;
         }
 
         if (data) setLogs(data as any);
       } catch (e) {
-        if (import.meta.env.DEV) console.error("Catch error in SecurityLogs fetch:", e);
+        if (import.meta.env.DEV)
+          console.error("Catch error in SecurityLogs fetch:", e);
       }
     };
     fetchLogs();
@@ -49,7 +51,7 @@ export default function SecurityLogs() {
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "security_logs" },
-        (payload) => {
+        (payload: any) => {
           if (isMounted.current) {
             setLogs((prev) => [payload.new as LogEntry, ...prev].slice(0, 30));
           }
@@ -68,7 +70,9 @@ export default function SecurityLogs() {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <TerminalIcon className="w-5 h-5 text-primary" />
-          <h1 className="text-xl font-mono font-bold text-primary neon-text">Güvenlik Merkezi</h1>
+          <h1 className="text-xl font-mono font-bold text-primary neon-text">
+            Güvenlik Merkezi
+          </h1>
         </div>
         <span className="text-xs font-mono text-muted-foreground animate-pulse-neon">
           ● LIVE MONITOR
@@ -105,7 +109,9 @@ export default function SecurityLogs() {
                 <span className="text-[10px] font-mono text-muted-foreground uppercase">
                   {s.label}
                 </span>
-                <span className={`text-lg font-mono font-bold ${s.color}`}>{s.value}</span>
+                <span className={`text-lg font-mono font-bold ${s.color}`}>
+                  {s.value}
+                </span>
               </div>
             ))}
           </div>
@@ -115,7 +121,10 @@ export default function SecurityLogs() {
             </div>
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="h-1 flex-1 bg-green-500/40 rounded-full" />
+                <div
+                  key={i}
+                  className="h-1 flex-1 bg-green-500/40 rounded-full"
+                />
               ))}
             </div>
           </div>
@@ -142,7 +151,10 @@ export default function SecurityLogs() {
           <tbody>
             {logs.length === 0 && (
               <tr>
-                <td colSpan={5} className="p-6 text-center text-muted-foreground text-xs">
+                <td
+                  colSpan={5}
+                  className="p-6 text-center text-muted-foreground text-xs"
+                >
                   Henüz log kaydı yok.
                 </td>
               </tr>
@@ -156,8 +168,12 @@ export default function SecurityLogs() {
                   {new Date(log.created_at).toLocaleString("tr-TR")}
                 </td>
                 <td className="p-3 text-xs">{log.user_email || "—"}</td>
-                <td className="p-3 text-xs text-muted-foreground">{log.ip || "—"}</td>
-                <td className="p-3 text-xs text-muted-foreground">{log.device || "—"}</td>
+                <td className="p-3 text-xs text-muted-foreground">
+                  {log.ip || "—"}
+                </td>
+                <td className="p-3 text-xs text-muted-foreground">
+                  {log.device || "—"}
+                </td>
                 <td className="p-3">
                   {log.success ? (
                     <span className="flex items-center gap-1 text-xs text-green-500">

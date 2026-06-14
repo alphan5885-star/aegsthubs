@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+  useCallback,
+} from "react";
 
 export type Language = "tr" | "en" | "ru";
 
@@ -152,7 +159,14 @@ const tr = {
   language: "Dil",
   selectLanguage: "Dil Seçimi",
   systemFont: "Sistem Fontu",
-  red: "Kırmızı", blue: "Mavi", green: "Yeşil", purple: "Mor", orange: "Turuncu", cyan: "Camgöbeği", pink: "Pembe", yellow: "Sarı",
+  red: "Kırmızı",
+  blue: "Mavi",
+  green: "Yeşil",
+  purple: "Mor",
+  orange: "Turuncu",
+  cyan: "Camgöbeği",
+  pink: "Pembe",
+  yellow: "Sarı",
   supportedFormats: "Desteklenen formatlar: JPG, PNG, GIF, WebP",
   maxFileSize: "Maksimum dosya boyutu: 10MB",
 
@@ -218,12 +232,14 @@ const tr = {
   "product.pgpFailed": "PGP şifreleme başarısız, sipariş iptal",
   "product.insufficientBalance": "Yetersiz bakiye. Önce wallet'a LTC yükle.",
   "product.pgpEncrypted": "🔐 Adres satıcının PGP anahtarıyla şifrelendi",
-  "product.escrowHeld": "Ödeme escrow'a alındı. Ürün teslim onayına kadar kilitli.",
+  "product.escrowHeld":
+    "Ödeme escrow'a alındı. Ürün teslim onayına kadar kilitli.",
   "product.unexpectedError": "Sipariş oluşturulurken beklenmedik hata",
   "product.notFound": "Ürün bulunamadı.",
   "product.deliveryInfo": "Teslimat Bilgileri",
   "product.noPgpWarning": "⚠ Satıcının PGP key'i yok — düz metin",
-  "product.deliveryPlaceholder": "Teslimat adresi / dead-drop koordinatları / posta kutusu...",
+  "product.deliveryPlaceholder":
+    "Teslimat adresi / dead-drop koordinatları / posta kutusu...",
   "product.notesPlaceholder": "Notlar (isteğe bağlı)",
   "product.ownProduct": "⚠️ Bu sizin kendi ürününüz — satın alamazsınız.",
   "product.preparing": "Hazırlanıyor...",
@@ -232,9 +248,10 @@ const tr = {
   "product.stockLabel": "Stok",
   "product.escrowTitle": "Bakiye Bazlı Escrow",
   "product.orderLabel": "Sipariş:",
-"product.pgpAutoEncrypt": "🔐 PGP otomatik şifrelenecek",
-  "product.orderDesc": "Bakiye escrow'a alındı. Satıcı teslim ettiğinde fonlar otomatik dağıtılır.",
-"product.addedToCart": "Ürün sepete eklendi!",
+  "product.pgpAutoEncrypt": "🔐 PGP otomatik şifrelenecek",
+  "product.orderDesc":
+    "Bakiye escrow'a alındı. Satıcı teslim ettiğinde fonlar otomatik dağıtılır.",
+  "product.addedToCart": "Ürün sepete eklendi!",
   "product.addToCart": "SEPETE EKLE",
   "product.inCart": "SEPETTE",
 
@@ -283,9 +300,10 @@ const tr = {
   "status.held": "Escrow'da",
   "status.released": "Bırakıldı",
 
-// Wallet
+  // Wallet
   "wallet.title": "Cüzdan",
-  "wallet.desc": "LTC cüzdan adreslerine para yatır, 3 onaydan sonra bakiyene otomatik yansır",
+  "wallet.desc":
+    "LTC cüzdan adreslerine para yatır, 3 onaydan sonra bakiyene otomatik yansır",
   "wallet.balance": "Bakiye",
   "wallet.available": "Kullanılabilir",
   "wallet.pendingBalance": "Bekleyen",
@@ -298,27 +316,32 @@ const tr = {
   "wallet.invalidAmount": "Geçersiz miktar",
   "wallet.insufficientFunds": "Yetersiz bakiye",
   "wallet.withdrawSuccess": "Çekme talebi gönderildi",
-  "wallet.depositProviderOffline": "LTC yatırma adresi sağlayıcısı şu an çevrim dışı. Lütfen birkaç dakika sonra tekrar dene.",
+  "wallet.depositProviderOffline":
+    "LTC yatırma adresi sağlayıcısı şu an çevrim dışı. Lütfen birkaç dakika sonra tekrar dene.",
   "wallet.depositAddressError": "LTC yatırma adresi alınamadı.",
   "wallet.newTransferCredited": "yeni transfer onaylandı ve bakiyene eklendi.",
   "wallet.noNewTransfer": "Yeni onaylı transfer bulunamadı.",
   "wallet.loadError": "Cüzdan yüklenemedi",
   "wallet.invalidAmountText": "Geçerli bir transfer tutarı girin.",
   "wallet.insufficientBalanceText": "Yetersiz bakiye",
-  "wallet.pinNotSetText": "Para çekme PIN'i belirlenmemiş. Profil sayfasından PIN oluştur.",
+  "wallet.pinNotSetText":
+    "Para çekme PIN'i belirlenmemiş. Profil sayfasından PIN oluştur.",
   "wallet.invalidAddressText": "Geçerli bir transfer adresi girin.",
   "wallet.withdrawFailedText": "Çekim başarısız",
   "wallet.withdrawSuccessText": "çekim talebi oluşturuldu.",
   "wallet.copiedToClipboard": "Adres panoya kopyalandı",
-  "wallet.depositDesc": "LTC cüzdan adresine para yatır, 3 onaydan sonra bakiyene otomatik yansır",
+  "wallet.depositDesc":
+    "LTC cüzdan adresine para yatır, 3 onaydan sonra bakiyene otomatik yansır",
   "wallet.refreshBtn": "BlockCypher ile Yenile",
   "wallet.ltcAddressTitle": "LTC Adresi",
   "wallet.withdrawTitle": "Para Çekimi (LTC)",
   "wallet.max": "Maks",
   "wallet.withdrawAddrPlaceholder": "LTC Cüzdan Adresi",
   "wallet.amountPlaceholder": "Miktar",
-  "wallet.warningNetwork": "Ödeme yapmadan önce ağ türünü doğrula. Yanlış ağa gönderilen transferler geri alınamaz.",
-  "wallet.infoEscrow": "LTC transferleri BlockCypher'da 3 onay aldiginda otomatik bakiyene eklenir. Satin alimda bakiye escrowa kilitlenir; teslimatta %95 saticiya, %5 admin hesaba aktarilir.",
+  "wallet.warningNetwork":
+    "Ödeme yapmadan önce ağ türünü doğrula. Yanlış ağa gönderilen transferler geri alınamaz.",
+  "wallet.infoEscrow":
+    "LTC transferleri BlockCypher'da 3 onay aldiginda otomatik bakiyene eklenir. Satin alimda bakiye escrowa kilitlenir; teslimatta %95 saticiya, %5 admin hesaba aktarilir.",
   "wallet.pending": "Bekleyen",
   "wallet.total": "Toplam",
   "wallet.generatingAddress": "Adres oluşturuluyor...",
@@ -329,7 +352,8 @@ const tr = {
   "vendorWallet.invalidAddress": "Geçersiz",
   "vendorWallet.withdrawFailed": "Çekim başarısız",
   "vendorWallet.withdrawSuccess": "çekim talebi başarıyla oluşturuldu.",
-  "vendorWallet.unexpectedError": "Çekim sırasında beklenmedik bir hata oluştu.",
+  "vendorWallet.unexpectedError":
+    "Çekim sırasında beklenmedik bir hata oluştu.",
   "vendorWallet.title": "SATICILAR İÇİN",
   "vendorWallet.titleCore": "FİNANS.CORE",
   "vendorWallet.connectionActive": "BAĞLANTI_AKTİF",
@@ -350,7 +374,8 @@ const tr = {
   "vendorWallet.processing": "İŞLEM GERÇEKLEŞTİRİLİYOR...",
   "vendorWallet.withdrawSubmitBtn": "ÇEKİM TALEBİNİ BORSAYA İLET",
   "vendorWallet.metricsTitle": "İŞLEM_SAYAÇLARI",
-  "vendorWallet.escrowRuleInfo": "Platform kuralları gereği, escrow korumasındaki siparişlerin parası alıcı tarafından onaylanmadan cüzdana aktarılamaz.",
+  "vendorWallet.escrowRuleInfo":
+    "Platform kuralları gereği, escrow korumasındaki siparişlerin parası alıcı tarafından onaylanmadan cüzdana aktarılamaz.",
   "vendorWallet.totalOrders": "TOPLAM SİPARİŞ",
   "vendorWallet.completed": "TAMAMLANAN",
   "vendorWallet.pending": "BEKLEYEN",
@@ -361,7 +386,8 @@ const tr = {
   "vendorWallet.pendingState": "Beklemede",
   "vendorWallet.txDate": "İŞLEM TARİHİ",
   "vendorWallet.at": "SAAT",
-  "vendorWallet.noLedgerRecords": "Henüz intikal eden finansal kayıt bulunamadı.",
+  "vendorWallet.noLedgerRecords":
+    "Henüz intikal eden finansal kayıt bulunamadı.",
 
   "wallet.empty": "Henüz işlem yok",
 
@@ -383,8 +409,10 @@ const tr = {
   "delivery.notesOptional": "Notlar (opsiyonel)",
   "delivery.submit": "Gönder ve İşaretle",
   "delivery.submitted": "Teslimat bilgisi kaydedildi",
-  "delivery.encryptionWarning": "Takip kodu uçtan uca şifrelenir. Kaybedersen geri getirilemez.",
-  "delivery.noBuyerKey": "Alıcının PGP anahtarı yok — kod düz metin olarak saklanacak",
+  "delivery.encryptionWarning":
+    "Takip kodu uçtan uca şifrelenir. Kaybedersen geri getirilemez.",
+  "delivery.noBuyerKey":
+    "Alıcının PGP anahtarı yok — kod düz metin olarak saklanacak",
   "delivery.waiting": "Teslimat bilgisi bekleniyor...",
   "delivery.encryptedTracking": "Şifreli Takip Kodu",
   "delivery.decryptHint": "PGP araçlarında özel anahtarınla çöz",
@@ -445,7 +473,8 @@ const tr = {
   "profile.bioPlaceholder": "Kendinizi tanıtın...",
   "profile.uploadError": "Yükleme hatası",
   "profile.profileUpdateError": "Profil güncellenemedi",
-  "profile.formatInfo": "💡 Profil fotoğrafı ve banner için GIF, PNG, JPG, WebP formatları desteklenir. Hareketli GIF'ler otomatik olarak oynatılır!",
+  "profile.formatInfo":
+    "💡 Profil fotoğrafı ve banner için GIF, PNG, JPG, WebP formatları desteklenir. Hareketli GIF'ler otomatik olarak oynatılır!",
   "profile.avatarUpdated": "Avatar güncellendi! 🎉",
   "profile.bannerUpdated": "Banner güncellendi! 🖼️",
   "profile.product": "Ürün",
@@ -491,7 +520,7 @@ const tr = {
   "vendor.maxFileSize5": "Maksimum dosya boyutu: 5MB",
   "vendor.stockLabel": "Stok:",
 
-// Security
+  // Security
   "security.connectionStatus": "Bağlantı Durumu",
   "security.online": "Çevrimiçi",
   "security.offline": "Çevrimdışı",
@@ -506,7 +535,8 @@ const tr = {
   "security.dataWiped": "Hassas oturum verileri temizlendi",
   "security.settingsTitle": "Güvenlik Ayarları",
   "security.phishingTitle": "Anti-Phishing Kodu",
-  "security.phishingDesc": "Giriş sayfasında size özel bir kelime gösterilir. Bu kelimeyi görmezseniz, sahte sitede olabilirsiniz.",
+  "security.phishingDesc":
+    "Giriş sayfasında size özel bir kelime gösterilir. Bu kelimeyi görmezseniz, sahte sitede olabilirsiniz.",
   "security.currentCode": "Mevcut Kodunuz:",
   "security.phishingPlaceholder": "Gizli kelime belirle (ör: MorKedi42)",
   "security.2faTitle": "İki Faktörlü Doğrulama (2FA)",
@@ -519,14 +549,17 @@ const tr = {
   "security.deadManTitle": "Dead-Man / Panic Mode",
   "security.encryptionTitle": "Veri Şifreleme",
   "security.adminTitle": "ADMIN ERİŞİMİ",
-  "security.adminActive": "Admin rolün aktif. /admin panelinden escrow, dispute ve sistem ayarlarına eriş.",
-  "security.firstAdmin": "Sistemde henüz admin yok. İlk admin olarak kendini atayabilirsin (tek seferlik).",
+  "security.adminActive":
+    "Admin rolün aktif. /admin panelinden escrow, dispute ve sistem ayarlarına eriş.",
+  "security.firstAdmin":
+    "Sistemde henüz admin yok. İlk admin olarak kendini atayabilirsin (tek seferlik).",
   "security.becomeAdmin": "İLK ADMİN OL",
   "security.processing": "İŞLENİYOR...",
   "security.inviteCode": "DAVET-KODU",
   "security.redeem": "KULLAN",
   "security.adminAssigned": "Admin olarak atandın. Sayfayı yenile.",
-  "security.inviteCodeDesc": "Mevcut bir adminden davet kodu aldıysan buraya gir.",
+  "security.inviteCodeDesc":
+    "Mevcut bir adminden davet kodu aldıysan buraya gir.",
   "security.invalidCode": "Geçersiz kod",
   "security.adminRoleGranted": "Admin rolü verildi.",
 
@@ -539,7 +572,8 @@ const tr = {
   "pgp.subtitle": "Yerel tarayıcı tabanlı PGP araçları",
   "pgp.verifyTitle": "İmza Doğrulama",
   "pgp.resultTitle": "Doğrulama Sonucu",
-  "pgp.noVerification": "Henüz bir doğrulama yapılmadı. Sol tarafa imzalı mesajı ve anahtarı yapıştırın.",
+  "pgp.noVerification":
+    "Henüz bir doğrulama yapılmadı. Sol tarafa imzalı mesajı ve anahtarı yapıştırın.",
   "pgp.validSignature": "GEÇERLİ İMZA",
   "pgp.invalidSignature": "GEÇERSİZ İMZA",
   "pgp.originalData": "Orijinal Veri",
@@ -548,7 +582,8 @@ const tr = {
   "pgp.receiverKey": "Alıcı Kamu Anahtarı (Public Key)",
   "pgp.senderKey": "Gönderen Kamu Anahtarı (Public Key)",
   "pgp.encryptedOutput": "Şifrelenmiş Çıktı",
-  "pgp.noEncryption": "Şifrelenmiş mesaj burada görünecek. Sol taraftaki alanları doldurun.",
+  "pgp.noEncryption":
+    "Şifrelenmiş mesaj burada görünecek. Sol taraftaki alanları doldurun.",
   "pgp.processing": "İşleniyor...",
   "pgp.verifyBtn": "İmzayı Doğrula",
   "pgp.encryptBtn": "Mesajı Şifrele",
@@ -586,16 +621,17 @@ const tr = {
   "admin.coldWalletPlaceholder": "Soğuk cüzdan adresi (Exodus)",
   "admin.minAmountPlaceholder": "Min miktar",
   "admin.paniTitle": "PANIC BUTTON — Self Destruct",
-  "admin.panicDesc": "Tüm logları, IP kayıtlarını, mesajları ve hassas verileri kalıcı olarak sil",
+  "admin.panicDesc":
+    "Tüm logları, IP kayıtlarını, mesajları ve hassas verileri kalıcı olarak sil",
   "admin.activate": "AKTİFLEŞTİR",
   "admin.areSure": "EMİN MİSİN?",
   "admin.destroy": "🔥 İMHA ET",
 
-
   // Bond (Vendor Bond)
   "bond.title": "Güven Depozitosu",
   "bond.required": "Satıcı Depozitosu Gerekli",
-  "bond.desc": "Ürün listeleyebilmek için 0.5 LTC güven depozitosu yatırmanız gerekmektedir.",
+  "bond.desc":
+    "Ürün listeleyebilmek için 0.5 LTC güven depozitosu yatırmanız gerekmektedir.",
   "bond.deposit": "Depozito Yatır",
   "bond.statusLabel": "Depozito Durumu",
   "bond.deposited": "Yatırılan",
@@ -668,7 +704,6 @@ const tr = {
   "disputes.adminMessage": "Admin mesajı...",
   "disputes.disputeLabel": "Uyuşmazlık: ",
 
-
   // Security Logs
   "security.center": "Güvenlik Merkezi",
   "security.liveMonitor": "LIVE MONITOR",
@@ -695,7 +730,7 @@ const tr = {
   "tx.withdrawal": "Çekim",
   "tx.deposit": "Yatırma",
 
-// Errors
+  // Errors
   "err.generic": "Bir şeyler ters gitti",
   "err.network": "Bağlantı hatası",
   "err.unauthorized": "Yetkisiz işlem",
@@ -706,7 +741,6 @@ const tr = {
   "err.walletLoadFailed": "Cüzdan yüklenemedi",
   "err.invalidAmount": "Geçersiz miktar",
   "err.insufficientBalance": "Yetersiz bakiye",
-
 
   // Forum extra
   "forum.loadError": "Forum verileri yüklenirken hata oluştu",
@@ -802,7 +836,8 @@ const tr = {
   "notif.filterSecurity": "🛡️ GÜVENLİK",
   "notif.filterSystem": "💡 SİSTEM",
   "notif.emptyBox": "Gelen kutunuz tamamen boş.",
-  "notif.confirmClear": "Tüm bildirimlerinizi silmek istediğinizden emin misiniz?",
+  "notif.confirmClear":
+    "Tüm bildirimlerinizi silmek istediğinizden emin misiniz?",
   "notif.allMarkedRead": "Tüm bildirimler okundu olarak işaretlendi.",
   "notif.boxCleared": "Bildirim kutusu temizlendi.",
   "notif.deleted": "Bildirim silindi.",
@@ -814,8 +849,10 @@ const tr = {
   "dispute.reason2": "Ürün Açıklamadan Farklı / Kusurlu",
   "dispute.reason3": "Satıcı Yanıt Vermiyor / İletişim Koptu",
   "dispute.detailsLabel": "Detaylı Gerekçe & Kanıt Logları",
-  "dispute.detailsPlaceholder": "Ürünün neden ulaşmadığını veya kusurunu detaylıca açıklayın...",
-  "dispute.warningText": "UYARI: UYUŞMAZLIK BAŞLATILDIĞINDA ESCROW HAVUZUNDAKİ TUTAR DONDURULUR VE SİPARİŞ ANLAŞMAZLIK MODUNA GEÇER. ÇÖZÜM İÇİN YÖNETİCİLER HAKEMLİK EDECEKTİR.",
+  "dispute.detailsPlaceholder":
+    "Ürünün neden ulaşmadığını veya kusurunu detaylıca açıklayın...",
+  "dispute.warningText":
+    "UYARI: UYUŞMAZLIK BAŞLATILDIĞINDA ESCROW HAVUZUNDAKİ TUTAR DONDURULUR VE SİPARİŞ ANLAŞMAZLIK MODUNA GEÇER. ÇÖZÜM İÇİN YÖNETİCİLER HAKEMLİK EDECEKTİR.",
   "dispute.submitBtn": "UYUŞMAZLIĞI RESMEN BAŞLAT",
   "dispute.submitting": "TALEBİNİZ GÖNDERİLİYOR...",
   "dispute.loginRequired": "Giriş yapmanız gerekmektedir.",
@@ -827,43 +864,53 @@ const tr = {
   // Payment tracker
   "payment.generating": "LTC escrow ekranı hazırlanıyor…",
   "payment.confirmed": "Ödeme onaylandı (3/3)",
-  "payment.dmOpened": "Operasyon DM aşağıda açıldı. 24 saat sonra otomatik imha edilir.",
+  "payment.dmOpened":
+    "Operasyon DM aşağıda açıldı. 24 saat sonra otomatik imha edilir.",
   "payment.waiting": "LTC Escrow Bekleniyor",
   "payment.autoEscrow": "Otomatik LTC escrow",
-  "payment.autoDesc": "LTC ödeme 3 onaydan sonra otomatik onaylanır ve operasyon DM açılır.",
+  "payment.autoDesc":
+    "LTC ödeme 3 onaydan sonra otomatik onaylanır ve operasyon DM açılır.",
   "payment.addressLabel": "Ödeme Adresi (LTC)",
   "payment.amountLabel": "Tutar:",
-  "payment.underpaid": "Eksik ödeme tespit edildi. Bakiye yansıtılmaz, sipariş onaylanmaz.",
+  "payment.underpaid":
+    "Eksik ödeme tespit edildi. Bakiye yansıtılmaz, sipariş onaylanmaz.",
   "payment.confirmations": "Doğrulama:",
-  "payment.singleSend": "Tam tutarı tek seferde gönder. Eksik ödemeler escrow'a yansımaz.",
-  "payment.monitoring": "Zincir canlı izleniyor (30sn) • 3 konfirmasyon sonrası otomatik onay",
+  "payment.singleSend":
+    "Tam tutarı tek seferde gönder. Eksik ödemeler escrow'a yansımaz.",
+  "payment.monitoring":
+    "Zincir canlı izleniyor (30sn) • 3 konfirmasyon sonrası otomatik onay",
   "payment.addressError": "Fallback ödeme adresi oluşturulamadı",
   "payment.underpaidAlert": "Eksik ödeme algılandı. Lütfen tam tutarı gönder.",
   "payment.addressCopied": "Adres kopyalandı",
 
   // Security HUD
   "hud.suspiciousActivity": "Şüpheli aktivite tespit edildi",
-  "hud.botDetected": "Çok hızlı tıklama / bot davranışı algılandı. Erişim 15 saniye boyunca kısıtlandı.",
+  "hud.botDetected":
+    "Çok hızlı tıklama / bot davranışı algılandı. Erişim 15 saniye boyunca kısıtlandı.",
   "hud.imHuman": "İnsanım, devam et",
   "hud.securityEvents": "Güvenlik Olayları",
   "hud.stealthActive": "Stealth Aktif",
   "hud.noEvents": "Olay yok — tüm sistemler nominal.",
-  "hud.frontendNote": "Not: Frontend tespitidir. Gerçek güvenlik sunucu tarafında (RLS + sunucu rate-limit) sağlanır.",
+  "hud.frontendNote":
+    "Not: Frontend tespitidir. Gerçek güvenlik sunucu tarafında (RLS + sunucu rate-limit) sağlanır.",
   "hud.statusTitle": "Güvenlik durumu",
 
   // Panic button
   "panic.title": "PANİK MODU",
-  "panic.desc": "Tüm sohbet geçmişlerin silinir, bekleyen siparişlerin iptal edilir, bakiyen dondurulur ve oturumun anında kapatılır.",
+  "panic.desc":
+    "Tüm sohbet geçmişlerin silinir, bekleyen siparişlerin iptal edilir, bakiyen dondurulur ve oturumun anında kapatılır.",
   "panic.irreversible": "Geri alınamaz.",
   "panic.armBtn": "Panik Modunu Aktifleştir",
   "panic.confirmBtn": "🔥 EVET, HER ŞEYİ SİL",
   "panic.wiping": "İMHA EDİLİYOR…",
-  "panic.success": "İzler silindi. {rooms} oda imha, {orders} sipariş iptal. Çıkış yapılıyor…",
+  "panic.success":
+    "İzler silindi. {rooms} oda imha, {orders} sipariş iptal. Çıkış yapılıyor…",
   "panic.failed": "Panik modu başarısız",
   "panic.unknownError": "Bilinmeyen hata",
 
   // Order status timeline
-  "timeline.disputeActive": "Uyuşmazlık Protokolü Aktif - Hakem Değerlendirmesi Bekleniyor",
+  "timeline.disputeActive":
+    "Uyuşmazlık Protokolü Aktif - Hakem Değerlendirmesi Bekleniyor",
 
   // Order chat button
   "chat.openError": "Sohbet açılamadı",
@@ -896,8 +943,10 @@ const tr = {
   "login.keyLabel": "ERİŞİM_ANAHTARI",
   "login.pinLabel": "GÜVENLİK PIN KODU (6 HANE)",
   "login.pinNote": "* PARA ÇEKME VE HASSAS İŞLEMLERDE KULLANILACAKTIR.",
-  "login.securityWarning": "🛡️ GÜVENLİK UYARISI: TÜM YENİ HESAPLAR OTOMATİK OLARAK \"ALICI\" (BUYER) OLARAK AÇILIR. SATICI OLMAK İÇİN DAHA SONRA KİMLİK DOĞRULAMA VE SATICI TEMİNATI (BOND) BAŞVURUSU YAPILMALIDIR.",
-  "login.tagline1": "\"POLİSTE 'BEN SADECE PAZAR YORUMU YAPIYORDUM HAKİM BEY' DEMEK YOK KARDEŞ! 🤫\"",
+  "login.securityWarning":
+    '🛡️ GÜVENLİK UYARISI: TÜM YENİ HESAPLAR OTOMATİK OLARAK "ALICI" (BUYER) OLARAK AÇILIR. SATICI OLMAK İÇİN DAHA SONRA KİMLİK DOĞRULAMA VE SATICI TEMİNATI (BOND) BAŞVURUSU YAPILMALIDIR.',
+  "login.tagline1":
+    "\"POLİSTE 'BEN SADECE PAZAR YORUMU YAPIYORDUM HAKİM BEY' DEMEK YOK KARDEŞ! 🤫\"",
   "login.tagline2": "AĞZINI SIKI TUT, 2FA KUR, RAHATINA BAK!",
 
   // TorWarningBanner
@@ -956,28 +1005,34 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
-    try { localStorage.setItem(LANG_KEY, lang); } catch {}
+    try {
+      localStorage.setItem(LANG_KEY, lang);
+    } catch {}
     if (typeof document !== "undefined") document.documentElement.lang = lang;
   }, []);
 
   useEffect(() => {
-    if (typeof document !== "undefined") document.documentElement.lang = language;
+    if (typeof document !== "undefined")
+      document.documentElement.lang = language;
   }, [language]);
 
-  const t = useCallback(
-    (key: TranslationKey | string): string => {
-      const dict = translations.tr as Record<string, string>;
-      return dict[key as string] || String(key);
-    },
-    [],
-  );
+  const t = useCallback((key: TranslationKey | string): string => {
+    const dict = translations.tr as Record<string, string>;
+    return dict[key as string] || String(key);
+  }, []);
 
   return (
-    <I18nContext.Provider value={{ language, setLanguage, t }}>{children}</I18nContext.Provider>
+    <I18nContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </I18nContext.Provider>
   );
 }
 
-export const languageOptions: { value: Language; label: string; flag: string }[] = [
+export const languageOptions: {
+  value: Language;
+  label: string;
+  flag: string;
+}[] = [
   { value: "tr", label: "Türkçe", flag: "🇹🇷" },
   { value: "en", label: "English", flag: "🇬🇧" },
   { value: "ru", label: "Русский", flag: "🇷🇺" },

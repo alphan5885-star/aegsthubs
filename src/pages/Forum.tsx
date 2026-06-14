@@ -22,7 +22,7 @@ import {
   ShieldCheck,
   EyeOff,
   Flame,
-  Award
+  Award,
 } from "lucide-react";
 import {
   Dialog,
@@ -59,11 +59,31 @@ interface ProfileData {
 }
 
 const CATEGORIES = [
-  { id: "genel", label: "💬 Genel Sohbet", desc: "Topluluk üyeleriyle genel muhabbet" },
-  { id: "duyurular", label: "📢 Duyurular", desc: "Sistem güncellemeleri ve resmi haberler" },
-  { id: "yardim", label: "🛡️ Destek & Yardım", desc: "PGP, Escrow ve sipariş yardımları" },
-  { id: "oneriler", label: "💡 Öneriler & Fikirler", desc: "Pazar yerini geliştirecek parlak fikirler" },
-  { id: "sikayet", label: "⚠️ Şikayet & Uyuşmazlık", desc: "Satıcı veya alıcı şikayet kayıtları" },
+  {
+    id: "genel",
+    label: "💬 Genel Sohbet",
+    desc: "Topluluk üyeleriyle genel muhabbet",
+  },
+  {
+    id: "duyurular",
+    label: "📢 Duyurular",
+    desc: "Sistem güncellemeleri ve resmi haberler",
+  },
+  {
+    id: "yardim",
+    label: "🛡️ Destek & Yardım",
+    desc: "PGP, Escrow ve sipariş yardımları",
+  },
+  {
+    id: "oneriler",
+    label: "💡 Öneriler & Fikirler",
+    desc: "Pazar yerini geliştirecek parlak fikirler",
+  },
+  {
+    id: "sikayet",
+    label: "⚠️ Şikayet & Uyuşmazlık",
+    desc: "Satıcı veya alıcı şikayet kayıtları",
+  },
 ];
 
 export default function Forum() {
@@ -73,12 +93,12 @@ export default function Forum() {
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [comments, setComments] = useState<ForumComment[]>([]);
   const [profiles, setProfiles] = useState<Record<string, ProfileData>>({});
-  
+
   const [selectedPost, setSelectedPost] = useState<ForumPost | null>(null);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [newThreadOpen, setNewThreadOpen] = useState(false);
-  
+
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
   const [newCategory, setNewCategory] = useState("genel");
@@ -117,7 +137,9 @@ export default function Forum() {
         setPosts(mappedPosts);
 
         // Fetch profiles for authors
-        const authorIds = Array.from(new Set(mappedPosts.map((p) => p.author_id)));
+        const authorIds = Array.from(
+          new Set(mappedPosts.map((p: any) => p.author_id)),
+        );
         if (authorIds.length > 0) {
           const { data: profilesData, error: profilesError } = await supabase
             .from("profiles")
@@ -126,7 +148,7 @@ export default function Forum() {
 
           if (!profilesError && profilesData) {
             const profileMap: Record<string, ProfileData> = {};
-            profilesData.forEach((p) => {
+            profilesData.forEach((p: any) => {
               profileMap[p.id] = p;
             });
             setProfiles((prev) => ({ ...prev, ...profileMap }));
@@ -134,7 +156,9 @@ export default function Forum() {
         }
       }
     } catch (e) {
-      toast.error(t("forum.loadError") || "Forum verileri yüklenirken hata oluştu.");
+      toast.error(
+        t("forum.loadError") || "Forum verileri yüklenirken hata oluştu.",
+      );
     } finally {
       if (isMounted.current) setLoading(false);
     }
@@ -156,7 +180,11 @@ export default function Forum() {
 
         // Fetch profiles for comment authors
         const authorIds = Array.from(
-          new Set(commentsData.map((c) => c.author_id).filter((id) => !profiles[id])),
+          new Set(
+            commentsData
+              .map((c: any) => c.author_id)
+              .filter((id: any) => !profiles[id]),
+          ),
         );
         if (authorIds.length > 0) {
           const { data: profilesData, error: profilesError } = await supabase
@@ -166,7 +194,7 @@ export default function Forum() {
 
           if (!profilesError && profilesData) {
             const profileMap: Record<string, ProfileData> = {};
-            profilesData.forEach((p) => {
+            profilesData.forEach((p: any) => {
               profileMap[p.id] = p;
             });
             setProfiles((prev) => ({ ...prev, ...profileMap }));
@@ -174,7 +202,9 @@ export default function Forum() {
         }
       }
     } catch (e) {
-      toast.error(t("forum.commentsLoadError") || "Yorumlar yüklenirken hata oluştu.");
+      toast.error(
+        t("forum.commentsLoadError") || "Yorumlar yüklenirken hata oluştu.",
+      );
     }
   };
 
@@ -217,7 +247,9 @@ export default function Forum() {
       setNewThreadOpen(false);
       fetchPosts();
     } catch (e) {
-      toast.error(t("forum.postError") || "Konu yayınlanırken bir hata oluştu.");
+      toast.error(
+        t("forum.postError") || "Konu yayınlanırken bir hata oluştu.",
+      );
     } finally {
       setSubmittingPost(false);
     }
@@ -249,7 +281,9 @@ export default function Forum() {
       setNewComment("");
       fetchComments(selectedPost.id);
     } catch (e) {
-      toast.error(t("forum.commentError") || "Yorum iletilirken bir hata oluştu.");
+      toast.error(
+        t("forum.commentError") || "Yorum iletilirken bir hata oluştu.",
+      );
     } finally {
       setSubmittingComment(false);
     }
@@ -266,7 +300,11 @@ export default function Forum() {
 
       if (error) throw error;
 
-      toast.success(post.pinned ? "Konunun sabitlemesi kaldırıldı." : "Konu başarıyla sabitlendi!");
+      toast.success(
+        post.pinned
+          ? "Konunun sabitlemesi kaldırıldı."
+          : "Konu başarıyla sabitlendi!",
+      );
       const updatedPost = { ...post, pinned: !post.pinned };
       if (selectedPost?.id === post.id) {
         setSelectedPost(updatedPost);
@@ -280,15 +318,20 @@ export default function Forum() {
   // Admin Tool: Delete Post
   const handleDeletePost = async (postId: string) => {
     if (role !== "admin") return;
-    const confirm = window.confirm("Bu konuyu ve tüm alt yorumlarını tamamen silmek istiyor musunuz?");
+    const confirm = window.confirm(
+      "Bu konuyu ve tüm alt yorumlarını tamamen silmek istiyor musunuz?",
+    );
     if (!confirm) return;
 
     try {
       // Delete comments first
       await supabase.from("forum_comments").delete().eq("post_id", postId);
-      
+
       // Delete post
-      const { error } = await supabase.from("forum_posts").delete().eq("id", postId);
+      const { error } = await supabase
+        .from("forum_posts")
+        .delete()
+        .eq("id", postId);
 
       if (error) throw error;
 
@@ -301,11 +344,12 @@ export default function Forum() {
   };
 
   // Filter & Search computation
-  const filteredPosts = posts.filter((p) => {
+  const filteredPosts = posts.filter((p: any) => {
     const matchesSearch =
       p.title.toLowerCase().includes(search.toLowerCase()) ||
       p.content.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = categoryFilter === "all" || p.category === categoryFilter;
+    const matchesCategory =
+      categoryFilter === "all" || p.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
 
@@ -320,19 +364,21 @@ export default function Forum() {
     }
     const profile = profiles[authorId];
     const name = profile?.display_name || `Kullanıcı_${authorId.slice(0, 4)}`;
-    
+
     // Determine badges based on names/ids for immersive fidelity
     const isAdmin = name.toLowerCase().includes("admin") || authorId === "sys";
-    const isVendor = name.toLowerCase().includes("vendor") || name.toLowerCase().includes("satıcı");
+    const isVendor =
+      name.toLowerCase().includes("vendor") ||
+      name.toLowerCase().includes("satıcı");
 
     return {
       name,
       avatar: profile?.avatar_url || "",
       badge: isAdmin ? "ADMIN" : isVendor ? "SATICI" : "ALICI",
-      badgeColor: isAdmin 
-        ? "bg-red-500/10 text-red-500 border-red-500/20" 
-        : isVendor 
-          ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" 
+      badgeColor: isAdmin
+        ? "bg-red-500/10 text-red-500 border-red-500/20"
+        : isVendor
+          ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
           : "bg-blue-500/10 text-blue-400 border-blue-500/20",
     };
   };
@@ -340,7 +386,6 @@ export default function Forum() {
   return (
     <PageShell>
       <div className="max-w-[1300px] mx-auto space-y-8 py-2 font-mono text-zinc-300 relative">
-        
         {/* Ambient background glow */}
         <div className="absolute -top-40 right-1/4 w-[450px] h-[450px] bg-red-600/5 rounded-full blur-[180px] pointer-events-none" />
 
@@ -357,7 +402,7 @@ export default function Forum() {
               <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 border-b border-white/[0.04] pb-8">
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-[9px] text-zinc-500 font-bold tracking-[0.3em] uppercase">
-                    <Zap className="w-4 h-4 text-primary animate-pulse" /> 
+                    <Zap className="w-4 h-4 text-primary animate-pulse" />
                     UNDERGROUND_COMMUNITY // Forums & Encrypted Threads
                   </div>
                   <h1 className="text-3xl font-black italic tracking-tighter text-white uppercase leading-none">
@@ -374,15 +419,17 @@ export default function Forum() {
                   <DialogContent className="bg-[#050505]/95 backdrop-blur-2xl border-white/[0.04] rounded-3xl max-w-2xl p-8 font-mono text-zinc-300">
                     <DialogHeader>
                       <DialogTitle className="text-xl font-black italic text-white uppercase tracking-tight flex items-center gap-2">
-                        <MessageSquare className="w-5 h-5 text-primary" /> {t("forum.newPost")}
+                        <MessageSquare className="w-5 h-5 text-primary" />{" "}
+                        {t("forum.newPost")}
                       </DialogTitle>
                     </DialogHeader>
 
                     <div className="space-y-5 mt-6 text-[10px]">
-                      
                       {/* Topic Category */}
                       <div className="space-y-1.5">
-                        <label className="text-zinc-500 font-bold uppercase tracking-wider">KATEGORİ SEÇİN</label>
+                        <label className="text-zinc-500 font-bold uppercase tracking-wider">
+                          KATEGORİ SEÇİN
+                        </label>
                         <select
                           value={newCategory}
                           onChange={(e) => setNewCategory(e.target.value)}
@@ -398,7 +445,9 @@ export default function Forum() {
 
                       {/* Title */}
                       <div className="space-y-1.5">
-                        <label className="text-zinc-500 font-bold uppercase tracking-wider">KONU BAŞLIĞI</label>
+                        <label className="text-zinc-500 font-bold uppercase tracking-wider">
+                          KONU BAŞLIĞI
+                        </label>
                         <input
                           value={newTitle}
                           onChange={(e) => setNewTitle(e.target.value)}
@@ -409,7 +458,9 @@ export default function Forum() {
 
                       {/* Content */}
                       <div className="space-y-1.5">
-                        <label className="text-zinc-500 font-bold uppercase tracking-wider">TARTIŞMA METNİ / DETAYI</label>
+                        <label className="text-zinc-500 font-bold uppercase tracking-wider">
+                          TARTIŞMA METNİ / DETAYI
+                        </label>
                         <textarea
                           value={newContent}
                           onChange={(e) => setNewContent(e.target.value)}
@@ -423,8 +474,12 @@ export default function Forum() {
                         <div className="flex items-center gap-3">
                           <EyeOff className="w-4 h-4 text-zinc-500" />
                           <div className="space-y-0.5">
-                            <div className="font-bold text-white uppercase tracking-wider text-[9px]">ANONİM OLARAK PAYLAŞ</div>
-                            <div className="text-[8px] text-zinc-500">{t("forum.anonDesc")}</div>
+                            <div className="font-bold text-white uppercase tracking-wider text-[9px]">
+                              ANONİM OLARAK PAYLAŞ
+                            </div>
+                            <div className="text-[8px] text-zinc-500">
+                              {t("forum.anonDesc")}
+                            </div>
                           </div>
                         </div>
                         <input
@@ -450,18 +505,41 @@ export default function Forum() {
               {/* Forum General Stats Banner */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-[#040404]/55 backdrop-blur-xl p-5 border border-white/[0.04] rounded-[24px]">
                 {[
-                  { label: t("forum.totalTopics"), value: posts.length, icon: MessageSquare },
-                  { label: t("forum.totalComments"), value: posts.reduce((sum, p) => sum + 3, 0), icon: MessageCircle },
-                  { label: t("forum.activeMembers"), value: Object.keys(profiles).length || 1, icon: User },
-                  { label: t("forum.lastActivity"), value: posts.length > 0 ? "ŞİMDİ" : "YOK", icon: Clock },
+                  {
+                    label: t("forum.totalTopics"),
+                    value: posts.length,
+                    icon: MessageSquare,
+                  },
+                  {
+                    label: t("forum.totalComments"),
+                    value: posts.reduce((sum, p) => sum + 3, 0),
+                    icon: MessageCircle,
+                  },
+                  {
+                    label: t("forum.activeMembers"),
+                    value: Object.keys(profiles).length || 1,
+                    icon: User,
+                  },
+                  {
+                    label: t("forum.lastActivity"),
+                    value: posts.length > 0 ? "ŞİMDİ" : "YOK",
+                    icon: Clock,
+                  },
                 ].map((stat, i) => (
-                  <div key={i} className="flex items-center gap-3.5 px-4 py-2 border-r border-white/[0.03] last:border-0">
+                  <div
+                    key={i}
+                    className="flex items-center gap-3.5 px-4 py-2 border-r border-white/[0.03] last:border-0"
+                  >
                     <div className="p-2 rounded-lg bg-white/[0.01] border border-white/[0.03]">
                       <stat.icon className="w-4 h-4 text-zinc-500" />
                     </div>
                     <div className="space-y-0.5">
-                      <div className="text-[7px] text-zinc-500 font-bold uppercase tracking-wider">{stat.label}</div>
-                      <div className="text-sm font-black italic tracking-tighter text-white">{stat.value}</div>
+                      <div className="text-[7px] text-zinc-500 font-bold uppercase tracking-wider">
+                        {stat.label}
+                      </div>
+                      <div className="text-sm font-black italic tracking-tighter text-white">
+                        {stat.value}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -469,14 +547,13 @@ export default function Forum() {
 
               {/* Grid: Left Category Navigation Panel & Right Topic Stream */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                
                 {/* Left Category Selection Panel */}
                 <div className="lg:col-span-4 space-y-6">
                   <div className="bg-[#040404]/55 backdrop-blur-xl p-6 rounded-[28px] border border-white/[0.04] space-y-4">
                     <div className="text-[8px] text-zinc-500 font-bold uppercase tracking-[0.2em] border-b border-white/[0.03] pb-3">
                       FORUM KATEGORİLERİ
                     </div>
-                    
+
                     <div className="space-y-2">
                       <button
                         onClick={() => setCategoryFilter("all")}
@@ -487,8 +564,12 @@ export default function Forum() {
                         }`}
                       >
                         <div className="space-y-1">
-                          <div className="text-[10px] uppercase font-bold">📂 Tüm Konular</div>
-                          <div className="text-[8px] text-zinc-500">{t("forum.allTopics")}</div>
+                          <div className="text-[10px] uppercase font-bold">
+                            📂 Tüm Konular
+                          </div>
+                          <div className="text-[8px] text-zinc-500">
+                            {t("forum.allTopics")}
+                          </div>
                         </div>
                         <ChevronRight className="w-4 h-4 text-zinc-600" />
                       </button>
@@ -506,8 +587,12 @@ export default function Forum() {
                             }`}
                           >
                             <div className="space-y-1">
-                              <div className="text-[10px] uppercase font-bold">{cat.label}</div>
-                              <div className="text-[8px] text-zinc-500">{cat.desc}</div>
+                              <div className="text-[10px] uppercase font-bold">
+                                {cat.label}
+                              </div>
+                              <div className="text-[8px] text-zinc-500">
+                                {cat.desc}
+                              </div>
                             </div>
                             <ChevronRight className="w-4 h-4 text-zinc-600" />
                           </button>
@@ -519,7 +604,6 @@ export default function Forum() {
 
                 {/* Right Topic Stream Panel */}
                 <div className="lg:col-span-8 space-y-6">
-                  
                   {/* Search and Filters */}
                   <div className="relative group w-full">
                     <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
@@ -559,7 +643,9 @@ export default function Forum() {
                                 </div>
                                 <div className="space-y-1.5">
                                   <div className="flex items-center gap-2">
-                                    {post.pinned && <Pin className="w-3.5 h-3.5 text-red-500 animate-pulse" />}
+                                    {post.pinned && (
+                                      <Pin className="w-3.5 h-3.5 text-red-500 animate-pulse" />
+                                    )}
                                     <span className="text-[7px] text-zinc-400 font-black tracking-widest bg-white/[0.02] border border-white/[0.04] px-2 py-0.5 rounded uppercase">
                                       [{post.category}]
                                     </span>
@@ -568,13 +654,19 @@ export default function Forum() {
                                     {post.title}
                                   </h3>
                                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[8px] text-zinc-500 font-bold uppercase tracking-wider">
-                                    <span className={`px-2 py-0.5 rounded border ${author.badgeColor} flex items-center gap-1`}>
-                                      {author.badge === "ADMIN" && <Award className="w-2.5 h-2.5 text-red-500" />}
+                                    <span
+                                      className={`px-2 py-0.5 rounded border ${author.badgeColor} flex items-center gap-1`}
+                                    >
+                                      {author.badge === "ADMIN" && (
+                                        <Award className="w-2.5 h-2.5 text-red-500" />
+                                      )}
                                       {author.name}
                                     </span>
                                     <span className="flex items-center gap-1.5">
-                                      <Clock className="w-3 h-3 text-zinc-600" /> 
-                                      {new Date(post.created_at).toLocaleDateString("tr-TR")}
+                                      <Clock className="w-3 h-3 text-zinc-600" />
+                                      {new Date(
+                                        post.created_at,
+                                      ).toLocaleDateString("tr-TR")}
                                     </span>
                                   </div>
                                 </div>
@@ -582,8 +674,12 @@ export default function Forum() {
 
                               <div className="flex items-center gap-6 text-right">
                                 <div className="hidden sm:block space-y-0.5">
-                                  <div className="text-[7px] text-zinc-500 font-bold uppercase tracking-widest">GÖRÜNTÜLEME</div>
-                                  <div className="text-sm font-black text-white italic">12</div>
+                                  <div className="text-[7px] text-zinc-500 font-bold uppercase tracking-widest">
+                                    GÖRÜNTÜLEME
+                                  </div>
+                                  <div className="text-sm font-black text-white italic">
+                                    12
+                                  </div>
                                 </div>
                                 <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-white transition-colors" />
                               </div>
@@ -598,9 +694,7 @@ export default function Forum() {
                     )}
                   </div>
                 </div>
-
               </div>
-
             </motion.div>
           ) : (
             // ================= FORUM DETAIL / READ VIEW =================
@@ -629,9 +723,12 @@ export default function Forum() {
                           : "bg-white/[0.01] border-white/[0.03] text-zinc-500 hover:text-zinc-300"
                       }`}
                     >
-                      <Pin className="w-3.5 h-3.5" /> {selectedPost.pinned ? t("forum.unpinPost") : t("forum.pinPost")}
+                      <Pin className="w-3.5 h-3.5" />{" "}
+                      {selectedPost.pinned
+                        ? t("forum.unpinPost")
+                        : t("forum.pinPost")}
                     </button>
-                    
+
                     <button
                       onClick={() => handleDeletePost(selectedPost.id)}
                       className="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest px-3 py-2 rounded-xl border border-red-500/20 bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all cursor-pointer"
@@ -645,7 +742,9 @@ export default function Forum() {
               {/* Main Post Card */}
               <div className="bg-[#040404]/55 backdrop-blur-xl p-8 rounded-[36px] border border-white/[0.04] space-y-6">
                 <div className="flex items-center gap-2">
-                  {selectedPost.pinned && <Pin className="w-4 h-4 text-amber-500 animate-pulse" />}
+                  {selectedPost.pinned && (
+                    <Pin className="w-4 h-4 text-amber-500 animate-pulse" />
+                  )}
                   <span className="text-[8px] text-zinc-400 font-black tracking-widest bg-white/[0.02] border border-white/[0.04] px-2 py-0.5 rounded uppercase">
                     [{selectedPost.category.toUpperCase()}]
                   </span>
@@ -665,12 +764,17 @@ export default function Forum() {
                       <span className="text-xs font-black text-white tracking-wide">
                         {getAuthorDisplay(selectedPost.author_id).name}
                       </span>
-                      <span className={`text-[7px] font-bold px-1.5 py-0.2 rounded border ${getAuthorDisplay(selectedPost.author_id).badgeColor}`}>
+                      <span
+                        className={`text-[7px] font-bold px-1.5 py-0.2 rounded border ${getAuthorDisplay(selectedPost.author_id).badgeColor}`}
+                      >
                         {getAuthorDisplay(selectedPost.author_id).badge}
                       </span>
                     </div>
                     <div className="text-[7px] text-zinc-500 font-bold uppercase tracking-wider">
-                      PAYLAŞIM TARİHİ: {new Date(selectedPost.created_at).toLocaleString("tr-TR")}
+                      PAYLAŞIM TARİHİ:{" "}
+                      {new Date(selectedPost.created_at).toLocaleString(
+                        "tr-TR",
+                      )}
                     </div>
                   </div>
                 </div>
@@ -705,13 +809,19 @@ export default function Forum() {
                           </div>
                           <div className="space-y-0.5">
                             <div className="flex items-center gap-2">
-                              <span className="text-[10px] font-black text-white">{author.name}</span>
-                              <span className={`text-[6px] font-bold px-1 py-0.2 rounded border ${author.badgeColor}`}>
+                              <span className="text-[10px] font-black text-white">
+                                {author.name}
+                              </span>
+                              <span
+                                className={`text-[6px] font-bold px-1 py-0.2 rounded border ${author.badgeColor}`}
+                              >
                                 {author.badge}
                               </span>
                             </div>
                             <div className="text-[7px] text-zinc-500">
-                              {new Date(comment.created_at).toLocaleString("tr-TR")}
+                              {new Date(comment.created_at).toLocaleString(
+                                "tr-TR",
+                              )}
                             </div>
                           </div>
                         </div>
@@ -735,7 +845,7 @@ export default function Forum() {
                 <div className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">
                   TARTIŞMAYA KATIL // WRITE_REPLY
                 </div>
-                
+
                 <div className="relative">
                   <textarea
                     value={newComment}
@@ -757,11 +867,9 @@ export default function Forum() {
                   </button>
                 </div>
               </div>
-
             </motion.div>
           )}
         </AnimatePresence>
-
       </div>
     </PageShell>
   );

@@ -27,7 +27,11 @@ export default function BackgroundMusic() {
         className="fixed bottom-4 right-4 z-50 w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-all neon-glow-btn"
         title={playing ? "Müziği Kapat" : "Müziği Aç"}
       >
-        {playing ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+        {playing ? (
+          <Volume2 className="w-4 h-4" />
+        ) : (
+          <VolumeX className="w-4 h-4" />
+        )}
       </button>
     </>
   );

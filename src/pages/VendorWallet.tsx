@@ -1,21 +1,21 @@
-﻿import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useI18n } from "@/lib/i18n";
 import PageShell from "@/components/PageShell";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
-import { 
-  Clock, 
-  CheckCircle, 
-  Percent, 
-  TrendingUp, 
-  Package, 
-  Activity, 
-  Coins, 
+import {
+  Clock,
+  CheckCircle,
+  Percent,
+  TrendingUp,
+  Package,
+  Activity,
+  Coins,
   ArrowRight,
-  SendHorizontal
+  SendHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { getVendorWalletFn, vendorWithdrawFn } from "@/lib/walletFns";
 
 interface WalletData {
   pending: number;
@@ -32,10 +32,11 @@ interface OrderSummary {
   totalCommission: number;
 }
 
-const RATES = {
-  BTC: 96500,  // BTC/USD
-  LTC: 84,     // LTC/USD
-  XMR: 180,    // XMR/USD
+// Fallback rates — overridden by live CoinGecko fetch
+const DEFAULT_RATES = {
+  BTC: 96500,
+  LTC: 84,
+  XMR: 180,
 };
 
 export default function VendorWalletPage() {
@@ -59,80 +60,78 @@ export default function VendorWalletPage() {
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawing, setWithdrawing] = useState(false);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Live exchange rates from CoinGecko
+  const [rates, setRates] = useState(DEFAULT_RATES);
+  const [ratesLoading, setRatesLoading] = useState(true);
 
   const isMounted = useRef(true);
 
-  const convertPriceFromLTC = (ltcAmount: number, to: "LTC" | "BTC" | "XMR"): number => {
+  const convertPriceFromLTC = (
+    ltcAmount: number,
+    to: "LTC" | "BTC" | "XMR",
+  ): number => {
     if (to === "LTC") return ltcAmount;
-    const amountInUSD = ltcAmount * RATES.LTC;
-    return amountInUSD / RATES[to];
+    const amountInUSD = ltcAmount * rates.LTC;
+    return amountInUSD / rates[to];
+  };
+
+  // Fetch live rates from CoinGecko
+  const fetchLiveRates = async () => {
+    try {
+      const res = await fetch(
+        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,litecoin,monero&vs_currencies=usd",
+      );
+      if (!res.ok) throw new Error("rate fetch failed");
+      const json = await res.json();
+      if (isMounted.current) {
+        setRates({
+          BTC: json?.bitcoin?.usd ?? DEFAULT_RATES.BTC,
+          LTC: json?.litecoin?.usd ?? DEFAULT_RATES.LTC,
+          XMR: json?.monero?.usd ?? DEFAULT_RATES.XMR,
+        });
+      }
+    } catch {
+      // keep DEFAULT_RATES
+    } finally {
+      if (isMounted.current) setRatesLoading(false);
+    }
+  };
+
+  const fetchWalletData = async () => {
+    if (!user?.id) return;
+    try {
+      const result = await getVendorWalletFn({ data: { vendorId: user.id } });
+      if (isMounted.current && result) {
+        setWallet(result.wallet);
+        setOrderSummary(result.orderSummary);
+        setRecentOrders(result.recentOrders);
+      }
+    } catch (e) {
+      console.error("Vendor wallet data fetch error:", e);
+    }
   };
 
   useEffect(() => {
-    if (!user) return;
     isMounted.current = true;
-    const fetchAll = async () => {
+    const init = async () => {
       try {
-        // Wallet data
-        const { data: walletData, error: walletError } = await supabase
-          .from("vendor_wallets")
-          .select("*")
-          .eq("vendor_id", user.id)
-          .maybeSingle();
-
-        if (!isMounted.current) return;
-
-        if (walletError) {
-          if (import.meta.env.DEV) console.error("Error fetching vendor wallet:", walletError);
-        } else if (walletData) {
-          setWallet({
-            pending: Number(walletData.pending),
-            available: Number(walletData.available),
-            commission: Number(walletData.commission),
-            total: Number(walletData.total),
-          });
-        }
-
-        // Orders summary
-        const { data: orders, error: ordersError } = await supabase
-          .from("orders")
-          .select("id, amount, status, service_fee, created_at, product_id")
-          .eq("vendor_id", user.id)
-          .order("created_at", { ascending: false });
-
-        if (!isMounted.current) return;
-
-        if (ordersError) {
-          if (import.meta.env.DEV)
-            console.error("Error fetching vendor orders summary:", ordersError);
-          return;
-        }
-
-        if (orders) {
-          const completed = orders.filter(
-            (o) => o.status === "completed" || o.status === "delivered",
-          );
-          const pending = orders.filter((o) => o.status === "paid" || o.status === "pending");
-          const totalRev = completed.reduce((s, o) => s + Number(o.amount), 0);
-          const totalComm = orders.reduce((s, o) => s + Number((o as any).service_fee || 0), 0);
-          setOrderSummary({
-            totalOrders: orders.length,
-            completedOrders: completed.length,
-            pendingOrders: pending.length,
-            totalRevenue: totalRev,
-            totalCommission: totalComm,
-          });
-          setRecentOrders(orders.slice(0, 10));
-        }
+        await Promise.all([
+          fetchWalletData(),
+          fetchLiveRates(),
+        ]);
       } catch (e) {
-        if (import.meta.env.DEV) console.error("Catch error in VendorWallet fetchAll:", e);
+        if (import.meta.env.DEV) console.error(e);
+      } finally {
+        if (isMounted.current) setLoading(false);
       }
     };
-    fetchAll();
+    init();
     return () => {
       isMounted.current = false;
     };
-  }, [user]);
+  }, [user?.id]);
 
   const handleWithdraw = async () => {
     if (!withdrawAddr || !withdrawAmount) {
@@ -140,12 +139,14 @@ export default function VendorWalletPage() {
       return;
     }
     const amt = parseFloat(withdrawAmount);
-    if (isNaN(amt) || amt <= 0) { toast.error(t("vendorWallet.invalidAmount")); return; }
+    if (isNaN(amt) || amt <= 0) {
+      toast.error(t("vendorWallet.invalidAmount"));
+      return;
+    }
 
     // Convert requested coin amount to LTC to check against available balance
-    const ltcAmountToCheck = selectedCoin === "LTC" 
-      ? amt 
-      : amt * (RATES[selectedCoin] / RATES.LTC);
+    const ltcAmountToCheck =
+      selectedCoin === "LTC" ? amt : amt * (rates[selectedCoin] / rates.LTC);
 
     if (ltcAmountToCheck > wallet.available) {
       toast.error(t("vendorWallet.insufficientBalance"));
@@ -154,58 +155,27 @@ export default function VendorWalletPage() {
 
     setWithdrawing(true);
     try {
-      let success = false;
-      let errorMsg = "";
+      if (!user?.id) throw new Error("User not authenticated");
 
-      if (selectedCoin === "LTC") {
-        const { data, error } = await supabase.rpc("vendor_withdraw_ltc", {
-          _address: withdrawAddr,
-          _amount: amt,
-        });
-        if (error || !(data as any)?.success) {
-          errorMsg = (data as any)?.error || "RPC_ERROR";
-        } else {
-          success = true;
-        }
-      } else if (selectedCoin === "XMR") {
-        const { data, error } = await supabase.rpc("vendor_withdraw_xmr", {
-          _address: withdrawAddr,
-          _amount: amt,
-        });
-        if (error || !(data as any)?.success) {
-          errorMsg = (data as any)?.error || "RPC_ERROR";
-        } else {
-          success = true;
-        }
-      } else if (selectedCoin === "BTC") {
-        // BTC uses internal LTC conversions for available ledger balance subtraction
-        const { data, error } = await supabase.rpc("vendor_withdraw_ltc", {
-          _address: withdrawAddr,
-          _amount: ltcAmountToCheck,
-        });
-        if (error || !(data as any)?.success) {
-          errorMsg = (data as any)?.error || "RPC_ERROR";
-        } else {
-          success = true;
-        }
-      }
+      await vendorWithdrawFn({
+        data: {
+          vendorId: user.id,
+          address: withdrawAddr,
+          amount: amt,
+          network: selectedCoin,
+        },
+      });
 
-      if (!success) {
-        toast.error(
-          errorMsg === "insufficient_balance" ? t("vendorWallet.insufficientBalance") :
-          errorMsg === "invalid_address" ? `${t("vendorWallet.invalidAddress")} ${selectedCoin}` : `${t("vendorWallet.withdrawFailed")} (${errorMsg})`,
-        );
-        return;
-      }
-
-      toast.success(`${amt} ${selectedCoin} ${t("vendorWallet.withdrawSuccess")}`);
+      toast.success(
+        `${amt} ${selectedCoin} ${t("vendorWallet.withdrawSuccess")}`,
+      );
       setWithdrawAddr("");
       setWithdrawAmount("");
-      if (isMounted.current) {
-        setWallet((prev) => ({ ...prev, available: prev.available - ltcAmountToCheck }));
-      }
-    } catch (e) {
-      toast.error(t("vendorWallet.unexpectedError"));
+      
+      // Refresh wallet data
+      await fetchWalletData();
+    } catch (e: any) {
+      toast.error(e.message || t("vendorWallet.unexpectedError"));
     } finally {
       setWithdrawing(false);
     }
@@ -213,10 +183,22 @@ export default function VendorWalletPage() {
 
   const maxWithdrawable = convertPriceFromLTC(wallet.available, selectedCoin);
 
+  if (loading) {
+    return (
+      <PageShell>
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground font-mono text-sm">Cüzdan yükleniyor...</p>
+          </div>
+        </div>
+      </PageShell>
+    );
+  }
+
   return (
     <PageShell>
       <div className="max-w-[1300px] mx-auto space-y-12 py-2 font-mono text-zinc-300 relative">
-        
         {/* Ambient background glow */}
         <div className="absolute -top-40 right-1/3 w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[160px] pointer-events-none" />
 
@@ -224,16 +206,19 @@ export default function VendorWalletPage() {
         <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 border-b border-white/[0.04] pb-8">
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-[9px] text-zinc-500 font-bold tracking-[0.3em] uppercase">
-              <Coins className="w-4 h-4 text-primary animate-pulse" /> 
-              SECURE_LEDGER // Escrow & Payments System
+              <Coins className="w-4 h-4 text-primary animate-pulse" />
+              SECURE LEDGER // Escrow & Payments System
             </div>
             <h1 className="text-3xl font-black italic tracking-tighter text-white uppercase leading-none">
-              {t("vendorWallet.title")} <span className="text-primary">{t("vendorWallet.titleCore")}</span>
+              {t("vendorWallet.title")}{" "}
+              <span className="text-primary">
+                {t("vendorWallet.titleCore")}
+              </span>
             </h1>
           </div>
           <div className="flex items-center gap-2 px-3 py-1.5 bg-[#080808]/80 border border-white/[0.04] rounded-xl text-[9px] text-zinc-500 font-bold">
             <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
-            {t("vendorWallet.connectionActive")} // ESCROW_READY
+            {t("vendorWallet.connectionActive")} // ESCROW READY
           </div>
         </div>
 
@@ -259,7 +244,7 @@ export default function VendorWalletPage() {
               label: t("vendorWallet.totalRevenueBrut"),
               value: orderSummary.totalRevenue,
               icon: TrendingUp,
-            }
+            },
           ].map((item, i) => {
             const btcVal = convertPriceFromLTC(item.value, "BTC");
             const ltcVal = item.value;
@@ -285,40 +270,59 @@ export default function VendorWalletPage() {
 
                 {/* Values on the EXACT same plane */}
                 <div className="space-y-2">
-                  
                   {/* BTC Item */}
                   <div className="flex items-center justify-between py-2 bg-white/[0.01] hover:bg-white/[0.02] px-3 rounded-xl border border-white/[0.02] transition-all">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] text-amber-500 font-bold">₿</span>
-                      <span className="text-[9px] text-zinc-500 font-bold tracking-wider">BTC:</span>
+                      <span className="text-[10px] text-amber-500 font-bold">
+                        ₿
+                      </span>
+                      <span className="text-[9px] text-zinc-500 font-bold tracking-wider">
+                        BTC:
+                      </span>
                     </div>
                     <span className="text-sm font-black italic tracking-tight text-amber-500">
-                      {btcVal.toFixed(6)} <span className="text-[8px] not-italic text-zinc-500 font-bold">BTC</span>
+                      {btcVal.toFixed(6)}{" "}
+                      <span className="text-[8px] not-italic text-zinc-500 font-bold">
+                        BTC
+                      </span>
                     </span>
                   </div>
 
                   {/* LTC Item */}
                   <div className="flex items-center justify-between py-2 bg-white/[0.01] hover:bg-white/[0.02] px-3 rounded-xl border border-white/[0.02] transition-all">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] text-emerald-500 font-bold">Ł</span>
-                      <span className="text-[9px] text-zinc-500 font-bold tracking-wider">LTC:</span>
+                      <span className="text-[10px] text-emerald-500 font-bold">
+                        Ł
+                      </span>
+                      <span className="text-[9px] text-zinc-500 font-bold tracking-wider">
+                        LTC:
+                      </span>
                     </div>
                     <span className="text-sm font-black italic tracking-tight text-emerald-500">
-                      {ltcVal.toFixed(4)} <span className="text-[8px] not-italic text-zinc-500 font-bold">LTC</span>
+                      {ltcVal.toFixed(4)}{" "}
+                      <span className="text-[8px] not-italic text-zinc-500 font-bold">
+                        LTC
+                      </span>
                     </span>
                   </div>
 
                   {/* XMR Item */}
                   <div className="flex items-center justify-between py-2 bg-white/[0.01] hover:bg-white/[0.02] px-3 rounded-xl border border-white/[0.02] transition-all">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] text-red-500 font-bold">ɱ</span>
-                      <span className="text-[9px] text-zinc-500 font-bold tracking-wider">XMR:</span>
+                      <span className="text-[10px] text-red-500 font-bold">
+                        ɱ
+                      </span>
+                      <span className="text-[9px] text-zinc-500 font-bold tracking-wider">
+                        XMR:
+                      </span>
                     </div>
                     <span className="text-sm font-black italic tracking-tight text-red-400">
-                      {xmrVal.toFixed(4)} <span className="text-[8px] not-italic text-zinc-500 font-bold">XMR</span>
+                      {xmrVal.toFixed(4)}{" "}
+                      <span className="text-[8px] not-italic text-zinc-500 font-bold">
+                        XMR
+                      </span>
                     </span>
                   </div>
-
                 </div>
               </motion.div>
             );
@@ -327,19 +331,21 @@ export default function VendorWalletPage() {
 
         {/* Withdrawal Section & General Analytics */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
           {/* Left Block: Withdrawal form */}
           <div className="lg:col-span-7 bg-[#040404]/55 backdrop-blur-xl p-8 rounded-[36px] border border-white/[0.04] space-y-6">
             <div className="flex items-center gap-3 border-b border-white/[0.03] pb-4">
               <SendHorizontal className="w-5 h-5 text-primary animate-pulse" />
-              <h2 className="text-lg font-black italic text-white uppercase tracking-tight">{t("vendorWallet.withdrawTitle")} // WITHDRAWAL</h2>
+              <h2 className="text-lg font-black italic text-white uppercase tracking-tight">
+                {t("vendorWallet.withdrawTitle")} // WITHDRAWAL
+              </h2>
             </div>
 
             <div className="space-y-6 text-[10px]">
-              
               {/* Premium Coin Selector Tab */}
               <div className="space-y-1.5">
-                <label className="text-zinc-500 font-bold uppercase tracking-wider">{t("vendorWallet.withdrawCurrency")}</label>
+                <label className="text-zinc-500 font-bold uppercase tracking-wider">
+                  {t("vendorWallet.withdrawCurrency")}
+                </label>
                 <div className="grid grid-cols-3 gap-2 bg-[#020202] p-1.5 border border-white/[0.04] rounded-2xl">
                   {(["BTC", "LTC", "XMR"] as const).map((coin) => {
                     const isSelected = selectedCoin === coin;
@@ -356,7 +362,11 @@ export default function VendorWalletPage() {
                             : "text-zinc-500 hover:text-zinc-300"
                         }`}
                       >
-                        {coin === "BTC" ? "₿ BTC" : coin === "LTC" ? "Ł LTC" : "ɱ XMR"}
+                        {coin === "BTC"
+                          ? "₿ BTC"
+                          : coin === "LTC"
+                            ? "Ł LTC"
+                            : "ɱ XMR"}
                       </button>
                     );
                   })}
@@ -365,15 +375,20 @@ export default function VendorWalletPage() {
 
               {/* Dynamic Limit Box */}
               <div className="flex items-center justify-between bg-white/[0.01] border border-white/[0.03] p-4 rounded-2xl">
-                <span className="text-zinc-500 font-bold uppercase tracking-wider">{t("vendorWallet.maxAvailable")}</span>
+                <span className="text-zinc-500 font-bold uppercase tracking-wider">
+                  {t("vendorWallet.maxAvailable")}
+                </span>
                 <span className="text-emerald-500 font-black text-xs uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-lg">
-                  {maxWithdrawable.toFixed(selectedCoin === "BTC" ? 6 : 4)} {selectedCoin}
+                  {maxWithdrawable.toFixed(selectedCoin === "BTC" ? 6 : 4)}{" "}
+                  {selectedCoin}
                 </span>
               </div>
 
               {/* Address input */}
               <div className="space-y-1.5">
-                <label className="text-zinc-500 font-bold uppercase tracking-wider">{selectedCoin} {t("vendorWallet.recipientAddress")}</label>
+                <label className="text-zinc-500 font-bold uppercase tracking-wider">
+                  {selectedCoin} {t("vendorWallet.recipientAddress")}
+                </label>
                 <input
                   value={withdrawAddr}
                   onChange={(e) => setWithdrawAddr(e.target.value)}
@@ -385,7 +400,9 @@ export default function VendorWalletPage() {
 
               {/* Amount input */}
               <div className="space-y-1.5">
-                <label className="text-zinc-500 font-bold uppercase tracking-wider">{t("vendorWallet.amountToWithdraw")} ({selectedCoin})</label>
+                <label className="text-zinc-500 font-bold uppercase tracking-wider">
+                  {t("vendorWallet.amountToWithdraw")} ({selectedCoin})
+                </label>
                 <div className="relative">
                   <input
                     value={withdrawAmount}
@@ -398,7 +415,9 @@ export default function VendorWalletPage() {
                     disabled={withdrawing}
                     className="w-full bg-[#020202] border border-white/[0.04] rounded-xl pl-4 pr-16 py-3.5 text-white focus:outline-none focus:border-red-600/40 font-bold focus:ring-1 focus:ring-red-600/20"
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 font-black text-primary text-[9px] uppercase tracking-wider">{selectedCoin}</span>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 font-black text-primary text-[9px] uppercase tracking-wider">
+                    {selectedCoin}
+                  </span>
                 </div>
               </div>
 
@@ -412,10 +431,16 @@ export default function VendorWalletPage() {
                     <div className="flex justify-between">
                       <span>{t("vendorWallet.btcEquivalent")}</span>
                       <span className="text-white font-bold">
-                        {selectedCoin === "LTC" 
-                          ? convertPriceFromLTC(parseFloat(withdrawAmount), "BTC").toFixed(6)
-                          : (parseFloat(withdrawAmount) * RATES.XMR / RATES.BTC).toFixed(6)
-                        } BTC
+                        {selectedCoin === "LTC"
+                          ? convertPriceFromLTC(
+                              parseFloat(withdrawAmount),
+                              "BTC",
+                            ).toFixed(6)
+                          : (
+                              (parseFloat(withdrawAmount) * rates.XMR) /
+                              rates.BTC
+                            ).toFixed(6)}{" "}
+                        BTC
                       </span>
                     </div>
                   )}
@@ -424,9 +449,15 @@ export default function VendorWalletPage() {
                       <span>{t("vendorWallet.ltcEquivalent")}</span>
                       <span className="text-white font-bold">
                         {selectedCoin === "BTC"
-                          ? (parseFloat(withdrawAmount) * RATES.BTC / RATES.LTC).toFixed(4)
-                          : (parseFloat(withdrawAmount) * RATES.XMR / RATES.LTC).toFixed(4)
-                        } LTC
+                          ? (
+                              (parseFloat(withdrawAmount) * rates.BTC) /
+                              rates.LTC
+                            ).toFixed(4)
+                          : (
+                              (parseFloat(withdrawAmount) * rates.XMR) /
+                              rates.LTC
+                            ).toFixed(4)}{" "}
+                        LTC
                       </span>
                     </div>
                   )}
@@ -435,9 +466,15 @@ export default function VendorWalletPage() {
                       <span>{t("vendorWallet.xmrEquivalent")}</span>
                       <span className="text-white font-bold">
                         {selectedCoin === "LTC"
-                          ? convertPriceFromLTC(parseFloat(withdrawAmount), "XMR").toFixed(4)
-                          : (parseFloat(withdrawAmount) * RATES.BTC / RATES.XMR).toFixed(4)
-                        } XMR
+                          ? convertPriceFromLTC(
+                              parseFloat(withdrawAmount),
+                              "XMR",
+                            ).toFixed(4)
+                          : (
+                              (parseFloat(withdrawAmount) * rates.BTC) /
+                              rates.XMR
+                            ).toFixed(4)}{" "}
+                        XMR
                       </span>
                     </div>
                   )}
@@ -451,9 +488,10 @@ export default function VendorWalletPage() {
                 className="w-full bg-red-600 hover:bg-red-700 text-white font-black uppercase py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-[10px] tracking-widest shadow-[0_10px_20px_rgba(255,0,0,0.1)] active:scale-[0.98]"
               >
                 <ArrowRight className="w-4 h-4" />
-                {withdrawing ? t("vendorWallet.processing") : `${t("vendorWallet.withdrawSubmitBtn")} (${selectedCoin})`}
+                {withdrawing
+                  ? t("vendorWallet.processing")
+                  : `${t("vendorWallet.withdrawSubmitBtn")} (${selectedCoin})`}
               </button>
-
             </div>
           </div>
 
@@ -462,7 +500,9 @@ export default function VendorWalletPage() {
             <div className="space-y-6">
               <div className="flex items-center gap-3 border-b border-white/[0.03] pb-4">
                 <Package className="w-5 h-5 text-primary animate-pulse" />
-                <h2 className="text-lg font-black italic text-white uppercase tracking-tight">{t("vendorWallet.metricsTitle")} // METRICS</h2>
+                <h2 className="text-lg font-black italic text-white uppercase tracking-tight">
+                  {t("vendorWallet.metricsTitle")} // METRICS
+                </h2>
               </div>
               <p className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest leading-relaxed">
                 {t("vendorWallet.escrowRuleInfo")}
@@ -471,11 +511,23 @@ export default function VendorWalletPage() {
 
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: t("vendorWallet.totalOrders"), value: orderSummary.totalOrders },
-                { label: t("vendorWallet.completed"), value: orderSummary.completedOrders },
-                { label: t("vendorWallet.pending"), value: orderSummary.pendingOrders }
+                {
+                  label: t("vendorWallet.totalOrders"),
+                  value: orderSummary.totalOrders,
+                },
+                {
+                  label: t("vendorWallet.completed"),
+                  value: orderSummary.completedOrders,
+                },
+                {
+                  label: t("vendorWallet.pending"),
+                  value: orderSummary.pendingOrders,
+                },
               ].map((item, i) => (
-                <div key={i} className="bg-[#020202] border border-white/[0.03] p-4 rounded-2xl text-center space-y-1 hover:border-white/[0.06] transition-all">
+                <div
+                  key={i}
+                  className="bg-[#020202] border border-white/[0.03] p-4 rounded-2xl text-center space-y-1 hover:border-white/[0.06] transition-all"
+                >
                   <div className="text-xl font-black italic tracking-tighter text-white">
                     {item.value}
                   </div>
@@ -486,7 +538,6 @@ export default function VendorWalletPage() {
               ))}
             </div>
           </div>
-
         </div>
 
         {/* Recent escrow transfers ledger */}
@@ -501,8 +552,14 @@ export default function VendorWalletPage() {
 
           <div className="grid grid-cols-1 gap-4">
             {recentOrders.map((order) => {
-              const btcEquivalent = convertPriceFromLTC(Number(order.amount), "BTC");
-              const xmrEquivalent = convertPriceFromLTC(Number(order.amount), "XMR");
+              const btcEquivalent = convertPriceFromLTC(
+                Number(order.amount),
+                "BTC",
+              );
+              const xmrEquivalent = convertPriceFromLTC(
+                Number(order.amount),
+                "XMR",
+              );
 
               return (
                 <div
@@ -516,7 +573,8 @@ export default function VendorWalletPage() {
                       </span>
                       <span
                         className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
-                          order.status === "completed" || order.status === "delivered"
+                          order.status === "completed" ||
+                          order.status === "delivered"
                             ? "bg-green-500/10 text-green-500"
                             : order.status === "paid"
                               ? "bg-blue-500/10 text-blue-400"
@@ -537,21 +595,38 @@ export default function VendorWalletPage() {
                       </span>
                     </div>
                     <div className="text-[7px] text-zinc-600 font-bold uppercase tracking-wider">
-                      {t("vendorWallet.txDate")}: {new Date(order.created_at).toLocaleDateString()} {t("vendorWallet.at")} {new Date(order.created_at).toLocaleTimeString()}
+                      {t("vendorWallet.txDate")}:{" "}
+                      {new Date(order.created_at).toLocaleDateString()}{" "}
+                      {t("vendorWallet.at")}{" "}
+                      {new Date(order.created_at).toLocaleTimeString()}
                     </div>
                   </div>
 
                   {/* Ledger currencies on the exact same line as well */}
                   <div className="text-right space-y-1">
                     <div className="text-sm font-black italic tracking-tighter space-x-2">
-                      <span className="text-amber-500">{btcEquivalent.toFixed(5)} <span className="text-[8px] not-italic font-bold text-zinc-600">BTC</span></span>
+                      <span className="text-amber-500">
+                        {btcEquivalent.toFixed(5)}{" "}
+                        <span className="text-[8px] not-italic font-bold text-zinc-600">
+                          BTC
+                        </span>
+                      </span>
                       <span className="text-zinc-700">/</span>
-                      <span className="text-emerald-500">{Number(order.amount).toFixed(4)} <span className="text-[8px] not-italic font-bold text-zinc-600">LTC</span></span>
+                      <span className="text-emerald-500">
+                        {Number(order.amount).toFixed(4)}{" "}
+                        <span className="text-[8px] not-italic font-bold text-zinc-600">
+                          LTC
+                        </span>
+                      </span>
                       <span className="text-zinc-700">/</span>
-                      <span className="text-red-400">{xmrEquivalent.toFixed(4)} <span className="text-[8px] not-italic font-bold text-zinc-600">XMR</span></span>
+                      <span className="text-red-400">
+                        {xmrEquivalent.toFixed(4)}{" "}
+                        <span className="text-[8px] not-italic font-bold text-zinc-600">
+                          XMR
+                        </span>
+                      </span>
                     </div>
                   </div>
-
                 </div>
               );
             })}
@@ -563,7 +638,6 @@ export default function VendorWalletPage() {
             )}
           </div>
         </div>
-
       </div>
     </PageShell>
   );

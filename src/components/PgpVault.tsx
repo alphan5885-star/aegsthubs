@@ -121,7 +121,10 @@ export default function PgpVault() {
   const remove = async () => {
     if (!user || !stored) return;
     if (!confirm("PGP anahtarını silmek istediğine emin misin?")) return;
-    const { error } = await (supabase as any).from("user_pgp_keys").delete().eq("user_id", user.id);
+    const { error } = await (supabase as any)
+      .from("user_pgp_keys")
+      .delete()
+      .eq("user_id", user.id);
     if (error) toast.error(error.message);
     else {
       toast.success("Anahtar silindi");
@@ -143,7 +146,9 @@ export default function PgpVault() {
       );
       setArmored(publicKey);
       setGeneratedPriv(privateKey);
-      toast.success("Anahtar üretildi! Private key'i indirip güvenli yere kaydet.");
+      toast.success(
+        "Anahtar üretildi! Private key'i indirip güvenli yere kaydet.",
+      );
     } catch (e: any) {
       toast.error(e.message || "Üretim başarısız");
     } finally {
@@ -173,7 +178,9 @@ export default function PgpVault() {
     <div className="glass-card rounded-lg p-5 space-y-4 neon-border">
       <div className="flex items-center gap-2">
         <Key className="w-4 h-4 text-primary" />
-        <h2 className="text-sm font-mono font-bold text-foreground">PGP Anahtar Kasası</h2>
+        <h2 className="text-sm font-mono font-bold text-foreground">
+          PGP Anahtar Kasası
+        </h2>
         {stored && (
           <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded bg-green-500/10 text-green-400">
             <ShieldCheck className="w-3 h-3" /> AKTİF
@@ -181,9 +188,10 @@ export default function PgpVault() {
         )}
       </div>
       <p className="text-[11px] font-mono text-muted-foreground leading-relaxed">
-        Public key'in profilinde görünür. Sipariş verdiğinde adres ve notların satıcının PGP
-        anahtarı ile <span className="text-primary">otomatik şifrelenir</span> — sunucu içeriği
-        görmez.
+        Public key'in profilinde görünür. Sipariş verdiğinde adres ve notların
+        satıcının PGP anahtarı ile{" "}
+        <span className="text-primary">otomatik şifrelenir</span> — sunucu
+        içeriği görmez.
       </p>
 
       {stored ? (
@@ -193,7 +201,9 @@ export default function PgpVault() {
           className="space-y-3 bg-secondary/40 rounded p-3 border border-primary/20"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono text-muted-foreground">FINGERPRINT</span>
+            <span className="text-[10px] font-mono text-muted-foreground">
+              FINGERPRINT
+            </span>
             <button
               onClick={() => {
                 navigator.clipboard.writeText(stored.fingerprint);
@@ -210,7 +220,9 @@ export default function PgpVault() {
           </div>
           <div className="flex items-center justify-between text-[10px] font-mono text-muted-foreground">
             <span>Key ID: {stored.key_id}</span>
-            <span>{new Date(stored.created_at).toLocaleDateString("tr-TR")}</span>
+            <span>
+              {new Date(stored.created_at).toLocaleDateString("tr-TR")}
+            </span>
           </div>
           <div className="flex gap-2">
             <button
@@ -252,9 +264,10 @@ export default function PgpVault() {
               <div className="flex items-start gap-2 text-[10px] font-mono text-yellow-400">
                 <AlertTriangle className="w-3 h-3 shrink-0 mt-0.5" />
                 <span>
-                  Üretilen private key tarayıcında oluşur, sunucuya gitmez. İndir ve{" "}
-                  <span className="text-primary">güvenli bir yerde sakla</span>. Kaybedersen geri
-                  alınamaz.
+                  Üretilen private key tarayıcında oluşur, sunucuya gitmez.
+                  İndir ve{" "}
+                  <span className="text-primary">güvenli bir yerde sakla</span>.
+                  Kaybedersen geri alınamaz.
                 </span>
               </div>
               <input
@@ -328,10 +341,14 @@ export default function PgpVault() {
                   <ShieldCheck className="w-3 h-3" /> Geçerli anahtar
                 </div>
                 <div className="text-[10px] font-mono text-muted-foreground">
-                  FP: <span className="text-foreground">{formatFingerprint(info.fingerprint)}</span>
+                  FP:{" "}
+                  <span className="text-foreground">
+                    {formatFingerprint(info.fingerprint)}
+                  </span>
                 </div>
                 <div className="text-[10px] font-mono text-muted-foreground">
-                  {info.algorithm.toUpperCase()} {info.bits ? `${info.bits}-bit` : ""} •{" "}
+                  {info.algorithm.toUpperCase()}{" "}
+                  {info.bits ? `${info.bits}-bit` : ""} •{" "}
                   {info.userIds.join(", ") || "—"}
                 </div>
               </motion.div>
@@ -341,7 +358,11 @@ export default function PgpVault() {
               disabled={!info || saving}
               className="w-full flex items-center justify-center gap-2 py-2 rounded bg-primary text-primary-foreground text-xs font-mono neon-glow-btn disabled:opacity-50"
             >
-              {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Lock className="w-3 h-3" />}{" "}
+              {saving ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Lock className="w-3 h-3" />
+              )}{" "}
               Kasaya Kaydet
             </button>
           </div>

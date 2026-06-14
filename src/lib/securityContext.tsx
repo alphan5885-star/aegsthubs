@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -101,7 +108,12 @@ function installAntiFingerprint() {
     };
 
     const origGetImageData = CanvasRenderingContext2D.prototype.getImageData;
-    CanvasRenderingContext2D.prototype.getImageData = function (sx, sy, sw, sh) {
+    CanvasRenderingContext2D.prototype.getImageData = function (
+      sx,
+      sy,
+      sw,
+      sh,
+    ) {
       const data = origGetImageData.call(this, sx, sy, sw, sh);
       // 50 pikselde bir 1 bit gürültü
       for (let i = 0; i < data.data.length; i += 50 * 4) {
@@ -165,7 +177,8 @@ export function SecurityProvider({ children }: { children: ReactNode }) {
     };
     setEvents((prev) => [ev, ...prev].slice(0, 50));
     if (level === "danger") setThreatLevel("danger");
-    else if (level === "warn") setThreatLevel((prev) => (prev === "danger" ? prev : "warn"));
+    else if (level === "warn")
+      setThreatLevel((prev) => (prev === "danger" ? prev : "warn"));
   };
 
   const guard = (action: string, maxPerMinute = 30): boolean => {
@@ -174,7 +187,11 @@ export function SecurityProvider({ children }: { children: ReactNode }) {
     const bucket = actionBuckets.current.get(action) ?? [];
     const fresh = bucket.filter((t) => now - t < 60_000);
     if (fresh.length >= maxPerMinute) {
-      log("rate_limit", "warn", `${action} (${fresh.length}/${maxPerMinute}/dk)`);
+      log(
+        "rate_limit",
+        "warn",
+        `${action} (${fresh.length}/${maxPerMinute}/dk)`,
+      );
       return false;
     }
     fresh.push(now);
@@ -199,7 +216,11 @@ export function SecurityProvider({ children }: { children: ReactNode }) {
         if (!stored) {
           localStorage.setItem(FP_KEY, fp);
         } else if (stored !== fp) {
-          log("fingerprint_change", "danger", "Cihaz/parmak izi değişti — oturum sonlandırıldı");
+          log(
+            "fingerprint_change",
+            "danger",
+            "Cihaz/parmak izi değişti — oturum sonlandırıldı",
+          );
           setFingerprintMismatch(true);
           // Otomatik logout
           try {
@@ -223,7 +244,11 @@ export function SecurityProvider({ children }: { children: ReactNode }) {
 
     const inactivityTimer = setInterval(async () => {
       if (Date.now() - lastActivity.current > INACTIVITY_MS) {
-        log("inactivity_wipe", "warn", `${INACTIVITY_MS / 60000}dk hareketsizlik`);
+        log(
+          "inactivity_wipe",
+          "warn",
+          `${INACTIVITY_MS / 60000}dk hareketsizlik`,
+        );
         try {
           sessionStorage.clear();
           await supabase.auth.signOut();
@@ -293,7 +318,9 @@ export function SecurityProvider({ children }: { children: ReactNode }) {
     if (typeof window === "undefined") return;
     const onClick = () => {
       const now = Date.now();
-      clickTimes.current = [...clickTimes.current, now].filter((t) => now - t < RAPID_CLICK_WINDOW);
+      clickTimes.current = [...clickTimes.current, now].filter(
+        (t) => now - t < RAPID_CLICK_WINDOW,
+      );
       if (clickTimes.current.length > RAPID_CLICK_THRESHOLD) {
         log("rapid_click", "danger", `${clickTimes.current.length} tık/sn`);
         setBlocked(true);
@@ -307,7 +334,8 @@ export function SecurityProvider({ children }: { children: ReactNode }) {
 
   // Headless / WebDriver tespiti
   useEffect(() => {
-    if (typeof window === "undefined" || typeof navigator === "undefined") return;
+    if (typeof window === "undefined" || typeof navigator === "undefined")
+      return;
     if ((navigator as any).webdriver) {
       log("webdriver_detected", "danger", "navigator.webdriver=true");
     }
@@ -323,7 +351,15 @@ export function SecurityProvider({ children }: { children: ReactNode }) {
 
   return (
     <Ctx.Provider
-      value={{ threatLevel, events, blocked, isTor, fingerprintMismatch, unblock, guard }}
+      value={{
+        threatLevel,
+        events,
+        blocked,
+        isTor,
+        fingerprintMismatch,
+        unblock,
+        guard,
+      }}
     >
       {children}
     </Ctx.Provider>

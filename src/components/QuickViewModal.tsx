@@ -5,7 +5,15 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { MapPin, Key, Package, ShieldCheck, ShoppingCart, User, ExternalLink } from "lucide-react";
+import {
+  MapPin,
+  Key,
+  Package,
+  ShieldCheck,
+  ShoppingCart,
+  User,
+  ExternalLink,
+} from "lucide-react";
 import { useNavigate } from "@/lib/router-shim";
 import VendorRating from "./VendorRating";
 import { useCustomization } from "@/lib/customizationContext";
@@ -71,7 +79,9 @@ export default function QuickViewModal({
             <div className="absolute top-3 left-3 flex flex-col gap-2">
               <span
                 className={`flex items-center gap-1 text-[10px] font-mono px-2 py-1 rounded bg-background/80 backdrop-blur-md border border-white/5 ${
-                  product.type === "digital" ? "text-blue-400" : "text-orange-400"
+                  product.type === "digital"
+                    ? "text-blue-400"
+                    : "text-orange-400"
                 }`}
               >
                 {product.type === "digital" ? (
@@ -79,7 +89,9 @@ export default function QuickViewModal({
                 ) : (
                   <Package className="w-3 h-3" />
                 )}
-                {product.type === "digital" ? t("quickview.digital" as any) : t("quickview.physical" as any)}
+                {product.type === "digital"
+                  ? t("quickview.digital" as any)
+                  : t("quickview.physical" as any)}
               </span>
             </div>
           </div>
@@ -94,7 +106,9 @@ export default function QuickViewModal({
                 <span
                   className={`text-[10px] font-mono ${product.stock > 0 ? "text-green-500" : "text-destructive"}`}
                 >
-                  {product.stock > 0 ? `STOK: ${product.stock}` : t("quickview.outOfStock" as any)}
+                  {product.stock > 0
+                    ? `STOK: ${product.stock}`
+                    : t("quickview.outOfStock" as any)}
                 </span>
               </div>
               <DialogTitle className="font-mono text-xl text-foreground mb-2">
@@ -132,10 +146,13 @@ export default function QuickViewModal({
                     <span className="text-2xl font-mono font-bold text-primary">
                       {displayPrice}
                     </span>
-                    <span className="text-xs font-mono text-primary/70">{currencyLabel}</span>
+                    <span className="text-xs font-mono text-primary/70">
+                      {currencyLabel}
+                    </span>
                   </div>
                   <span className="text-[10px] font-mono text-muted-foreground italic">
-                    {settings.preferredCurrency !== "LTC" && `≈ ${priceLTC.toFixed(4)} LTC`}
+                    {settings.preferredCurrency !== "LTC" &&
+                      `≈ ${priceLTC.toFixed(4)} LTC`}
                   </span>
                 </div>
                 <div className="flex flex-col items-end gap-1 text-[10px] font-mono text-muted-foreground">

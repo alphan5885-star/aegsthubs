@@ -1,7 +1,6 @@
 ﻿import { useEffect, useState, useCallback } from "react";
 import { useI18n } from "@/lib/i18n";
 import PageShell from "@/components/PageShell";
-import { supabase } from "@/integrations/supabase/client";
 import {
   // Category & UI Standard Icons
   Terminal, Shield, ShieldAlert, ShieldCheck, Lock, Unlock, Key, KeyRound, FileCode, Binary,
@@ -23,12 +22,15 @@ import { ResponsiveContainer, AreaChart, Area } from "recharts";
 import { useAuth } from "@/lib/authContext";
 import { Star } from "lucide-react";
 import { getProductAverageRating } from "@/lib/productReviews";
+import { getProductsFn, type Product } from "@/lib/productFns";
+import { genericQueryFn } from "@/lib/supabaseMock";
 
 interface ProductRow {
   id: string;
   name: string;
   description: string | null;
   price: number;
+  currency: "BTC" | "LTC" | "XMR";
   type: string;
   image_emoji: string | null;
   image_url: string | null;
@@ -302,14 +304,10 @@ export default function Market() {
   useEffect(() => {
     const fetchGlobalTree = async () => {
       try {
-        const { data, error } = await supabase
-          .from("system_announcements")
-          .select("content")
-          .eq("id", "00000000-0000-0000-0000-000000000000")
-          .maybeSingle();
-        
-        if (data?.content) {
-          const parsed = JSON.parse(data.content);
+        const _r = await genericQueryFn({ data: { table: "system_announcements", action: "select", query: { eq: { id: "00000000-0000-0000-0000-000000000000" } } } });
+        const _row = Array.isArray(_r?.data) ? _r.data[0] : _r?.data;
+        if (_row?.content) {
+          const parsed = JSON.parse(_row.content);
           setCategoryTree(parsed);
           localStorage.setItem("aeigs_category_tree", JSON.stringify(parsed));
         }
@@ -323,12 +321,8 @@ export default function Market() {
   useEffect(() => {
     const fetch = async () => {
       setLoading(true);
-      const { data } = await supabase
-        .from("products")
-        .select("*")
-        .gt("stock", 0)
-        .order("created_at", { ascending: false });
-      if (data) {
+      const result = await getProductsFn();
+      if (result.success) {
         // Safe helper to resolve a category ID back to its Root, Sub, and Sub-sub nodes
         const resolveCategoryHierarchy = (categoryValue: string | null, tree: CategoryNode[]) => {
           if (!categoryValue) return null;
@@ -362,7 +356,7 @@ export default function Market() {
         );
 
         if (flatSubSub.length > 0) {
-          const enriched = (data as ProductRow[]).map((p, i) => {
+          const enriched = (result.products as ProductRow[]).map((p, i) => {
             const resolved = resolveCategoryHierarchy(p.category, categoryTree);
             if (resolved) {
               return {
@@ -383,7 +377,7 @@ export default function Market() {
           });
           setProducts(enriched);
         } else {
-          setProducts(data as ProductRow[]);
+          setProducts(result.products as ProductRow[]);
         }
       }
       setLoading(false);
@@ -448,27 +442,14 @@ export default function Market() {
     localStorage.setItem("aeigs_category_tree", JSON.stringify(updatedTree));
     setSelectedNodeToEdit(null);
 
-    // Persist globally in Supabase system_announcements for all users
+    // Persist globally in system_announcements for all users
     try {
-      const { data: existing } = await supabase
-        .from("system_announcements")
-        .select("id")
-        .eq("id", "00000000-0000-0000-0000-000000000000")
-        .maybeSingle();
-
-      if (existing?.id) {
-        await supabase
-          .from("system_announcements")
-          .update({ content: JSON.stringify(updatedTree) })
-          .eq("id", "00000000-0000-0000-0000-000000000000");
+      const _ex = await genericQueryFn({ data: { table: "system_announcements", action: "select", query: { eq: { id: "00000000-0000-0000-0000-000000000000" } } } });
+      const _exRow = Array.isArray(_ex?.data) ? _ex.data[0] : _ex?.data;
+      if (_exRow?.id) {
+        await genericQueryFn({ data: { table: "system_announcements", action: "update", query: { eq: { id: "00000000-0000-0000-0000-000000000000" } }, body: { content: JSON.stringify(updatedTree) } } });
       } else {
-        await supabase
-          .from("system_announcements")
-          .insert({
-            id: "00000000-0000-0000-0000-000000000000",
-            content: JSON.stringify(updatedTree),
-            is_active: false
-          });
+        await genericQueryFn({ data: { table: "system_announcements", action: "insert", body: { id: "00000000-0000-0000-0000-000000000000", content: JSON.stringify(updatedTree), is_active: false } } });
       }
     } catch (err) {
       console.error("Error persisting global tree:", err);
@@ -481,12 +462,9 @@ export default function Market() {
       localStorage.removeItem("aeigs_category_tree");
       setSelectedNodeToEdit(null);
 
-      // Reset globally in Supabase
+      // Reset globally in system_announcements
       try {
-        await supabase
-          .from("system_announcements")
-          .delete()
-          .eq("id", "00000000-0000-0000-0000-000000000000");
+        await genericQueryFn({ data: { table: "system_announcements", action: "update", query: { eq: { id: "00000000-0000-0000-0000-000000000000" } }, body: { content: JSON.stringify(DEFAULT_CATEGORY_TREE) } } });
       } catch (err) {
         console.error("Error resetting global tree:", err);
       }
@@ -783,7 +761,7 @@ export default function Market() {
                     {filtered.map((p, i) => {
                       const matchedItem = categoryTree.flatMap(root => root.items || []).flatMap(sub => sub.items || []).find(item => item.id === p.subsubcategory);
                       return (
-                        <Link key={p.id} to={`/product/${p.id}`}>
+                        <Link key={p.id} to={"/product/" + p.id}>
                           <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -843,12 +821,10 @@ export default function Market() {
                                      return (
                                         <div className="flex items-center gap-1.5 pt-1">
                                            <div className="flex items-center gap-0.5">
-                                              {[1, 2, 3, 4, 5].map((s) => (
-                                                 <Star 
-                                                    key={s} 
-                                                    className={`w-2.5 h-2.5 ${s <= Math.round(avg) ? "text-yellow-500 fill-yellow-500" : "text-zinc-800"}`} 
-                                                 />
-                                              ))}
+                                              {[1, 2, 3, 4, 5].map((s) => {
+                                                 const starCls = (Math.round(avg) >= s) ? "w-2.5 h-2.5 text-yellow-500 fill-yellow-500" : "w-2.5 h-2.5 text-zinc-800";
+                                                 return <Star key={s} className={starCls} />;
+                                              })}
                                            </div>
                                            <span className="text-[7.5px] font-bold text-zinc-500 uppercase tracking-widest">
                                               ({count > 0 ? avg : "PUAN_YOK"})
@@ -868,7 +844,7 @@ export default function Market() {
                                <div className="space-y-0.5">
                                   <span className="text-[6px] text-zinc-600 font-black uppercase tracking-widest">{t("market.transferFee")}</span>
                                   <div className="text-base font-black text-white italic tracking-tighter">
-                                     {p.price.toFixed(4)} <span className="text-[9px] text-primary not-italic font-bold">LTC</span>
+                                     {p.price.toFixed(4)} {(() => { const cc = p.currency === "BTC" ? "text-[9px] not-italic font-bold text-orange-500" : p.currency === "LTC" ? "text-[9px] not-italic font-bold text-primary" : "text-[9px] not-italic font-bold text-green-500"; return <span className={cc}>{p.currency}</span>; })()}
                                   </div>
                                </div>
                                
@@ -894,7 +870,7 @@ export default function Market() {
                     {filtered.map((p, i) => {
                       const matchedItem = categoryTree.flatMap(root => root.items || []).flatMap(sub => sub.items || []).find(item => item.id === p.subsubcategory);
                       return (
-                        <Link key={p.id} to={`/product/${p.id}`}>
+                        <Link key={p.id} to={"/product/" + p.id}>
                           <motion.div
                             initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -928,12 +904,10 @@ export default function Market() {
                                          const { avg, count } = getProductAverageRating(p.id);
                                          return (
                                             <div className="flex items-center gap-1 bg-black/40 border border-white/[0.04] rounded-md px-1.5 py-0.5 shrink-0">
-                                               {[1, 2, 3, 4, 5].map((s) => (
-                                                  <Star 
-                                                     key={s} 
-                                                     className={`w-2 h-2 ${s <= Math.round(avg) ? "text-yellow-500 fill-yellow-500" : "text-zinc-800"}`} 
-                                                  />
-                                               ))}
+                                               {[1, 2, 3, 4, 5].map((s) => {
+                                                  const starCls = (Math.round(avg) >= s) ? "w-2 h-2 text-yellow-500 fill-yellow-500" : "w-2 h-2 text-zinc-800";
+                                                  return <Star key={s} className={starCls} />;
+                                               })}
                                                <span className="text-[6.5px] font-black text-zinc-500 uppercase ml-0.5">
                                                   {count > 0 ? avg : "PUAN_YOK"}
                                                </span>
@@ -957,7 +931,7 @@ export default function Market() {
                                 <div className="text-right">
                                    <span className="text-[6px] text-zinc-600 font-black uppercase tracking-widest block">{t("market.transferFee")}</span>
                                    <span className="text-xs font-black text-white italic tracking-tighter">
-                                      {p.price.toFixed(4)} <span className="text-[8px] text-primary not-italic font-bold">LTC</span>
+                                      {p.price.toFixed(4)} {(() => { const cc = p.currency === "BTC" ? "text-[8px] not-italic font-bold text-orange-500" : p.currency === "LTC" ? "text-[8px] not-italic font-bold text-primary" : "text-[8px] not-italic font-bold text-green-500"; return <span className={cc}>{p.currency}</span>; })()}
                                    </span>
                                 </div>
 

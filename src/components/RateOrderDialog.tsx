@@ -56,12 +56,19 @@ export default function RateOrderDialog({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-mono font-bold text-primary">Satıcıyı Puanla</h3>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+          <h3 className="text-sm font-mono font-bold text-primary">
+            Satıcıyı Puanla
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
-        <p className="text-xs text-muted-foreground font-mono mb-4">{productName}</p>
+        <p className="text-xs text-muted-foreground font-mono mb-4">
+          {productName}
+        </p>
 
         <div className="flex items-center gap-1 justify-center mb-4">
           {[1, 2, 3, 4, 5].map((s) => (

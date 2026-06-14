@@ -42,7 +42,9 @@ export async function encryptForRecipient(
   plaintext: string,
   armoredPublicKey: string,
 ): Promise<string> {
-  const publicKey = await openpgp.readKey({ armoredKey: armoredPublicKey.trim() });
+  const publicKey = await openpgp.readKey({
+    armoredKey: armoredPublicKey.trim(),
+  });
   const message = await openpgp.createMessage({ text: plaintext });
   const encrypted = await openpgp.encrypt({
     message,
@@ -70,14 +72,19 @@ export async function encryptForRecipients(
   return encrypted as string;
 }
 
-export async function generateKeyPair(name: string, email: string, passphrase: string) {
-  const { privateKey, publicKey, revocationCertificate } = await openpgp.generateKey({
-    type: "ecc",
-    curve: "ed25519",
-    userIDs: [{ name, email }],
-    passphrase,
-    format: "armored",
-  });
+export async function generateKeyPair(
+  name: string,
+  email: string,
+  passphrase: string,
+) {
+  const { privateKey, publicKey, revocationCertificate } =
+    await openpgp.generateKey({
+      type: "ecc",
+      curve: "ed25519",
+      userIDs: [{ name, email }],
+      passphrase,
+      format: "armored",
+    });
   return { privateKey, publicKey, revocationCertificate };
 }
 
@@ -92,8 +99,12 @@ export async function verifySignature(
   signedMessage: string,
   armoredPublicKey: string,
 ): Promise<{ verified: boolean; data: string }> {
-  const publicKey = await openpgp.readKey({ armoredKey: armoredPublicKey.trim() });
-  const message = await openpgp.readCleartextMessage({ cleartextMessage: signedMessage.trim() });
+  const publicKey = await openpgp.readKey({
+    armoredKey: armoredPublicKey.trim(),
+  });
+  const message = await openpgp.readCleartextMessage({
+    cleartextMessage: signedMessage.trim(),
+  });
   const verificationResult = await openpgp.verify({
     message,
     verificationKeys: publicKey,

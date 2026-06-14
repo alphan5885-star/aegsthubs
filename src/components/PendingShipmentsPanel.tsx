@@ -37,32 +37,51 @@ export default function PendingShipmentsPanel() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, [user]);
+  useEffect(() => {
+    load();
+  }, [user]);
 
   return (
     <div className="glass-card rounded-xl p-4 border border-white/5">
       <div className="flex items-center gap-2 mb-3">
         <Truck className="w-4 h-4 text-orange-400" />
-        <h2 className="text-sm font-mono font-bold text-foreground">{t("vendor.pendingShipments")}</h2>
+        <h2 className="text-sm font-mono font-bold text-foreground">
+          {t("vendor.pendingShipments")}
+        </h2>
         {orders.length > 0 && (
-          <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400">{orders.length}</span>
+          <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400">
+            {orders.length}
+          </span>
         )}
       </div>
 
       {loading ? (
-        <div className="text-xs font-mono text-muted-foreground animate-pulse">{t("loading")}</div>
+        <div className="text-xs font-mono text-muted-foreground animate-pulse">
+          {t("loading")}
+        </div>
       ) : orders.length === 0 ? (
         <EmptyState title={t("vendor.noPending")} />
       ) : (
         <div className="space-y-2">
           {orders.map((o) => (
-            <div key={o.id} className="flex items-center justify-between bg-secondary/30 rounded p-2">
+            <div
+              key={o.id}
+              className="flex items-center justify-between bg-secondary/30 rounded p-2"
+            >
               <div className="min-w-0 flex-1">
                 <div className="text-xs font-mono text-foreground truncate">
-                  {o.product_name || "—"} <span className="text-muted-foreground">#{o.id.slice(0, 8)}</span>
+                  {o.product_name || "—"}{" "}
+                  <span className="text-muted-foreground">
+                    #{o.id.slice(0, 8)}
+                  </span>
                 </div>
                 <div className="text-[10px] font-mono text-muted-foreground">
-                  {o.amount} LTC · {o.delivery_method === "dead_drop" ? t("delivery.deadDrop") : o.delivery_method === "mailbox" ? t("delivery.mailbox") : t("delivery.cargo")}
+                  {o.amount} LTC ·{" "}
+                  {o.delivery_method === "dead_drop"
+                    ? t("delivery.deadDrop")
+                    : o.delivery_method === "mailbox"
+                      ? t("delivery.mailbox")
+                      : t("delivery.cargo")}
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -82,7 +101,9 @@ export default function PendingShipmentsPanel() {
       {active && (
         <AnonymousShippingForm
           open={!!active}
-          onOpenChange={(open) => { if (!open) setActive(null); }}
+          onOpenChange={(open) => {
+            if (!open) setActive(null);
+          }}
           orderId={active.id}
           buyerId={active.buyer_id}
           onSubmitted={load}

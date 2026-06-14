@@ -4,1235 +4,1244 @@ export type Json =
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[]
+  | Json[];
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
+    PostgrestVersion: "14.5";
+  };
   public: {
     Tables: {
       admin_auto_withdraw: {
         Row: {
-          admin_id: string
-          available: number | null
-          cold_wallet: string | null
-          created_at: string
-          enabled: boolean | null
-          frequency: string | null
-          id: string
-          min_amount: number | null
-          threshold: number | null
-        }
+          admin_id: string;
+          available: number | null;
+          cold_wallet: string | null;
+          created_at: string;
+          enabled: boolean | null;
+          frequency: string | null;
+          id: string;
+          min_amount: number | null;
+          threshold: number | null;
+        };
         Insert: {
-          admin_id: string
-          available?: number | null
-          cold_wallet?: string | null
-          created_at?: string
-          enabled?: boolean | null
-          frequency?: string | null
-          id?: string
-          min_amount?: number | null
-          threshold?: number | null
-        }
+          admin_id: string;
+          available?: number | null;
+          cold_wallet?: string | null;
+          created_at?: string;
+          enabled?: boolean | null;
+          frequency?: string | null;
+          id?: string;
+          min_amount?: number | null;
+          threshold?: number | null;
+        };
         Update: {
-          admin_id?: string
-          available?: number | null
-          cold_wallet?: string | null
-          created_at?: string
-          enabled?: boolean | null
-          frequency?: string | null
-          id?: string
-          min_amount?: number | null
-          threshold?: number | null
-        }
-        Relationships: []
-      }
+          admin_id?: string;
+          available?: number | null;
+          cold_wallet?: string | null;
+          created_at?: string;
+          enabled?: boolean | null;
+          frequency?: string | null;
+          id?: string;
+          min_amount?: number | null;
+          threshold?: number | null;
+        };
+        Relationships: [];
+      };
       admin_invite_codes: {
         Row: {
-          code: string
-          created_at: string
-          created_by: string | null
-          id: string
-          used_at: string | null
-          used_by: string | null
-        }
+          code: string;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          used_at: string | null;
+          used_by: string | null;
+        };
         Insert: {
-          code: string
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          used_at?: string | null
-          used_by?: string | null
-        }
+          code: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          used_at?: string | null;
+          used_by?: string | null;
+        };
         Update: {
-          code?: string
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          used_at?: string | null
-          used_by?: string | null
-        }
-        Relationships: []
-      }
+          code?: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          used_at?: string | null;
+          used_by?: string | null;
+        };
+        Relationships: [];
+      };
       anti_phishing_codes: {
         Row: {
-          code: string
-          created_at: string
-          id: string
-          user_id: string
-        }
+          code: string;
+          created_at: string;
+          id: string;
+          user_id: string;
+        };
         Insert: {
-          code: string
-          created_at?: string
-          id?: string
-          user_id: string
-        }
+          code: string;
+          created_at?: string;
+          id?: string;
+          user_id: string;
+        };
         Update: {
-          code?: string
-          created_at?: string
-          id?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          code?: string;
+          created_at?: string;
+          id?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       chat_room_messages: {
         Row: {
-          content: string
-          created_at: string
-          id: string
-          is_system: boolean
-          room_id: string
-          sender_id: string | null
-        }
+          content: string;
+          created_at: string;
+          id: string;
+          is_system: boolean;
+          room_id: string;
+          sender_id: string | null;
+        };
         Insert: {
-          content: string
-          created_at?: string
-          id?: string
-          is_system?: boolean
-          room_id: string
-          sender_id?: string | null
-        }
+          content: string;
+          created_at?: string;
+          id?: string;
+          is_system?: boolean;
+          room_id: string;
+          sender_id?: string | null;
+        };
         Update: {
-          content?: string
-          created_at?: string
-          id?: string
-          is_system?: boolean
-          room_id?: string
-          sender_id?: string | null
-        }
+          content?: string;
+          created_at?: string;
+          id?: string;
+          is_system?: boolean;
+          room_id?: string;
+          sender_id?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "chat_room_messages_room_id_fkey"
-            columns: ["room_id"]
-            isOneToOne: false
-            referencedRelation: "order_chat_rooms"
-            referencedColumns: ["id"]
+            foreignKeyName: "chat_room_messages_room_id_fkey";
+            columns: ["room_id"];
+            isOneToOne: false;
+            referencedRelation: "order_chat_rooms";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       dead_drop_locations: {
         Row: {
-          created_at: string
-          description: string | null
-          id: string
-          latitude: number | null
-          longitude: number | null
-          order_id: string
-          pgp_encrypted_data: string | null
-          status: string | null
-        }
+          created_at: string;
+          description: string | null;
+          id: string;
+          latitude: number | null;
+          longitude: number | null;
+          order_id: string;
+          pgp_encrypted_data: string | null;
+          status: string | null;
+        };
         Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          latitude?: number | null
-          longitude?: number | null
-          order_id: string
-          pgp_encrypted_data?: string | null
-          status?: string | null
-        }
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          latitude?: number | null;
+          longitude?: number | null;
+          order_id: string;
+          pgp_encrypted_data?: string | null;
+          status?: string | null;
+        };
         Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          latitude?: number | null
-          longitude?: number | null
-          order_id?: string
-          pgp_encrypted_data?: string | null
-          status?: string | null
-        }
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          latitude?: number | null;
+          longitude?: number | null;
+          order_id?: string;
+          pgp_encrypted_data?: string | null;
+          status?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "dead_drop_locations_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
+            foreignKeyName: "dead_drop_locations_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       dispute_messages: {
         Row: {
-          created_at: string
-          dispute_id: string
-          from_user_id: string | null
-          id: string
-          message: string
-          sender_id: string
-          text: string | null
-        }
+          created_at: string;
+          dispute_id: string;
+          from_user_id: string | null;
+          id: string;
+          message: string;
+          sender_id: string;
+          text: string | null;
+        };
         Insert: {
-          created_at?: string
-          dispute_id: string
-          from_user_id?: string | null
-          id?: string
-          message: string
-          sender_id: string
-          text?: string | null
-        }
+          created_at?: string;
+          dispute_id: string;
+          from_user_id?: string | null;
+          id?: string;
+          message: string;
+          sender_id: string;
+          text?: string | null;
+        };
         Update: {
-          created_at?: string
-          dispute_id?: string
-          from_user_id?: string | null
-          id?: string
-          message?: string
-          sender_id?: string
-          text?: string | null
-        }
+          created_at?: string;
+          dispute_id?: string;
+          from_user_id?: string | null;
+          id?: string;
+          message?: string;
+          sender_id?: string;
+          text?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "dispute_messages_dispute_id_fkey"
-            columns: ["dispute_id"]
-            isOneToOne: false
-            referencedRelation: "disputes"
-            referencedColumns: ["id"]
+            foreignKeyName: "dispute_messages_dispute_id_fkey";
+            columns: ["dispute_id"];
+            isOneToOne: false;
+            referencedRelation: "disputes";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       disputes: {
         Row: {
-          amount: number | null
-          buyer_id: string
-          created_at: string
-          id: string
-          order_id: string | null
-          product_name: string | null
-          reason: string | null
-          resolution: string | null
-          seller_id: string
-          status: string | null
-        }
+          amount: number | null;
+          buyer_id: string;
+          created_at: string;
+          id: string;
+          order_id: string | null;
+          product_name: string | null;
+          reason: string | null;
+          resolution: string | null;
+          seller_id: string;
+          status: string | null;
+        };
         Insert: {
-          amount?: number | null
-          buyer_id: string
-          created_at?: string
-          id?: string
-          order_id?: string | null
-          product_name?: string | null
-          reason?: string | null
-          resolution?: string | null
-          seller_id: string
-          status?: string | null
-        }
+          amount?: number | null;
+          buyer_id: string;
+          created_at?: string;
+          id?: string;
+          order_id?: string | null;
+          product_name?: string | null;
+          reason?: string | null;
+          resolution?: string | null;
+          seller_id: string;
+          status?: string | null;
+        };
         Update: {
-          amount?: number | null
-          buyer_id?: string
-          created_at?: string
-          id?: string
-          order_id?: string | null
-          product_name?: string | null
-          reason?: string | null
-          resolution?: string | null
-          seller_id?: string
-          status?: string | null
-        }
+          amount?: number | null;
+          buyer_id?: string;
+          created_at?: string;
+          id?: string;
+          order_id?: string | null;
+          product_name?: string | null;
+          reason?: string | null;
+          resolution?: string | null;
+          seller_id?: string;
+          status?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "disputes_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
+            foreignKeyName: "disputes_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       encrypted_messages: {
         Row: {
-          ciphertext: string
-          created_at: string
-          id: string
-          iv: string
-          order_id: string
-          sender_id: string
-        }
+          ciphertext: string;
+          created_at: string;
+          id: string;
+          iv: string;
+          order_id: string;
+          sender_id: string;
+        };
         Insert: {
-          ciphertext: string
-          created_at?: string
-          id?: string
-          iv: string
-          order_id: string
-          sender_id: string
-        }
+          ciphertext: string;
+          created_at?: string;
+          id?: string;
+          iv: string;
+          order_id: string;
+          sender_id: string;
+        };
         Update: {
-          ciphertext?: string
-          created_at?: string
-          id?: string
-          iv?: string
-          order_id?: string
-          sender_id?: string
-        }
-        Relationships: []
-      }
+          ciphertext?: string;
+          created_at?: string;
+          id?: string;
+          iv?: string;
+          order_id?: string;
+          sender_id?: string;
+        };
+        Relationships: [];
+      };
       escrow_pool: {
         Row: {
-          amount: number | null
-          commission: number | null
-          created_at: string
-          id: string
-          order_id: string | null
-          status: string | null
-        }
+          amount: number | null;
+          commission: number | null;
+          created_at: string;
+          id: string;
+          order_id: string | null;
+          status: string | null;
+        };
         Insert: {
-          amount?: number | null
-          commission?: number | null
-          created_at?: string
-          id?: string
-          order_id?: string | null
-          status?: string | null
-        }
+          amount?: number | null;
+          commission?: number | null;
+          created_at?: string;
+          id?: string;
+          order_id?: string | null;
+          status?: string | null;
+        };
         Update: {
-          amount?: number | null
-          commission?: number | null
-          created_at?: string
-          id?: string
-          order_id?: string | null
-          status?: string | null
-        }
+          amount?: number | null;
+          commission?: number | null;
+          created_at?: string;
+          id?: string;
+          order_id?: string | null;
+          status?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "escrow_pool_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
+            foreignKeyName: "escrow_pool_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       forum_comments: {
         Row: {
-          author_id: string
-          content: string
-          created_at: string
-          id: string
-          post_id: string
-        }
+          author_id: string;
+          content: string;
+          created_at: string;
+          id: string;
+          post_id: string;
+        };
         Insert: {
-          author_id: string
-          content: string
-          created_at?: string
-          id?: string
-          post_id: string
-        }
+          author_id: string;
+          content: string;
+          created_at?: string;
+          id?: string;
+          post_id: string;
+        };
         Update: {
-          author_id?: string
-          content?: string
-          created_at?: string
-          id?: string
-          post_id?: string
-        }
+          author_id?: string;
+          content?: string;
+          created_at?: string;
+          id?: string;
+          post_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "forum_comments_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "forum_posts"
-            referencedColumns: ["id"]
+            foreignKeyName: "forum_comments_post_id_fkey";
+            columns: ["post_id"];
+            isOneToOne: false;
+            referencedRelation: "forum_posts";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       forum_posts: {
         Row: {
-          author_id: string
-          category: string | null
-          content: string
-          created_at: string
-          id: string
-          pinned: boolean | null
-          title: string
-        }
+          author_id: string;
+          category: string | null;
+          content: string;
+          created_at: string;
+          id: string;
+          pinned: boolean | null;
+          title: string;
+        };
         Insert: {
-          author_id: string
-          category?: string | null
-          content: string
-          created_at?: string
-          id?: string
-          pinned?: boolean | null
-          title: string
-        }
+          author_id: string;
+          category?: string | null;
+          content: string;
+          created_at?: string;
+          id?: string;
+          pinned?: boolean | null;
+          title: string;
+        };
         Update: {
-          author_id?: string
-          category?: string | null
-          content?: string
-          created_at?: string
-          id?: string
-          pinned?: boolean | null
-          title?: string
-        }
-        Relationships: []
-      }
+          author_id?: string;
+          category?: string | null;
+          content?: string;
+          created_at?: string;
+          id?: string;
+          pinned?: boolean | null;
+          title?: string;
+        };
+        Relationships: [];
+      };
       mirrors: {
         Row: {
-          created_at: string
-          id: string
-          is_canary: boolean
-          label: string | null
-          last_checked_at: string | null
-          signature: string | null
-          url: string
-        }
+          created_at: string;
+          id: string;
+          is_canary: boolean;
+          label: string | null;
+          last_checked_at: string | null;
+          signature: string | null;
+          url: string;
+        };
         Insert: {
-          created_at?: string
-          id?: string
-          is_canary?: boolean
-          label?: string | null
-          last_checked_at?: string | null
-          signature?: string | null
-          url: string
-        }
+          created_at?: string;
+          id?: string;
+          is_canary?: boolean;
+          label?: string | null;
+          last_checked_at?: string | null;
+          signature?: string | null;
+          url: string;
+        };
         Update: {
-          created_at?: string
-          id?: string
-          is_canary?: boolean
-          label?: string | null
-          last_checked_at?: string | null
-          signature?: string | null
-          url?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          id?: string;
+          is_canary?: boolean;
+          label?: string | null;
+          last_checked_at?: string | null;
+          signature?: string | null;
+          url?: string;
+        };
+        Relationships: [];
+      };
       notifications: {
         Row: {
-          body: string | null
-          created_at: string
-          id: string
-          link: string | null
-          read: boolean | null
-          title: string
-          type: string | null
-          user_id: string
-        }
+          body: string | null;
+          created_at: string;
+          id: string;
+          link: string | null;
+          read: boolean | null;
+          title: string;
+          type: string | null;
+          user_id: string;
+        };
         Insert: {
-          body?: string | null
-          created_at?: string
-          id?: string
-          link?: string | null
-          read?: boolean | null
-          title: string
-          type?: string | null
-          user_id: string
-        }
+          body?: string | null;
+          created_at?: string;
+          id?: string;
+          link?: string | null;
+          read?: boolean | null;
+          title: string;
+          type?: string | null;
+          user_id: string;
+        };
         Update: {
-          body?: string | null
-          created_at?: string
-          id?: string
-          link?: string | null
-          read?: boolean | null
-          title?: string
-          type?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
+          body?: string | null;
+          created_at?: string;
+          id?: string;
+          link?: string | null;
+          read?: boolean | null;
+          title?: string;
+          type?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       order_chat_rooms: {
         Row: {
-          buyer_id: string
-          created_at: string
-          destroyed_at: string | null
-          id: string
-          order_id: string
-          status: string
-          vendor_id: string
-        }
+          buyer_id: string;
+          created_at: string;
+          destroyed_at: string | null;
+          id: string;
+          order_id: string;
+          status: string;
+          vendor_id: string;
+        };
         Insert: {
-          buyer_id: string
-          created_at?: string
-          destroyed_at?: string | null
-          id?: string
-          order_id: string
-          status?: string
-          vendor_id: string
-        }
+          buyer_id: string;
+          created_at?: string;
+          destroyed_at?: string | null;
+          id?: string;
+          order_id: string;
+          status?: string;
+          vendor_id: string;
+        };
         Update: {
-          buyer_id?: string
-          created_at?: string
-          destroyed_at?: string | null
-          id?: string
-          order_id?: string
-          status?: string
-          vendor_id?: string
-        }
-        Relationships: []
-      }
+          buyer_id?: string;
+          created_at?: string;
+          destroyed_at?: string | null;
+          id?: string;
+          order_id?: string;
+          status?: string;
+          vendor_id?: string;
+        };
+        Relationships: [];
+      };
       orders: {
         Row: {
-          amount: number
-          buyer_id: string
-          confirmations: number | null
-          created_at: string
-          delivery_method: string | null
-          id: string
-          notes: string | null
-          payment_address: string | null
-          payment_status: string | null
-          product_id: string | null
-          product_name: string | null
-          service_fee: number | null
-          shipping_address: string | null
-          status: string | null
-          txid: string | null
-          updated_at: string
-          vendor_id: string
-        }
+          amount: number;
+          buyer_id: string;
+          confirmations: number | null;
+          created_at: string;
+          delivery_method: string | null;
+          id: string;
+          notes: string | null;
+          payment_address: string | null;
+          payment_status: string | null;
+          product_id: string | null;
+          product_name: string | null;
+          service_fee: number | null;
+          shipping_address: string | null;
+          status: string | null;
+          txid: string | null;
+          updated_at: string;
+          vendor_id: string;
+        };
         Insert: {
-          amount?: number
-          buyer_id: string
-          confirmations?: number | null
-          created_at?: string
-          delivery_method?: string | null
-          id?: string
-          notes?: string | null
-          payment_address?: string | null
-          payment_status?: string | null
-          product_id?: string | null
-          product_name?: string | null
-          service_fee?: number | null
-          shipping_address?: string | null
-          status?: string | null
-          txid?: string | null
-          updated_at?: string
-          vendor_id: string
-        }
+          amount?: number;
+          buyer_id: string;
+          confirmations?: number | null;
+          created_at?: string;
+          delivery_method?: string | null;
+          id?: string;
+          notes?: string | null;
+          payment_address?: string | null;
+          payment_status?: string | null;
+          product_id?: string | null;
+          product_name?: string | null;
+          service_fee?: number | null;
+          shipping_address?: string | null;
+          status?: string | null;
+          txid?: string | null;
+          updated_at?: string;
+          vendor_id: string;
+        };
         Update: {
-          amount?: number
-          buyer_id?: string
-          confirmations?: number | null
-          created_at?: string
-          delivery_method?: string | null
-          id?: string
-          notes?: string | null
-          payment_address?: string | null
-          payment_status?: string | null
-          product_id?: string | null
-          product_name?: string | null
-          service_fee?: number | null
-          shipping_address?: string | null
-          status?: string | null
-          txid?: string | null
-          updated_at?: string
-          vendor_id?: string
-        }
+          amount?: number;
+          buyer_id?: string;
+          confirmations?: number | null;
+          created_at?: string;
+          delivery_method?: string | null;
+          id?: string;
+          notes?: string | null;
+          payment_address?: string | null;
+          payment_status?: string | null;
+          product_id?: string | null;
+          product_name?: string | null;
+          service_fee?: number | null;
+          shipping_address?: string | null;
+          status?: string | null;
+          txid?: string | null;
+          updated_at?: string;
+          vendor_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "orders_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
+            foreignKeyName: "orders_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       processed_deposits: {
         Row: {
-          amount: number
-          created_at: string
-          id: string
-          network: string
-          tx_hash: string
-          user_id: string
-        }
+          amount: number;
+          created_at: string;
+          id: string;
+          network: string;
+          tx_hash: string;
+          user_id: string;
+        };
         Insert: {
-          amount?: number
-          created_at?: string
-          id?: string
-          network?: string
-          tx_hash: string
-          user_id: string
-        }
+          amount?: number;
+          created_at?: string;
+          id?: string;
+          network?: string;
+          tx_hash: string;
+          user_id: string;
+        };
         Update: {
-          amount?: number
-          created_at?: string
-          id?: string
-          network?: string
-          tx_hash?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          amount?: number;
+          created_at?: string;
+          id?: string;
+          network?: string;
+          tx_hash?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       products: {
         Row: {
-          category: string | null
-          commission_rate: number | null
-          created_at: string
-          delivery_data: string | null
-          description: string | null
-          destination: string | null
-          id: string
-          image_emoji: string | null
-          image_url: string | null
-          is_active: boolean | null
-          is_admin_product: boolean | null
-          name: string | null
-          origin: string | null
-          price: number
-          stock: number | null
-          title: string
-          tracking_number: string | null
-          type: string | null
-          updated_at: string
-          vendor_id: string
-        }
+          category: string | null;
+          commission_rate: number | null;
+          created_at: string;
+          delivery_data: string | null;
+          description: string | null;
+          destination: string | null;
+          id: string;
+          image_emoji: string | null;
+          image_url: string | null;
+          is_active: boolean | null;
+          is_admin_product: boolean | null;
+          name: string | null;
+          origin: string | null;
+          price: number;
+          stock: number | null;
+          title: string;
+          tracking_number: string | null;
+          type: string | null;
+          updated_at: string;
+          vendor_id: string;
+        };
         Insert: {
-          category?: string | null
-          commission_rate?: number | null
-          created_at?: string
-          delivery_data?: string | null
-          description?: string | null
-          destination?: string | null
-          id?: string
-          image_emoji?: string | null
-          image_url?: string | null
-          is_active?: boolean | null
-          is_admin_product?: boolean | null
-          name?: string | null
-          origin?: string | null
-          price?: number
-          stock?: number | null
-          title: string
-          tracking_number?: string | null
-          type?: string | null
-          updated_at?: string
-          vendor_id: string
-        }
+          category?: string | null;
+          commission_rate?: number | null;
+          created_at?: string;
+          delivery_data?: string | null;
+          description?: string | null;
+          destination?: string | null;
+          id?: string;
+          image_emoji?: string | null;
+          image_url?: string | null;
+          is_active?: boolean | null;
+          is_admin_product?: boolean | null;
+          name?: string | null;
+          origin?: string | null;
+          price?: number;
+          stock?: number | null;
+          title: string;
+          tracking_number?: string | null;
+          type?: string | null;
+          updated_at?: string;
+          vendor_id: string;
+        };
         Update: {
-          category?: string | null
-          commission_rate?: number | null
-          created_at?: string
-          delivery_data?: string | null
-          description?: string | null
-          destination?: string | null
-          id?: string
-          image_emoji?: string | null
-          image_url?: string | null
-          is_active?: boolean | null
-          is_admin_product?: boolean | null
-          name?: string | null
-          origin?: string | null
-          price?: number
-          stock?: number | null
-          title?: string
-          tracking_number?: string | null
-          type?: string | null
-          updated_at?: string
-          vendor_id?: string
-        }
-        Relationships: []
-      }
+          category?: string | null;
+          commission_rate?: number | null;
+          created_at?: string;
+          delivery_data?: string | null;
+          description?: string | null;
+          destination?: string | null;
+          id?: string;
+          image_emoji?: string | null;
+          image_url?: string | null;
+          is_active?: boolean | null;
+          is_admin_product?: boolean | null;
+          name?: string | null;
+          origin?: string | null;
+          price?: number;
+          stock?: number | null;
+          title?: string;
+          tracking_number?: string | null;
+          type?: string | null;
+          updated_at?: string;
+          vendor_id?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
-          avatar_url: string | null
-          bio: string | null
-          created_at: string
-          display_name: string | null
-          id: string
-          pgp_key: string | null
-          updated_at: string
-          user_id: string
-          withdraw_pin_hash: string | null
-        }
+          avatar_url: string | null;
+          bio: string | null;
+          created_at: string;
+          display_name: string | null;
+          id: string;
+          pgp_key: string | null;
+          updated_at: string;
+          user_id: string;
+          withdraw_pin_hash: string | null;
+        };
         Insert: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string
-          display_name?: string | null
-          id?: string
-          pgp_key?: string | null
-          updated_at?: string
-          user_id: string
-          withdraw_pin_hash?: string | null
-        }
+          avatar_url?: string | null;
+          bio?: string | null;
+          created_at?: string;
+          display_name?: string | null;
+          id?: string;
+          pgp_key?: string | null;
+          updated_at?: string;
+          user_id: string;
+          withdraw_pin_hash?: string | null;
+        };
         Update: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string
-          display_name?: string | null
-          id?: string
-          pgp_key?: string | null
-          updated_at?: string
-          user_id?: string
-          withdraw_pin_hash?: string | null
-        }
-        Relationships: []
-      }
+          avatar_url?: string | null;
+          bio?: string | null;
+          created_at?: string;
+          display_name?: string | null;
+          id?: string;
+          pgp_key?: string | null;
+          updated_at?: string;
+          user_id?: string;
+          withdraw_pin_hash?: string | null;
+        };
+        Relationships: [];
+      };
       rate_limits: {
         Row: {
-          action: string
-          count: number | null
-          created_at: string
-          id: string
-          identifier: string
-          locked_until: string | null
-        }
+          action: string;
+          count: number | null;
+          created_at: string;
+          id: string;
+          identifier: string;
+          locked_until: string | null;
+        };
         Insert: {
-          action: string
-          count?: number | null
-          created_at?: string
-          id?: string
-          identifier: string
-          locked_until?: string | null
-        }
+          action: string;
+          count?: number | null;
+          created_at?: string;
+          id?: string;
+          identifier: string;
+          locked_until?: string | null;
+        };
         Update: {
-          action?: string
-          count?: number | null
-          created_at?: string
-          id?: string
-          identifier?: string
-          locked_until?: string | null
-        }
-        Relationships: []
-      }
+          action?: string;
+          count?: number | null;
+          created_at?: string;
+          id?: string;
+          identifier?: string;
+          locked_until?: string | null;
+        };
+        Relationships: [];
+      };
       security_logs: {
         Row: {
-          created_at: string
-          device: string | null
-          id: string
-          ip: string | null
-          success: boolean | null
-          user_email: string | null
-          user_id: string | null
-        }
+          created_at: string;
+          device: string | null;
+          id: string;
+          ip: string | null;
+          success: boolean | null;
+          user_email: string | null;
+          user_id: string | null;
+        };
         Insert: {
-          created_at?: string
-          device?: string | null
-          id?: string
-          ip?: string | null
-          success?: boolean | null
-          user_email?: string | null
-          user_id?: string | null
-        }
+          created_at?: string;
+          device?: string | null;
+          id?: string;
+          ip?: string | null;
+          success?: boolean | null;
+          user_email?: string | null;
+          user_id?: string | null;
+        };
         Update: {
-          created_at?: string
-          device?: string | null
-          id?: string
-          ip?: string | null
-          success?: boolean | null
-          user_email?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          device?: string | null;
+          id?: string;
+          ip?: string | null;
+          success?: boolean | null;
+          user_email?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [];
+      };
       shipping_tracking: {
         Row: {
-          carrier: string | null
-          country_from: string | null
-          country_to: string | null
-          cover_sender_name: string | null
-          created_at: string
-          estimated_delivery: string | null
-          id: string
-          is_anonymous: boolean | null
-          notes: string | null
-          order_id: string
-          pgp_encrypted_tracking: string | null
-          shipped_at: string | null
-          status: string | null
-          stealth_method: string | null
-          tracking_number: string | null
-        }
+          carrier: string | null;
+          country_from: string | null;
+          country_to: string | null;
+          cover_sender_name: string | null;
+          created_at: string;
+          estimated_delivery: string | null;
+          id: string;
+          is_anonymous: boolean | null;
+          notes: string | null;
+          order_id: string;
+          pgp_encrypted_tracking: string | null;
+          shipped_at: string | null;
+          status: string | null;
+          stealth_method: string | null;
+          tracking_number: string | null;
+        };
         Insert: {
-          carrier?: string | null
-          country_from?: string | null
-          country_to?: string | null
-          cover_sender_name?: string | null
-          created_at?: string
-          estimated_delivery?: string | null
-          id?: string
-          is_anonymous?: boolean | null
-          notes?: string | null
-          order_id: string
-          pgp_encrypted_tracking?: string | null
-          shipped_at?: string | null
-          status?: string | null
-          stealth_method?: string | null
-          tracking_number?: string | null
-        }
+          carrier?: string | null;
+          country_from?: string | null;
+          country_to?: string | null;
+          cover_sender_name?: string | null;
+          created_at?: string;
+          estimated_delivery?: string | null;
+          id?: string;
+          is_anonymous?: boolean | null;
+          notes?: string | null;
+          order_id: string;
+          pgp_encrypted_tracking?: string | null;
+          shipped_at?: string | null;
+          status?: string | null;
+          stealth_method?: string | null;
+          tracking_number?: string | null;
+        };
         Update: {
-          carrier?: string | null
-          country_from?: string | null
-          country_to?: string | null
-          cover_sender_name?: string | null
-          created_at?: string
-          estimated_delivery?: string | null
-          id?: string
-          is_anonymous?: boolean | null
-          notes?: string | null
-          order_id?: string
-          pgp_encrypted_tracking?: string | null
-          shipped_at?: string | null
-          status?: string | null
-          stealth_method?: string | null
-          tracking_number?: string | null
-        }
+          carrier?: string | null;
+          country_from?: string | null;
+          country_to?: string | null;
+          cover_sender_name?: string | null;
+          created_at?: string;
+          estimated_delivery?: string | null;
+          id?: string;
+          is_anonymous?: boolean | null;
+          notes?: string | null;
+          order_id?: string;
+          pgp_encrypted_tracking?: string | null;
+          shipped_at?: string | null;
+          status?: string | null;
+          stealth_method?: string | null;
+          tracking_number?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "shipping_tracking_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
+            foreignKeyName: "shipping_tracking_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       system_announcements: {
         Row: {
-          content: string
-          created_at: string
-          id: string
-          is_active: boolean | null
-          priority: string | null
-        }
+          content: string;
+          created_at: string;
+          id: string;
+          is_active: boolean | null;
+          priority: string | null;
+        };
         Insert: {
-          content: string
-          created_at?: string
-          id?: string
-          is_active?: boolean | null
-          priority?: string | null
-        }
+          content: string;
+          created_at?: string;
+          id?: string;
+          is_active?: boolean | null;
+          priority?: string | null;
+        };
         Update: {
-          content?: string
-          created_at?: string
-          id?: string
-          is_active?: boolean | null
-          priority?: string | null
-        }
-        Relationships: []
-      }
+          content?: string;
+          created_at?: string;
+          id?: string;
+          is_active?: boolean | null;
+          priority?: string | null;
+        };
+        Relationships: [];
+      };
       transactions: {
         Row: {
-          amount: number | null
-          created_at: string
-          description: string | null
-          id: string
-          order_id: string | null
-          status: string | null
-          type: string | null
-          user_id: string
-        }
+          amount: number | null;
+          created_at: string;
+          description: string | null;
+          id: string;
+          order_id: string | null;
+          status: string | null;
+          type: string | null;
+          user_id: string;
+        };
         Insert: {
-          amount?: number | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          order_id?: string | null
-          status?: string | null
-          type?: string | null
-          user_id: string
-        }
+          amount?: number | null;
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          order_id?: string | null;
+          status?: string | null;
+          type?: string | null;
+          user_id: string;
+        };
         Update: {
-          amount?: number | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          order_id?: string | null
-          status?: string | null
-          type?: string | null
-          user_id?: string
-        }
+          amount?: number | null;
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          order_id?: string | null;
+          status?: string | null;
+          type?: string | null;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "transactions_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
+            foreignKeyName: "transactions_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       user_balances: {
         Row: {
-          available: number
-          created_at: string
-          id: string
-          pending: number
-          total: number
-          updated_at: string
-          user_id: string
-          withdrawn: number
-        }
+          available: number;
+          created_at: string;
+          id: string;
+          pending: number;
+          total: number;
+          updated_at: string;
+          user_id: string;
+          withdrawn: number;
+        };
         Insert: {
-          available?: number
-          created_at?: string
-          id?: string
-          pending?: number
-          total?: number
-          updated_at?: string
-          user_id: string
-          withdrawn?: number
-        }
+          available?: number;
+          created_at?: string;
+          id?: string;
+          pending?: number;
+          total?: number;
+          updated_at?: string;
+          user_id: string;
+          withdrawn?: number;
+        };
         Update: {
-          available?: number
-          created_at?: string
-          id?: string
-          pending?: number
-          total?: number
-          updated_at?: string
-          user_id?: string
-          withdrawn?: number
-        }
-        Relationships: []
-      }
+          available?: number;
+          created_at?: string;
+          id?: string;
+          pending?: number;
+          total?: number;
+          updated_at?: string;
+          user_id?: string;
+          withdrawn?: number;
+        };
+        Relationships: [];
+      };
       user_deposit_addresses: {
         Row: {
-          address: string
-          created_at: string
-          id: string
-          network: string
-          status: string
-          user_id: string
-        }
+          address: string;
+          created_at: string;
+          id: string;
+          network: string;
+          status: string;
+          user_id: string;
+        };
         Insert: {
-          address: string
-          created_at?: string
-          id?: string
-          network?: string
-          status?: string
-          user_id: string
-        }
+          address: string;
+          created_at?: string;
+          id?: string;
+          network?: string;
+          status?: string;
+          user_id: string;
+        };
         Update: {
-          address?: string
-          created_at?: string
-          id?: string
-          network?: string
-          status?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          address?: string;
+          created_at?: string;
+          id?: string;
+          network?: string;
+          status?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       user_pgp_keys: {
         Row: {
-          created_at: string
-          fingerprint: string
-          id: string
-          key_id: string | null
-          public_key: string
-          updated_at: string
-          user_id: string
-          verified: boolean
-        }
+          created_at: string;
+          fingerprint: string;
+          id: string;
+          key_id: string | null;
+          public_key: string;
+          updated_at: string;
+          user_id: string;
+          verified: boolean;
+        };
         Insert: {
-          created_at?: string
-          fingerprint: string
-          id?: string
-          key_id?: string | null
-          public_key: string
-          updated_at?: string
-          user_id: string
-          verified?: boolean
-        }
+          created_at?: string;
+          fingerprint: string;
+          id?: string;
+          key_id?: string | null;
+          public_key: string;
+          updated_at?: string;
+          user_id: string;
+          verified?: boolean;
+        };
         Update: {
-          created_at?: string
-          fingerprint?: string
-          id?: string
-          key_id?: string | null
-          public_key?: string
-          updated_at?: string
-          user_id?: string
-          verified?: boolean
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          fingerprint?: string;
+          id?: string;
+          key_id?: string | null;
+          public_key?: string;
+          updated_at?: string;
+          user_id?: string;
+          verified?: boolean;
+        };
+        Relationships: [];
+      };
       user_roles: {
         Row: {
-          created_at: string
-          id: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
+          created_at: string;
+          id: string;
+          role: Database["public"]["Enums"]["app_role"];
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          id?: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
+          created_at?: string;
+          id?: string;
+          role: Database["public"]["Enums"]["app_role"];
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          user_id?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          id?: string;
+          role?: Database["public"]["Enums"]["app_role"];
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       vendor_bonds: {
         Row: {
-          amount: number | null
-          created_at: string
-          id: string
-          status: string | null
-          vendor_id: string
-        }
+          amount: number | null;
+          created_at: string;
+          id: string;
+          status: string | null;
+          vendor_id: string;
+        };
         Insert: {
-          amount?: number | null
-          created_at?: string
-          id?: string
-          status?: string | null
-          vendor_id: string
-        }
+          amount?: number | null;
+          created_at?: string;
+          id?: string;
+          status?: string | null;
+          vendor_id: string;
+        };
         Update: {
-          amount?: number | null
-          created_at?: string
-          id?: string
-          status?: string | null
-          vendor_id?: string
-        }
-        Relationships: []
-      }
+          amount?: number | null;
+          created_at?: string;
+          id?: string;
+          status?: string | null;
+          vendor_id?: string;
+        };
+        Relationships: [];
+      };
       vendor_ratings: {
         Row: {
-          buyer_id: string
-          created_at: string
-          id: string
-          order_id: string | null
-          rating: number
-          review: string | null
-          vendor_id: string
-        }
+          buyer_id: string;
+          created_at: string;
+          id: string;
+          order_id: string | null;
+          rating: number;
+          review: string | null;
+          vendor_id: string;
+        };
         Insert: {
-          buyer_id: string
-          created_at?: string
-          id?: string
-          order_id?: string | null
-          rating: number
-          review?: string | null
-          vendor_id: string
-        }
+          buyer_id: string;
+          created_at?: string;
+          id?: string;
+          order_id?: string | null;
+          rating: number;
+          review?: string | null;
+          vendor_id: string;
+        };
         Update: {
-          buyer_id?: string
-          created_at?: string
-          id?: string
-          order_id?: string | null
-          rating?: number
-          review?: string | null
-          vendor_id?: string
-        }
+          buyer_id?: string;
+          created_at?: string;
+          id?: string;
+          order_id?: string | null;
+          rating?: number;
+          review?: string | null;
+          vendor_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "vendor_ratings_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
+            foreignKeyName: "vendor_ratings_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       vendor_wallets: {
         Row: {
-          available: number | null
-          balance: number | null
-          btc_address: string | null
-          commission: number | null
-          created_at: string
-          id: string
-          pending: number | null
-          total: number | null
-          updated_at: string
-          vendor_id: string
-        }
+          available: number | null;
+          balance: number | null;
+          btc_address: string | null;
+          commission: number | null;
+          created_at: string;
+          id: string;
+          pending: number | null;
+          total: number | null;
+          updated_at: string;
+          vendor_id: string;
+        };
         Insert: {
-          available?: number | null
-          balance?: number | null
-          btc_address?: string | null
-          commission?: number | null
-          created_at?: string
-          id?: string
-          pending?: number | null
-          total?: number | null
-          updated_at?: string
-          vendor_id: string
-        }
+          available?: number | null;
+          balance?: number | null;
+          btc_address?: string | null;
+          commission?: number | null;
+          created_at?: string;
+          id?: string;
+          pending?: number | null;
+          total?: number | null;
+          updated_at?: string;
+          vendor_id: string;
+        };
         Update: {
-          available?: number | null
-          balance?: number | null
-          btc_address?: string | null
-          commission?: number | null
-          created_at?: string
-          id?: string
-          pending?: number | null
-          total?: number | null
-          updated_at?: string
-          vendor_id?: string
-        }
-        Relationships: []
-      }
+          available?: number | null;
+          balance?: number | null;
+          btc_address?: string | null;
+          commission?: number | null;
+          created_at?: string;
+          id?: string;
+          pending?: number | null;
+          total?: number | null;
+          updated_at?: string;
+          vendor_id?: string;
+        };
+        Relationships: [];
+      };
       watchlist: {
         Row: {
-          created_at: string
-          id: string
-          product_id: string
-          user_id: string
-        }
+          created_at: string;
+          id: string;
+          product_id: string;
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          id?: string
-          product_id: string
-          user_id: string
-        }
+          created_at?: string;
+          id?: string;
+          product_id: string;
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          id?: string
-          product_id?: string
-          user_id?: string
-        }
+          created_at?: string;
+          id?: string;
+          product_id?: string;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "watchlist_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
+            foreignKeyName: "watchlist_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
           },
-        ]
-      }
-    }
+        ];
+      };
+    };
     Views: {
       vendor_reputation: {
         Row: {
-          avg_rating: number | null
-          completed_orders: number | null
-          display_name: string | null
-          total_ratings: number | null
-          vendor_id: string | null
-        }
-        Relationships: []
-      }
-    }
+          avg_rating: number | null;
+          completed_orders: number | null;
+          display_name: string | null;
+          total_ratings: number | null;
+          vendor_id: string | null;
+        };
+        Relationships: [];
+      };
+    };
     Functions: {
-      assign_role_on_signup: { Args: { _role: string }; Returns: undefined }
-      auto_release_pending_escrow: { Args: never; Returns: Json }
-      bootstrap_first_admin: { Args: never; Returns: Json }
-      cancel_order: { Args: { _order_id: string }; Returns: Json }
+      assign_role_on_signup: { Args: { _role: string }; Returns: undefined };
+      auto_release_pending_escrow: { Args: never; Returns: Json };
+      bootstrap_first_admin: { Args: never; Returns: Json };
+      cancel_order: { Args: { _order_id: string }; Returns: Json };
       check_rate_limit: {
         Args: {
-          _action: string
-          _identifier: string
-          _lock_minutes?: number
-          _max_attempts?: number
-          _window_minutes?: number
-        }
-        Returns: Json
-      }
-      cleanup_old_messages: { Args: { _days?: number }; Returns: Json }
-      confirm_delivery: { Args: { _order_id: string }; Returns: undefined }
+          _action: string;
+          _identifier: string;
+          _lock_minutes?: number;
+          _max_attempts?: number;
+          _window_minutes?: number;
+        };
+        Returns: Json;
+      };
+      cleanup_old_messages: { Args: { _days?: number }; Returns: Json };
+      confirm_delivery: { Args: { _order_id: string }; Returns: undefined };
       confirm_order_payment_by_tx: {
         Args: {
-          _address: string
-          _amount_satoshi: number
-          _confirmations: number
-          _tx_hash: string
-        }
-        Returns: Json
-      }
+          _address: string;
+          _amount_satoshi: number;
+          _confirmations: number;
+          _tx_hash: string;
+        };
+        Returns: Json;
+      };
       credit_confirmed_deposit: {
         Args: {
-          _address: string
-          _amount_satoshi: number
-          _confirmations: number
-          _tx_hash: string
-          _user_id: string
-        }
-        Returns: Json
-      }
-      generate_payment_address: { Args: { _order_id: string }; Returns: string }
-      get_market_stats: { Args: never; Returns: Json }
-      get_or_create_order_chat: { Args: { _order_id: string }; Returns: string }
-      get_user_role: { Args: { _user_id: string }; Returns: string }
+          _address: string;
+          _amount_satoshi: number;
+          _confirmations: number;
+          _tx_hash: string;
+          _user_id: string;
+        };
+        Returns: Json;
+      };
+      generate_payment_address: {
+        Args: { _order_id: string };
+        Returns: string;
+      };
+      get_market_stats: { Args: never; Returns: Json };
+      get_or_create_order_chat: {
+        Args: { _order_id: string };
+        Returns: string;
+      };
+      get_user_role: { Args: { _user_id: string }; Returns: string };
       get_vendor_rating: {
-        Args: { _vendor_id: string }
+        Args: { _vendor_id: string };
         Returns: {
-          avg_rating: number
-          total_ratings: number
-        }[]
-      }
+          avg_rating: number;
+          total_ratings: number;
+        }[];
+      };
       has_role: {
         Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
-      is_account_locked: { Args: { _email: string }; Returns: boolean }
-      mark_order_shipped: { Args: { _order_id: string }; Returns: Json }
-      panic_destroy: { Args: never; Returns: Json }
+          _role: Database["public"]["Enums"]["app_role"];
+          _user_id: string;
+        };
+        Returns: boolean;
+      };
+      is_account_locked: { Args: { _email: string }; Returns: boolean };
+      mark_order_shipped: { Args: { _order_id: string }; Returns: Json };
+      panic_destroy: { Args: never; Returns: Json };
       process_order_payment: {
-        Args: { _ltc_address?: string; _order_id: string; _tx_hash?: string }
-        Returns: undefined
-      }
+        Args: { _ltc_address?: string; _order_id: string; _tx_hash?: string };
+        Returns: undefined;
+      };
       record_login_attempt: {
-        Args: { _email: string; _ip?: string; _success: boolean }
-        Returns: undefined
-      }
-      redeem_admin_invite: { Args: { _code: string }; Returns: Json }
+        Args: { _email: string; _ip?: string; _success: boolean };
+        Returns: undefined;
+      };
+      redeem_admin_invite: { Args: { _code: string }; Returns: Json };
       release_escrow: {
-        Args: { _escrow_id?: string; _order_id?: string }
-        Returns: Json
-      }
+        Args: { _escrow_id?: string; _order_id?: string };
+        Returns: Json;
+      };
       user_withdraw_ltc: {
-        Args: { _address: string; _amount: number; _pin_hash: string }
-        Returns: Json
-      }
+        Args: { _address: string; _amount: number; _pin_hash: string };
+        Returns: Json;
+      };
       user_withdraw_xmr: {
-        Args: { _address: string; _amount: number; _pin_hash: string }
-        Returns: Json
-      }
+        Args: { _address: string; _amount: number; _pin_hash: string };
+        Returns: Json;
+      };
       vendor_withdraw_ltc: {
-        Args: { _address: string; _amount: number }
-        Returns: Json
-      }
+        Args: { _address: string; _amount: number };
+        Returns: Json;
+      };
       vendor_withdraw_xmr: {
-        Args: { _address: string; _amount: number }
-        Returns: Json
-      }
-    }
+        Args: { _address: string; _amount: number };
+        Returns: Json;
+      };
+    };
     Enums: {
-      app_role: "admin" | "vendor" | "buyer"
-    }
+      app_role: "admin" | "vendor" | "buyer";
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+      [_ in never]: never;
+    };
+  };
+};
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<
+  keyof Database,
+  "public"
+>];
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
       DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
+      Row: infer R;
     }
     ? R
     : never
@@ -1240,95 +1249,95 @@ export type Tables<
         DefaultSchema["Views"])
     ? (DefaultSchema["Tables"] &
         DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
+        Row: infer R;
       }
       ? R
       : never
-    : never
+    : never;
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
+      Insert: infer I;
     }
     ? I
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
+        Insert: infer I;
       }
       ? I
       : never
-    : never
+    : never;
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
+      Update: infer U;
     }
     ? U
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
+        Update: infer U;
       }
       ? U
       : never
-    : never
+    : never;
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+    : never;
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+    : never;
 
 export const Constants = {
   public: {
@@ -1336,4 +1345,4 @@ export const Constants = {
       app_role: ["admin", "vendor", "buyer"],
     },
   },
-} as const
+} as const;

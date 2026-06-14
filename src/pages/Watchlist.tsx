@@ -45,7 +45,8 @@ export default function Watchlist() {
       if (!isMounted.current) return;
 
       if (wError) {
-        if (import.meta.env.DEV) console.error("Error loading watchlist ids:", wError);
+        if (import.meta.env.DEV)
+          console.error("Error loading watchlist ids:", wError);
         setLoading(false);
         return;
       }
@@ -65,16 +66,23 @@ export default function Watchlist() {
       if (!isMounted.current) return;
 
       if (pError) {
-        if (import.meta.env.DEV) console.error("Error loading products for watchlist:", pError);
+        if (import.meta.env.DEV)
+          console.error("Error loading products for watchlist:", pError);
         setLoading(false);
         return;
       }
 
       const map = new Map((products || []).map((p: any) => [p.id, p]));
-      setItems(w.map((x: any) => ({ id: x.id, product: map.get(x.product_id) || null })));
+      setItems(
+        w.map((x: any) => ({
+          id: x.id,
+          product: map.get(x.product_id) || null,
+        })),
+      );
       setLoading(false);
     } catch (e) {
-      if (import.meta.env.DEV) console.error("Catch error in watchlist load:", e);
+      if (import.meta.env.DEV)
+        console.error("Catch error in watchlist load:", e);
       if (isMounted.current) setLoading(false);
     }
   }, [user]);
@@ -93,25 +101,32 @@ export default function Watchlist() {
     };
   }, [load]);
 
-  const productName = (name: string | null) => name || t("product.product") || "Ürün";
+  const productName = (name: string | null) =>
+    name || t("product.product") || "Ürün";
 
   return (
     <PageShell>
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
           <Heart className="w-6 h-6 text-destructive fill-current" />
-          <h1 className="text-2xl font-mono font-bold neon-text">{t("watchlist")}</h1>
+          <h1 className="text-2xl font-mono font-bold neon-text">
+            {t("watchlist")}
+          </h1>
           <span className="ml-auto text-xs font-mono text-muted-foreground">
             {items.length} {t("market.stockUnit")}
           </span>
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-muted-foreground font-mono">{t("loading")}</div>
+          <div className="text-center py-12 text-muted-foreground font-mono">
+            {t("loading")}
+          </div>
         ) : items.length === 0 ? (
           <div className="glass-card neon-border rounded-lg p-12 text-center">
             <Heart className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-sm font-mono text-muted-foreground">{t("emptyTitle")}</p>
+            <p className="text-sm font-mono text-muted-foreground">
+              {t("emptyTitle")}
+            </p>
             <button
               onClick={() => navigate("/market")}
               className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded font-mono text-sm"

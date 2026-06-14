@@ -37,7 +37,11 @@ export function devWarn(...args: any[]) {
   console.warn(...args);
 }
 
-export function devError(message: string, err?: unknown, extra?: Record<string, unknown>) {
+export function devError(
+  message: string,
+  err?: unknown,
+  extra?: Record<string, unknown>,
+) {
   if (!import.meta.env.DEV) return;
   if (isAbortLikeError(err)) return;
   if (extra) console.error(message, err, extra);

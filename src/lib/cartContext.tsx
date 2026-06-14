@@ -1,4 +1,10 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface CartItem {
@@ -65,7 +71,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         return prev.map((i) =>
           i.productId === item.productId
             ? { ...i, quantity: i.quantity + 1 }
-            : i
+            : i,
         );
       }
       return [...prev, { ...item, quantity: 1 }];
@@ -83,9 +89,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return;
     }
     setItems((prev) =>
-      prev.map((i) =>
-        i.productId === productId ? { ...i, quantity } : i
-      )
+      prev.map((i) => (i.productId === productId ? { ...i, quantity } : i)),
     );
   };
 
@@ -94,10 +98,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(STORAGE_KEY);
   };
 
-  const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalPrice = items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
-  const isInCart = (productId: string) => items.some((i) => i.productId === productId);
+  const isInCart = (productId: string) =>
+    items.some((i) => i.productId === productId);
 
   return (
     <CartContext.Provider

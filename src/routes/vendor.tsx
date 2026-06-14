@@ -6,9 +6,10 @@ function VendorRoutePage() {
   const { pathname } = useLocation();
 
   // Dynamically allow "buyer" roles only for the application page, keeping other vendor paths locked
-  const allowedRoles = pathname === "/vendor/bond"
-    ? (["buyer", "vendor", "admin"] as Array<"buyer" | "vendor" | "admin">)
-    : (["vendor", "admin"] as Array<"buyer" | "vendor" | "admin">);
+  const allowedRoles =
+    pathname === "/vendor/bond"
+      ? (["buyer", "vendor", "admin"] as Array<"buyer" | "vendor" | "admin">)
+      : (["vendor", "admin"] as Array<"buyer" | "vendor" | "admin">);
 
   return (
     <Protected roles={allowedRoles}>

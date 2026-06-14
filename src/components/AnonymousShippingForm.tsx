@@ -3,12 +3,27 @@ import { supabase } from "@/integrations/supabase/client";
 import { encryptForRecipient } from "@/lib/pgp";
 import { useI18n } from "@/lib/i18n";
 import { COUNTRIES } from "@/lib/countries";
-import { generateCoverIdentity, STEALTH_METHODS, SHIPPING_CARRIERS } from "@/lib/coverIdentity";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  generateCoverIdentity,
+  STEALTH_METHODS,
+  SHIPPING_CARRIERS,
+} from "@/lib/coverIdentity";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Shuffle, Lock, AlertTriangle } from "lucide-react";
@@ -21,7 +36,13 @@ interface Props {
   onSubmitted?: () => void;
 }
 
-export default function AnonymousShippingForm({ open, onOpenChange, orderId, buyerId, onSubmitted }: Props) {
+export default function AnonymousShippingForm({
+  open,
+  onOpenChange,
+  orderId,
+  buyerId,
+  onSubmitted,
+}: Props) {
   const { t } = useI18n();
   const [carrier, setCarrier] = useState("stealth_mail");
   const [tracking, setTracking] = useState("");
@@ -41,7 +62,7 @@ export default function AnonymousShippingForm({ open, onOpenChange, orderId, buy
       .select("public_key")
       .eq("user_id", buyerId)
       .maybeSingle()
-      .then(({ data }) => setBuyerKey(data?.public_key ?? null));
+      .then(({ data }: any) => setBuyerKey(data?.public_key ?? null));
   }, [open, buyerId]);
 
   const generateCover = () => {
@@ -84,7 +105,9 @@ export default function AnonymousShippingForm({ open, onOpenChange, orderId, buy
       );
       if (error) throw error;
 
-      const { error: rpcErr } = await supabase.rpc("mark_order_shipped", { _order_id: orderId });
+      const { error: rpcErr } = await supabase.rpc("mark_order_shipped", {
+        _order_id: orderId,
+      });
       if (rpcErr) console.warn("mark_order_shipped:", rpcErr);
 
       toast.success(t("delivery.submitted"));
@@ -123,50 +146,85 @@ export default function AnonymousShippingForm({ open, onOpenChange, orderId, buy
           )}
 
           <div>
-            <label className="text-xs font-mono text-muted-foreground">{t("delivery.carrier")}</label>
+            <label className="text-xs font-mono text-muted-foreground">
+              {t("delivery.carrier")}
+            </label>
             <Select value={carrier} onValueChange={setCarrier}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {SHIPPING_CARRIERS.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{t(c.labelKey)}</SelectItem>
+                  <SelectItem key={c.id} value={c.id}>
+                    {t(c.labelKey)}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
           <div>
-            <label className="text-xs font-mono text-muted-foreground">{t("delivery.trackingCode")}</label>
-            <Input value={tracking} onChange={(e) => setTracking(e.target.value)} placeholder="LX123456789NL" className="font-mono" />
+            <label className="text-xs font-mono text-muted-foreground">
+              {t("delivery.trackingCode")}
+            </label>
+            <Input
+              value={tracking}
+              onChange={(e) => setTracking(e.target.value)}
+              placeholder="LX123456789NL"
+              className="font-mono"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs font-mono text-muted-foreground">{t("delivery.countryFrom")}</label>
+              <label className="text-xs font-mono text-muted-foreground">
+                {t("delivery.countryFrom")}
+              </label>
               <Select value={countryFrom} onValueChange={setCountryFrom}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent className="max-h-60">
-                  {COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  {COUNTRIES.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <label className="text-xs font-mono text-muted-foreground">{t("delivery.countryTo")}</label>
+              <label className="text-xs font-mono text-muted-foreground">
+                {t("delivery.countryTo")}
+              </label>
               <Select value={countryTo} onValueChange={setCountryTo}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent className="max-h-60">
-                  {COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  {COUNTRIES.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-mono text-muted-foreground">{t("delivery.stealthMethod")}</label>
+            <label className="text-xs font-mono text-muted-foreground">
+              {t("delivery.stealthMethod")}
+            </label>
             <Select value={stealth} onValueChange={setStealth}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {STEALTH_METHODS.map((m) => (
-                  <SelectItem key={m.id} value={m.id}>{t(m.labelKey)}</SelectItem>
+                  <SelectItem key={m.id} value={m.id}>
+                    {t(m.labelKey)}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -174,17 +232,36 @@ export default function AnonymousShippingForm({ open, onOpenChange, orderId, buy
 
           <div>
             <div className="flex items-center justify-between">
-              <label className="text-xs font-mono text-muted-foreground">{t("delivery.coverIdentity")}</label>
-              <button type="button" onClick={generateCover} className="text-[10px] font-mono text-primary flex items-center gap-1 hover:underline">
+              <label className="text-xs font-mono text-muted-foreground">
+                {t("delivery.coverIdentity")}
+              </label>
+              <button
+                type="button"
+                onClick={generateCover}
+                className="text-[10px] font-mono text-primary flex items-center gap-1 hover:underline"
+              >
                 <Shuffle className="w-3 h-3" /> {t("delivery.generateCover")}
               </button>
             </div>
-            <Textarea value={coverName} onChange={(e) => setCoverName(e.target.value)} rows={3} className="font-mono text-xs" placeholder="John Doe&#10;123 Main St&#10;Amsterdam, 1011&#10;NL" />
+            <Textarea
+              value={coverName}
+              onChange={(e) => setCoverName(e.target.value)}
+              rows={3}
+              className="font-mono text-xs"
+              placeholder="John Doe&#10;123 Main St&#10;Amsterdam, 1011&#10;NL"
+            />
           </div>
 
           <div>
-            <label className="text-xs font-mono text-muted-foreground">{t("delivery.notesOptional")}</label>
-            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="font-mono text-xs" />
+            <label className="text-xs font-mono text-muted-foreground">
+              {t("delivery.notesOptional")}
+            </label>
+            <Textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={2}
+              className="font-mono text-xs"
+            />
           </div>
 
           <div className="flex items-center justify-between bg-secondary/30 rounded p-2">
@@ -193,8 +270,18 @@ export default function AnonymousShippingForm({ open, onOpenChange, orderId, buy
           </div>
 
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1">{t("cancel")}</Button>
-            <Button onClick={handleSubmit} disabled={submitting} className="flex-1">
+            <Button
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="flex-1"
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="flex-1"
+            >
               {submitting ? t("loading") : t("delivery.submit")}
             </Button>
           </div>

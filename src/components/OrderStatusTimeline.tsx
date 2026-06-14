@@ -1,4 +1,13 @@
-import { CheckCircle2, Circle, Clock, Truck, Package, Award, XCircle, ShieldAlert } from "lucide-react";
+import {
+  CheckCircle2,
+  Circle,
+  Clock,
+  Truck,
+  Package,
+  Award,
+  XCircle,
+  ShieldAlert,
+} from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 const STEPS = ["pending", "paid", "shipped", "delivered", "completed"] as const;
@@ -27,7 +36,8 @@ export default function OrderStatusTimeline({ status }: { status: string }) {
   if (s === "disputed") {
     return (
       <div className="flex items-center gap-2 text-[11px] font-mono text-red-500 bg-red-950/20 border border-red-500/10 rounded-xl p-3 uppercase font-bold tracking-wide">
-        <ShieldAlert className="w-4 h-4 animate-pulse text-red-500" /> {t("timeline.disputeActive" as any)}
+        <ShieldAlert className="w-4 h-4 animate-pulse text-red-500" />{" "}
+        {t("timeline.disputeActive" as any)}
       </div>
     );
   }
@@ -41,7 +51,10 @@ export default function OrderStatusTimeline({ status }: { status: string }) {
         const done = idx <= currentIdx;
         const active = idx === currentIdx;
         return (
-          <div key={step} className="flex flex-col items-center flex-1 relative">
+          <div
+            key={step}
+            className="flex flex-col items-center flex-1 relative"
+          >
             <div
               className={`w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all ${
                 done

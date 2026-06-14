@@ -13,7 +13,9 @@ export function Protected({
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-muted-foreground font-mono animate-pulse">Yükleniyor...</div>
+        <div className="text-muted-foreground font-mono animate-pulse">
+          Yükleniyor...
+        </div>
       </div>
     );
   }

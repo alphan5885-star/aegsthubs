@@ -1,7 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeadersBase = {
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -17,13 +18,20 @@ function getCorsHeaders(req: Request) {
     if (siteUrl) allowedOrigins.push(siteUrl);
   }
   const allowOrigin =
-    origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0] || "null";
-  return { ...corsHeadersBase, "Access-Control-Allow-Origin": allowOrigin, Vary: "Origin" };
+    origin && allowedOrigins.includes(origin)
+      ? origin
+      : allowedOrigins[0] || "null";
+  return {
+    ...corsHeadersBase,
+    "Access-Control-Allow-Origin": allowOrigin,
+    Vary: "Origin",
+  };
 }
 
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method === "OPTIONS")
+    return new Response(null, { headers: corsHeaders });
 
   try {
     const authHeader = req.headers.get("Authorization");
@@ -39,10 +47,13 @@ Deno.serve(async (req) => {
     const serviceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const blockcypherToken = Deno.env.get("BLOCKCYPHER_TOKEN");
     if (!blockcypherToken) {
-      return new Response(JSON.stringify({ error: "BLOCKCYPHER_TOKEN missing" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "BLOCKCYPHER_TOKEN missing" }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     const userClient = createClient(supabaseUrl, anonKey, {
@@ -67,7 +78,11 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (existing?.address) {
       return new Response(
-        JSON.stringify({ address: existing.address, network: "LTC", reused: true }),
+        JSON.stringify({
+          address: existing.address,
+          network: "LTC",
+          reused: true,
+        }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         },
@@ -83,7 +98,10 @@ Deno.serve(async (req) => {
     const bcData = await bcResp.json();
     if (!bcResp.ok || !bcData.address) {
       return new Response(
-        JSON.stringify({ error: "BlockCypher address generation failed", detail: bcData }),
+        JSON.stringify({
+          error: "BlockCypher address generation failed",
+          detail: bcData,
+        }),
         {
           status: 502,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -91,18 +109,23 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { error: insertError } = await service.from("user_deposit_addresses").upsert(
-      {
-        user_id: userId,
-        network: "LTC",
-        address: bcData.address,
-        status: "active",
-      },
-      { onConflict: "user_id,network" },
-    );
+    const { error: insertError } = await service
+      .from("user_deposit_addresses")
+      .upsert(
+        {
+          user_id: userId,
+          network: "LTC",
+          address: bcData.address,
+          status: "active",
+        },
+        { onConflict: "user_id,network" },
+      );
     if (insertError) {
       return new Response(
-        JSON.stringify({ error: "Failed to persist address", detail: insertError.message }),
+        JSON.stringify({
+          error: "Failed to persist address",
+          detail: insertError.message,
+        }),
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -111,15 +134,22 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ address: bcData.address, network: "LTC", reused: false }),
+      JSON.stringify({
+        address: bcData.address,
+        network: "LTC",
+        reused: false,
+      }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       },
     );
   } catch (e) {
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : String(e) }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: e instanceof Error ? e.message : String(e) }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   }
 });

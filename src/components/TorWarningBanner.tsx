@@ -1,10 +1,17 @@
 import { useState, useEffect } from "react";
 import { useSecurity } from "@/lib/securityContext";
-import { ShieldCheck, X, Wifi, Terminal, EyeOff, ShieldAlert } from "lucide-react";
+import {
+  ShieldCheck,
+  X,
+  Wifi,
+  Terminal,
+  EyeOff,
+  ShieldAlert,
+} from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 /**
- * Redesigned Top HUD Bar: Replaces the flat yellow banner with an ultra-premium 
+ * Redesigned Top HUD Bar: Replaces the flat yellow banner with an ultra-premium
  * cyber security glassmorphic status monitor.
  */
 export default function TorWarningBanner() {
@@ -27,7 +34,6 @@ export default function TorWarningBanner() {
   return (
     <div className="fixed top-0 inset-x-0 z-[60] bg-[#020202]/85 backdrop-blur-xl border-b border-white/[0.04] shadow-[0_4px_30px_rgba(0,0,0,0.5)] animate-fade-in font-mono text-[9px] select-none">
       <div className="max-w-[1400px] mx-auto px-4 py-2.5 flex items-center justify-between gap-4 text-zinc-400">
-        
         {/* Left Side: Connection Status HUD */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
@@ -44,7 +50,12 @@ export default function TorWarningBanner() {
 
           <div className="hidden sm:flex items-center gap-1.5">
             <Wifi className="w-3.5 h-3.5 text-red-500" />
-            <span>{t("tor.network" as any)} <strong className="text-white">{t("tor.networkValue" as any)}</strong></span>
+            <span>
+              {t("tor.network" as any)}{" "}
+              <strong className="text-white">
+                {t("tor.networkValue" as any)}
+              </strong>
+            </span>
           </div>
 
           <span className="hidden sm:inline-block text-zinc-800">|</span>
@@ -52,7 +63,10 @@ export default function TorWarningBanner() {
           <div className="flex items-center gap-1.5">
             <EyeOff className="w-3.5 h-3.5 text-zinc-500" />
             <span className="text-zinc-400">
-              {t("tor.traceProtection" as any)} <strong className="text-zinc-200">{t("tor.traceValue" as any)}</strong>
+              {t("tor.traceProtection" as any)}{" "}
+              <strong className="text-zinc-200">
+                {t("tor.traceValue" as any)}
+              </strong>
             </span>
           </div>
         </div>
@@ -61,7 +75,14 @@ export default function TorWarningBanner() {
         <div className="hidden lg:flex items-center gap-2 text-zinc-500 truncate max-w-[500px]">
           <Terminal className="w-3 h-3 text-red-500 shrink-0" />
           <span className="truncate">
-            <span className="text-zinc-400">{t("tor.advice" as any).split(":")[0]}:</span> {t("tor.advice" as any).split(":").slice(1).join(":").trim()}
+            <span className="text-zinc-400">
+              {t("tor.advice" as any).split(":")[0]}:
+            </span>{" "}
+            {t("tor.advice" as any)
+              .split(":")
+              .slice(1)
+              .join(":")
+              .trim()}
           </span>
         </div>
 
@@ -81,7 +102,6 @@ export default function TorWarningBanner() {
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
-
       </div>
     </div>
   );

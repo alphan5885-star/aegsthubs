@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 
 export interface CustomizationSettings {
   // Theme color (HSL hue)
@@ -66,8 +72,14 @@ function applySettings(s: CustomizationSettings) {
   root.style.setProperty("--sidebar-ring", `${s.themeHue} 100% 50%`);
 
   // Update neon glow CSS vars
-  root.style.setProperty("--neon-glow", `0 0px 20px hsl(${s.themeHue} 100% 50% / 0.4)`);
-  root.style.setProperty("--neon-glow-strong", `0 0px 40px hsl(${s.themeHue} 100% 50% / 0.6)`);
+  root.style.setProperty(
+    "--neon-glow",
+    `0 0px 20px hsl(${s.themeHue} 100% 50% / 0.4)`,
+  );
+  root.style.setProperty(
+    "--neon-glow-strong",
+    `0 0px 40px hsl(${s.themeHue} 100% 50% / 0.6)`,
+  );
 
   // Font
   root.style.setProperty("--app-font", fontMap[s.fontFamily]);
@@ -116,7 +128,9 @@ export function CustomizationProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <CustomizationContext.Provider value={{ settings, updateSettings, resetSettings }}>
+    <CustomizationContext.Provider
+      value={{ settings, updateSettings, resetSettings }}
+    >
       {children}
     </CustomizationContext.Provider>
   );

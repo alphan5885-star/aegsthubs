@@ -10,7 +10,8 @@ function Index() {
   const { user, role } = useAuth();
 
   if (user && role) {
-    const target = role === "admin" ? "/admin" : role === "vendor" ? "/vendor" : "/market";
+    const target =
+      role === "admin" ? "/admin" : role === "vendor" ? "/vendor" : "/market";
     return <Navigate to={target} replace />;
   }
   return <Login />;

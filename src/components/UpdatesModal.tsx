@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { X, Sparkles, Rocket, Shield, Zap, Lock, ArrowRight } from "lucide-react";
+import {
+  X,
+  Sparkles,
+  Rocket,
+  Shield,
+  Zap,
+  Lock,
+  ArrowRight,
+} from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 type Update = {
@@ -16,7 +24,8 @@ const updatesData: Update[] = [
     version: "4.0.0",
     date: "2026-05-17",
     title: "Triple Crypt Prominence (BTC, LTC, XMR)",
-    description: "Stripped the 'Litecoin-only' limitation across the marketplace. Bitcoin, Litecoin, and Monero are now promoted to equal status across all wallet structures, listing details, checkout forms, and seller dashboards.",
+    description:
+      "Stripped the 'Litecoin-only' limitation across the marketplace. Bitcoin, Litecoin, and Monero are now promoted to equal status across all wallet structures, listing details, checkout forms, and seller dashboards.",
     icon: "zap",
     category: "new",
   },
@@ -24,7 +33,8 @@ const updatesData: Update[] = [
     version: "4.0.0",
     date: "2026-05-17",
     title: "Holographic Cyber Console (Kimlik.sys)",
-    description: "Re-engineered user profiles into high-tech dashboards with glowing status rings, functional Base64 photo/banner uploaders, dynamic achievement rewards connected directly to database metrics, and live currency translation ledgers.",
+    description:
+      "Re-engineered user profiles into high-tech dashboards with glowing status rings, functional Base64 photo/banner uploaders, dynamic achievement rewards connected directly to database metrics, and live currency translation ledgers.",
     icon: "sparkles",
     category: "feature",
   },
@@ -32,7 +42,8 @@ const updatesData: Update[] = [
     version: "4.0.0",
     date: "2026-05-17",
     title: "PGP Cryptographic Suite Redesign",
-    description: "Expanded PGP tools with a browser-native ECC Key Generator (Curve 25519) and a technical Public Key block metadata/fingerprint parser, next to robust verification and encryption modules.",
+    description:
+      "Expanded PGP tools with a browser-native ECC Key Generator (Curve 25519) and a technical Public Key block metadata/fingerprint parser, next to robust verification and encryption modules.",
     icon: "shield",
     category: "security",
   },
@@ -40,7 +51,8 @@ const updatesData: Update[] = [
     version: "4.0.0",
     date: "2026-05-17",
     title: "Split-Pane Siberian Forums Engine",
-    description: "Launched a fully-synchronized siberian-themed forum with real-time Supabase integrations. Features category filters, post-detail threads, an anonymous posting mode, and integrated administrative moderation tools.",
+    description:
+      "Launched a fully-synchronized siberian-themed forum with real-time Supabase integrations. Features category filters, post-detail threads, an anonymous posting mode, and integrated administrative moderation tools.",
     icon: "rocket",
     category: "new",
   },
@@ -48,7 +60,8 @@ const updatesData: Update[] = [
     version: "4.0.0",
     date: "2026-05-17",
     title: "Multi-Coin Vendor Withdrawals & PIN Setup",
-    description: "Empowered vendors to withdraw funds directly in BTC, LTC, or XMR with integrated PIN authorization keys and cold Exodus wallet synchronization systems.",
+    description:
+      "Empowered vendors to withdraw funds directly in BTC, LTC, or XMR with integrated PIN authorization keys and cold Exodus wallet synchronization systems.",
     icon: "lock",
     category: "security",
   },
@@ -56,7 +69,8 @@ const updatesData: Update[] = [
     version: "3.5.0",
     date: "2026-05-05",
     title: "Clearweb Anonymous Mode",
-    description: "Platform shifted to clearweb access with stealth mode, anonymous browsing, and BlockCypher-powered automatic LTC deposit sync.",
+    description:
+      "Platform shifted to clearweb access with stealth mode, anonymous browsing, and BlockCypher-powered automatic LTC deposit sync.",
     icon: "rocket",
     category: "new",
   },
@@ -64,7 +78,8 @@ const updatesData: Update[] = [
     version: "3.0.0",
     date: "2025-06-01",
     title: "aeigsthub v3.0 - Ultimate Security",
-    description: "Complete platform security overhaul with PGP encryption, stealth mode, and Tor integration.",
+    description:
+      "Complete platform security overhaul with PGP encryption, stealth mode, and Tor integration.",
     icon: "shield",
     category: "security",
   },
@@ -72,7 +87,8 @@ const updatesData: Update[] = [
     version: "3.0.0",
     date: "2025-06-01",
     title: "Balance-Based Escrow",
-    description: "New escrow system that holds payment until buyer confirms delivery.",
+    description:
+      "New escrow system that holds payment until buyer confirms delivery.",
     icon: "lock",
     category: "feature",
   },
@@ -80,7 +96,8 @@ const updatesData: Update[] = [
     version: "3.0.0",
     date: "2025-06-01",
     title: "Vendor Trust Bond",
-    description: "Vendor verification through LTC deposit - 0.5 LTC minimum bond required.",
+    description:
+      "Vendor verification through LTC deposit - 0.5 LTC minimum bond required.",
     icon: "shield",
     category: "security",
   },
@@ -88,7 +105,8 @@ const updatesData: Update[] = [
     version: "2.5.0",
     date: "2025-04-15",
     title: "Automatic Withdrawal",
-    description: "Set minimum amount and auto-withdraw to cold wallet (Exodus).",
+    description:
+      "Set minimum amount and auto-withdraw to cold wallet (Exodus).",
     icon: "zap",
     category: "improvement",
   },
@@ -96,7 +114,8 @@ const updatesData: Update[] = [
     version: "2.4.0",
     date: "2025-03-20",
     title: "Live Market Analytics",
-    description: "Real-time market statistics, product activity, and vendor performance.",
+    description:
+      "Real-time market statistics, product activity, and vendor performance.",
     icon: "sparkles",
     category: "feature",
   },
@@ -104,7 +123,8 @@ const updatesData: Update[] = [
     version: "2.3.0",
     date: "2025-02-10",
     title: "PGP Tools Suite",
-    description: "Browser-based encryption, decryption, and signature verification.",
+    description:
+      "Browser-based encryption, decryption, and signature verification.",
     icon: "shield",
     category: "feature",
   },
@@ -112,7 +132,8 @@ const updatesData: Update[] = [
     version: "2.2.0",
     date: "2025-01-05",
     title: "Anonymous Shipping",
-    description: "Dead-drop maps, stealth packaging, and cover identity generator.",
+    description:
+      "Dead-drop maps, stealth packaging, and cover identity generator.",
     icon: "rocket",
     category: "feature",
   },
@@ -229,7 +250,9 @@ export default function UpdatesModal({
                 <div className="flex items-start gap-3">
                   <div
                     className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center border ${
-                      categoryColors[update.category as keyof typeof categoryColors]
+                      categoryColors[
+                        update.category as keyof typeof categoryColors
+                      ]
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -244,7 +267,9 @@ export default function UpdatesModal({
                       </span>
                       <span
                         className={`text-[8px] font-mono px-1.5 py-0.5 rounded border capitalize ${
-                          categoryColors[update.category as keyof typeof categoryColors]
+                          categoryColors[
+                            update.category as keyof typeof categoryColors
+                          ]
                         }`}
                       >
                         {update.category}

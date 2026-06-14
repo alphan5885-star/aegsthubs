@@ -6,7 +6,8 @@
 
 @theme inline {
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -64,28 +65,43 @@
     font-family: "JetBrains Mono", "Inter", monospace;
     overflow-x: hidden;
   }
-  ::-webkit-scrollbar { width: 0px; height: 0px; }
-  * { scrollbar-width: none !important; -ms-overflow-style: none !important; }
+  ::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+  }
+  * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
 }
 
 @layer utilities {
   .neon-glow {
-    text-shadow: 0 0 10px hsla(var(--primary), 0.8), 0 0 20px hsla(var(--primary), 0.4);
+    text-shadow:
+      0 0 10px hsla(var(--primary), 0.8),
+      0 0 20px hsla(var(--primary), 0.4);
   }
   .neon-border {
     box-shadow: 0 0 20px hsla(var(--primary), 0.1);
   }
   .obsidian-card {
-    @apply bg-[#020202] border border-white/5 backdrop-blur-3xl transition-all duration-700 relative;
+    @apply bg-[#020202] border border-white/5 backdrop-blur-3xl relative;
     background: linear-gradient(165deg, #050505 0%, #010101 100%);
+  }
+  .obsidian-card:not(.no-transition) {
+    @apply transition-all duration-700;
   }
   .obsidian-card::before {
     content: "";
     @apply absolute inset-0 opacity-0 transition-opacity duration-700 pointer-events-none rounded-[inherit];
     padding: 1px;
     background: linear-gradient(90deg, transparent, hsla(var(--primary), 0.5), transparent);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
   }
@@ -94,16 +110,22 @@
     animation: border-trace 3s linear infinite;
   }
   @keyframes border-trace {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 200% 50%; }
+    0% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: 200% 50%;
+    }
   }
   .obsidian-card:hover {
     border-color: hsla(var(--primary), 0.3);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 20px hsla(var(--primary), 0.05);
+    box-shadow:
+      0 20px 40px rgba(0, 0, 0, 0.6),
+      0 0 20px hsla(var(--primary), 0.05);
     transform: translateY(-2px);
   }
   .cyber-grid {
-    background-image: 
+    background-image:
       linear-gradient(to right, hsla(var(--primary), 0.03) 1px, transparent 1px),
       linear-gradient(to bottom, hsla(var(--primary), 0.03) 1px, transparent 1px);
     background-size: 60px 60px;
@@ -120,14 +142,23 @@
     opacity: 0.3;
   }
   @keyframes scanline {
-    0% { transform: translateY(-100%); }
-    100% { transform: translateY(100vh); }
+    0% {
+      transform: translateY(-100%);
+    }
+    100% {
+      transform: translateY(100vh);
+    }
   }
   .animate-pulse-slow {
     animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
   @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.4;
+    }
   }
 }

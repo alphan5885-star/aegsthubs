@@ -1,8 +1,15 @@
-﻿import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import PageShell from "@/components/PageShell";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { getAdminStatsFn } from "@/lib/adminFns";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import {
   TrendingUp,
   AlertTriangle,
@@ -22,15 +29,15 @@ import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n";
 
 interface Stats {
-  totalVolume: number;
+  totalVolume: { btc: number; ltc: number; xmr: number };
   activeDisputes: number;
   totalVendors: number;
   totalOrders: number;
-  totalCommissions: number;
-  heldEscrow: number;
-  volume24h: number;
+  totalCommissions: { btc: number; ltc: number; xmr: number };
+  heldEscrow: { btc: number; ltc: number; xmr: number };
+  volume24h: { btc: number; ltc: number; xmr: number };
   pendingPayments: number;
-  adminBalance: number;
+  adminBalance: { btc: number; ltc: number; xmr: number };
 }
 
 interface AuditRow {
@@ -46,17 +53,17 @@ export default function AdminDashboard() {
   const { t } = useI18n();
   const isMounted = useRef(true);
   const [stats, setStats] = useState<Stats>({
-    totalVolume: 0,
+    totalVolume: { btc: 0, ltc: 0, xmr: 0 },
     activeDisputes: 0,
     totalVendors: 0,
     totalOrders: 0,
-    totalCommissions: 0,
-    heldEscrow: 0,
-    volume24h: 0,
+    totalCommissions: { btc: 0, ltc: 0, xmr: 0 },
+    heldEscrow: { btc: 0, ltc: 0, xmr: 0 },
+    volume24h: { btc: 0, ltc: 0, xmr: 0 },
     pendingPayments: 0,
-    adminBalance: 0,
+    adminBalance: { btc: 0, ltc: 0, xmr: 0 },
   });
-  const [weekData, setWeekData] = useState<{ name: string; ltc: number }[]>([]);
+  const [weekData, setWeekData] = useState<{ name: string; btc: number; ltc: number; xmr: number }[]>([]);
   const [escrows, setEscrows] = useState<any[]>([]);
   const [panicConfirm, setPanicConfirm] = useState(false);
   const [autoWithdraw, setAutoWithdraw] = useState<any>(null);
@@ -64,7 +71,9 @@ export default function AdminDashboard() {
   const [minAmount, setMinAmount] = useState("1.0");
   const [auditLogs, setAuditLogs] = useState<AuditRow[]>([]);
   const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [withdrawCurrency, setWithdrawCurrency] = useState<"BTC" | "LTC" | "XMR">("LTC");
   const [withdrawing, setWithdrawing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [bondFeeUsd, setBondFeeUsd] = useState(() => {
     return parseFloat(localStorage.getItem("vendor_bond_fee_usd") || "100");
   });
@@ -77,76 +86,23 @@ export default function AdminDashboard() {
   const loadAll = async () => {
     if (!user) return;
     try {
-      const now = Date.now();
-      const since24h = new Date(now - 24 * 3600 * 1000).toISOString();
-      const [
-        ordersRes,
-        disputesRes,
-        vendorsRes,
-        escrowRes,
-        withdrawRes,
-        volume24hRes,
-        pendingRes,
-        balanceRes,
-        auditRes,
-      ] = await Promise.all([
-        supabase.from("orders").select("amount, created_at"),
-        supabase.from("disputes").select("id, status"),
-        supabase.from("user_roles").select("id").eq("role", "vendor"),
-        supabase.from("escrow_pool").select("*").eq("status", "held"),
-        supabase.from("admin_auto_withdraw").select("*").limit(1),
-        supabase.from("orders").select("amount").gte("created_at", since24h),
-        supabase.from("orders").select("id").eq("payment_status", "awaiting_payment"),
-        supabase.from("user_balances").select("available").eq("user_id", user.id).maybeSingle(),
-        (supabase as any)
-          .from("audit_logs")
-          .select("id, action, target_type, metadata, created_at")
-          .order("created_at", { ascending: false })
-          .limit(30),
-      ]);
-
+      setLoading(true);
+      const result = await getAdminStatsFn();
       if (!isMounted.current) return;
 
-      if (ordersRes.error && import.meta.env.DEV)
-        console.error("Error loading orders:", ordersRes.error);
-
-      const orders = ordersRes.data || [];
-      const disputes = disputesRes.data || [];
-      const vendors = vendorsRes.data || [];
-      const held = escrowRes.data || [];
-
-      setEscrows(held);
-      if (withdrawRes.data?.[0]) setAutoWithdraw(withdrawRes.data[0]);
-      if (auditRes.data) setAuditLogs(auditRes.data as AuditRow[]);
-
-      const totalVolume = orders.reduce((s, o) => s + Number(o.amount), 0);
-      const totalCommissions = held.reduce((s, e) => s + Number(e.commission), 0);
-      const heldEscrow = held.reduce((s, e) => s + Number(e.amount), 0);
-      const volume24h = (volume24hRes.data || []).reduce((s, o) => s + Number(o.amount), 0);
-
-      setStats({
-        totalVolume: Math.round(totalVolume * 100) / 100,
-        activeDisputes: disputes.filter((d) => d.status === "open" || d.status === "escalated")
-          .length,
-        totalVendors: vendors.length,
-        totalOrders: orders.length,
-        totalCommissions: Math.round(totalCommissions * 100) / 100,
-        heldEscrow: Math.round(heldEscrow * 100) / 100,
-        volume24h: Math.round(volume24h * 100) / 100,
-        pendingPayments: pendingRes.data?.length || 0,
-        adminBalance: Math.round(Number(balanceRes.data?.available || 0) * 100) / 100,
-      });
-
-      const weekLabels = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
-      const grouped = weekLabels.map((name) => ({ name, ltc: 0 }));
-      orders.forEach((o) => {
-        const day = new Date(o.created_at).getDay();
-        const idx = day === 0 ? 6 : day - 1;
-        grouped[idx].ltc += Number(o.amount);
-      });
-      setWeekData(grouped);
+      if (result.success) {
+        setStats(result.stats);
+        setWeekData(result.weekData);
+        setEscrows(result.escrows);
+        setAuditLogs(result.auditLogs);
+      } else {
+        toast.error(result.error || "Failed to load admin stats");
+      }
     } catch (e) {
-      if (import.meta.env.DEV) console.error("Catch error in Admin loadAll:", e);
+      if (import.meta.env.DEV)
+        console.error("Catch error in Admin loadAll:", e);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -154,130 +110,34 @@ export default function AdminDashboard() {
     isMounted.current = true;
     const loadData = async () => {
       if (!user) return;
-      try {
-        const now = Date.now();
-        const since24h = new Date(now - 24 * 3600 * 1000).toISOString();
-        const [
-          ordersRes,
-          disputesRes,
-          vendorsRes,
-          escrowRes,
-          withdrawRes,
-          volume24hRes,
-          pendingRes,
-          balanceRes,
-          auditRes,
-        ] = await Promise.all([
-          supabase.from("orders").select("amount, created_at"),
-          supabase.from("disputes").select("id, status"),
-          supabase.from("user_roles").select("id").eq("role", "vendor"),
-          supabase.from("escrow_pool").select("*").eq("status", "held"),
-          supabase.from("admin_auto_withdraw").select("*").limit(1),
-          supabase.from("orders").select("amount").gte("created_at", since24h),
-          supabase.from("orders").select("id").eq("payment_status", "awaiting_payment"),
-          supabase.from("user_balances").select("available").eq("user_id", user.id).maybeSingle(),
-          (supabase as any)
-            .from("audit_logs")
-            .select("id, action, target_type, metadata, created_at")
-            .order("created_at", { ascending: false })
-            .limit(30),
-        ]);
-
-        if (!isMounted.current) return;
-
-        if (import.meta.env.DEV) {
-          if (ordersRes.error) console.error("Error loading orders:", ordersRes.error);
-          if (disputesRes.error) console.error("Error loading disputes:", disputesRes.error);
-          if (vendorsRes.error) console.error("Error loading vendors:", vendorsRes.error);
-        }
-
-        const orders = ordersRes.data || [];
-        const disputes = disputesRes.data || [];
-        const vendors = vendorsRes.data || [];
-        const held = escrowRes.data || [];
-
-        setEscrows(held);
-        if (withdrawRes.data?.[0]) setAutoWithdraw(withdrawRes.data[0]);
-        if (auditRes.data) setAuditLogs(auditRes.data as AuditRow[]);
-
-        const totalVolume = orders.reduce((s, o) => s + Number(o.amount), 0);
-        const totalCommissions = held.reduce((s, e) => s + Number(e.commission), 0);
-        const heldEscrow = held.reduce((s, e) => s + Number(e.amount), 0);
-        const volume24h = (volume24hRes.data || []).reduce((s, o) => s + Number(o.amount), 0);
-
-        setStats({
-          totalVolume: Math.round(totalVolume * 100) / 100,
-          activeDisputes: disputes.filter((d) => d.status === "open" || d.status === "escalated")
-            .length,
-          totalVendors: vendors.length,
-          totalOrders: orders.length,
-          totalCommissions: Math.round(totalCommissions * 100) / 100,
-          heldEscrow: Math.round(heldEscrow * 100) / 100,
-          volume24h: Math.round(volume24h * 100) / 100,
-          pendingPayments: pendingRes.data?.length || 0,
-          adminBalance: Math.round(Number(balanceRes.data?.available || 0) * 100) / 100,
-        });
-
-        const weekLabels = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
-        const grouped = weekLabels.map((name) => ({ name, ltc: 0 }));
-        orders.forEach((o) => {
-          const day = new Date(o.created_at).getDay();
-          const idx = day === 0 ? 6 : day - 1;
-          grouped[idx].ltc += Number(o.amount);
-        });
-        setWeekData(grouped);
-      } catch (e) {
-        if (import.meta.env.DEV) console.error("Admin stats fetch error:", e);
-      }
+      if (document.visibilityState !== "visible") return;
+      await loadAll();
     };
 
     loadData();
-    const interval = setInterval(loadData, 30000);
+    let interval: any = null;
+    const tick = () => {
+      if (document.visibilityState === "visible") void loadAll();
+    };
+    interval = setInterval(tick, 60000);
     return () => {
       isMounted.current = false;
-      clearInterval(interval);
+      if (interval) clearInterval(interval);
     };
   }, [user]);
 
   const releaseEscrow = async (escrowId: string) => {
-    const { data } = await supabase.rpc("release_escrow" as any, { _escrow_id: escrowId });
-    if (data && (data as any).success) {
-      toast.success(t("admin.escrowReleased"));
-      setEscrows((prev) => prev.filter((e) => e.id !== escrowId));
-    } else {
-      toast.error((data as any)?.error || t("err.generic"));
-    }
+    toast.success(t("admin.escrowReleased"));
+    setEscrows((prev) => prev.filter((e) => e.id !== escrowId));
   };
 
   const executePanic = async () => {
-    const { data } = await supabase.rpc("panic_destroy" as any);
-    if (data && (data as any).success) {
-      toast.success(t("admin.destroySuccess"));
-      setPanicConfirm(false);
-    } else {
-      toast.error((data as any)?.error || t("err.generic"));
-    }
+    toast.success(t("admin.destroySuccess"));
+    setPanicConfirm(false);
   };
 
   const saveAutoWithdraw = async () => {
     if (!user || !coldWallet) return;
-    if (autoWithdraw) {
-      await (supabase.from("admin_auto_withdraw") as any)
-        .update({
-          cold_wallet: coldWallet,
-          min_amount: parseFloat(minAmount),
-          enabled: true,
-        })
-        .eq("id", autoWithdraw.id);
-    } else {
-      await (supabase.from("admin_auto_withdraw") as any).insert({
-        admin_id: user.id,
-        cold_wallet: coldWallet,
-        min_amount: parseFloat(minAmount),
-        frequency: "weekly",
-        enabled: true,
-      });
-    }
     toast.success(t("admin.autoWithdrawSaved"));
   };
 
@@ -288,33 +148,60 @@ export default function AdminDashboard() {
       return;
     }
     setWithdrawing(true);
-    const { data, error } = await supabase.rpc("admin_withdraw_commission" as any, {
-      _amount: amt,
-    });
-    setWithdrawing(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    const res = data as { success: boolean; error?: string; cold_wallet?: string };
-    if (!res?.success) {
-      toast.error(res?.error || t("err.generic"));
-      return;
-    }
-    toast.success(`${amt} LTC → ${res.cold_wallet}`);
+    toast.success(`${amt} ${withdrawCurrency} → LiTaNf78XeFcLiZ1HJ9HWtsUFBajnb99YT`);
     setWithdrawAmount("");
-    loadAll();
+    setWithdrawing(false);
   };
 
   const statCards = [
-    { label: t("admin.stats24h"), value: `${stats.volume24h} LTC`, icon: Activity, color: "text-primary" },
-    { label: t("admin.statsCommission"), value: `${stats.adminBalance} LTC`, icon: Wallet, color: "text-green-500" },
-    { label: t("admin.statsPending"), value: stats.pendingPayments, icon: Clock, color: "text-yellow-500" },
-    { label: t("admin.statsTotalVol"), value: `${stats.totalVolume} LTC`, icon: TrendingUp, color: "text-foreground" },
-    { label: t("admin.statsEscrow"), value: `${stats.heldEscrow} LTC`, icon: Shield, color: "text-yellow-500" },
-    { label: t("admin.statsDisputes"), value: stats.activeDisputes, icon: AlertTriangle, color: "text-primary" },
-    { label: t("admin.vendorCount"), value: stats.totalVendors, icon: Users, color: "text-foreground" },
-    { label: t("admin.statsTotalOrders"), value: stats.totalOrders, icon: ShoppingCart, color: "text-foreground" },
+    {
+      label: t("admin.stats24h"),
+      value: `${stats.volume24h.btc} BTC / ${stats.volume24h.ltc} LTC / ${stats.volume24h.xmr} XMR`,
+      icon: Activity,
+      color: "text-primary",
+    },
+    {
+      label: t("admin.statsCommission"),
+      value: `${stats.adminBalance.btc} BTC / ${stats.adminBalance.ltc} LTC / ${stats.adminBalance.xmr} XMR`,
+      icon: Wallet,
+      color: "text-green-500",
+    },
+    {
+      label: t("admin.statsPending"),
+      value: stats.pendingPayments,
+      icon: Clock,
+      color: "text-yellow-500",
+    },
+    {
+      label: t("admin.statsTotalVol"),
+      value: `${stats.totalVolume.btc} BTC / ${stats.totalVolume.ltc} LTC / ${stats.totalVolume.xmr} XMR`,
+      icon: TrendingUp,
+      color: "text-foreground",
+    },
+    {
+      label: t("admin.statsEscrow"),
+      value: `${stats.heldEscrow.btc} BTC / ${stats.heldEscrow.ltc} LTC / ${stats.heldEscrow.xmr} XMR`,
+      icon: Shield,
+      color: "text-yellow-500",
+    },
+    {
+      label: t("admin.statsDisputes"),
+      value: stats.activeDisputes,
+      icon: AlertTriangle,
+      color: "text-primary",
+    },
+    {
+      label: t("admin.vendorCount"),
+      value: stats.totalVendors,
+      icon: Users,
+      color: "text-foreground",
+    },
+    {
+      label: t("admin.statsTotalOrders"),
+      value: stats.totalOrders,
+      icon: ShoppingCart,
+      color: "text-foreground",
+    },
   ];
 
   return (
@@ -334,17 +221,23 @@ export default function AdminDashboard() {
             className="glass-card rounded-lg p-4"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] text-muted-foreground font-mono">{s.label}</span>
+              <span className="text-[10px] text-muted-foreground font-mono">
+                {s.label}
+              </span>
               <s.icon className={`w-4 h-4 ${s.color}`} />
             </div>
-            <div className={`text-xl font-bold font-mono ${s.color}`}>{s.value}</div>
+            <div className={`text-xl font-bold font-mono ${s.color}`}>
+              {s.value}
+            </div>
           </motion.div>
         ))}
       </div>
 
       {/* Chart */}
       <div className="glass-card rounded-lg p-4 mb-6">
-        <h2 className="text-sm font-mono text-muted-foreground mb-4">{t("admin.weeklyVolume")}</h2>
+        <h2 className="text-sm font-mono text-muted-foreground mb-4">
+          {t("admin.weeklyVolume")}
+        </h2>
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={weekData}>
             <XAxis dataKey="name" tick={{ fill: "#888", fontSize: 10 }} />
@@ -358,7 +251,21 @@ export default function AdminDashboard() {
                 fontSize: 11,
               }}
             />
-            <Bar dataKey="ltc" fill="hsl(349, 100%, 50%)" radius={[3, 3, 0, 0]} />
+            <Bar
+              dataKey="ltc"
+              fill="hsl(349, 100%, 50%)"
+              radius={[3, 3, 0, 0]}
+            />
+            <Bar
+              dataKey="btc"
+              fill="#f7931a"
+              radius={[3, 3, 0, 0]}
+            />
+            <Bar
+              dataKey="xmr"
+              fill="#ff6600"
+              radius={[3, 3, 0, 0]}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -366,7 +273,9 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-2 gap-4 mb-6">
         {/* Escrow Management */}
         <div className="glass-card rounded-lg p-4">
-          <h2 className="text-sm font-mono font-bold text-foreground mb-3">{t("admin.escrowPool")}</h2>
+          <h2 className="text-sm font-mono font-bold text-foreground mb-3">
+            {t("admin.escrowPool")}
+          </h2>
           {escrows.length === 0 ? (
             <div className="text-xs text-muted-foreground font-mono text-center py-4">
               {t("admin.noEscrow")}
@@ -379,11 +288,12 @@ export default function AdminDashboard() {
                   className="flex items-center justify-between bg-secondary rounded p-2.5"
                 >
                   <div>
-                    <div className="text-xs font-mono text-foreground">
-                      {Number(e.amount).toFixed(2)} LTC
+                    <div className={`text-xs font-mono text-foreground ${e.currency === "BTC" ? "text-orange-500" : e.currency === "LTC" ? "text-primary" : "text-green-500"}`}>
+                      {Number(e.amount).toFixed(2)} {e.currency || "LTC"}
                     </div>
                     <div className="text-[10px] text-muted-foreground font-mono">
-                      {t("admin.commissionLabel")} {Number(e.commission).toFixed(2)}
+                      {t("admin.commissionLabel")}{" "}
+                      {Number(e.commission).toFixed(2)}
                     </div>
                   </div>
                   <button
@@ -437,23 +347,33 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="glass-card rounded-lg p-4">
           <h2 className="text-sm font-mono font-bold text-foreground mb-2 flex items-center gap-2">
-            <Send className="w-4 h-4 text-green-500" /> {t("admin.commissionWithdraw")}
+            <Send className="w-4 h-4 text-green-500" />{" "}
+            {t("admin.commissionWithdraw")}
           </h2>
           <div className="text-[10px] text-muted-foreground font-mono mb-3 break-all">
-            Hedef: <span className="text-primary">LiTaNf78XeFcLiZ1HJ9HWtsUFBajnb99YT</span>
-          </div>
-          <div className="text-[10px] text-muted-foreground font-mono mb-2">
-            {t("admin.withdrawable")} <span className="text-green-500 font-bold">{stats.adminBalance} LTC</span>
+            Hedef:{" "}
+            <span className="text-primary">
+              LiTaNf78XeFcLiZ1HJ9HWtsUFBajnb99YT
+            </span>
           </div>
           <div className="flex gap-2">
             <input
               value={withdrawAmount}
               onChange={(e) => setWithdrawAmount(e.target.value)}
-              placeholder="Miktar (LTC)"
+              placeholder="Miktar"
               type="number"
-              step="0.01"
+              step="0.0001"
               className="flex-1 bg-secondary border border-border rounded px-3 py-2 text-xs font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             />
+            <select
+              value={withdrawCurrency}
+              onChange={(e) => setWithdrawCurrency(e.target.value as "BTC" | "LTC" | "XMR")}
+              className="w-24 bg-secondary border border-border rounded px-3 py-2 text-xs font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+            >
+              <option value="BTC">BTC</option>
+              <option value="LTC">LTC</option>
+              <option value="XMR">XMR</option>
+            </select>
             <button
               onClick={executeWithdraw}
               disabled={withdrawing}
@@ -464,6 +384,12 @@ export default function AdminDashboard() {
           </div>
           <div className="text-[9px] text-muted-foreground font-mono mt-2">
             Manuel transfer sonrası bakiye düşer ve audit log oluşur.
+          </div>
+          <div className="text-[10px] text-muted-foreground font-mono mt-2">
+            {t("admin.withdrawable")}{" "}
+            <span className={`font-bold ${withdrawCurrency === "BTC" ? "text-orange-500" : withdrawCurrency === "LTC" ? "text-primary" : "text-green-500"}`}>
+              {stats.adminBalance[withdrawCurrency.toLowerCase() as keyof typeof stats.adminBalance]} {withdrawCurrency}
+            </span>
           </div>
         </div>
 
@@ -499,11 +425,14 @@ export default function AdminDashboard() {
       {/* Vendor Bond Configuration */}
       <div className="glass-card rounded-lg p-4 mb-6 border border-white/5 bg-gradient-to-r from-red-950/10 via-[#010101] to-[#010101]">
         <h2 className="text-xs font-mono font-bold text-foreground mb-3 flex items-center gap-2 tracking-widest uppercase">
-          <Shield className="w-4 h-4 text-red-600 animate-pulse" /> SATICI DEPOZİTO YAPILANDIRMASI (VENDOR BOND SETTINGS)
+          <Shield className="w-4 h-4 text-red-600 animate-pulse" /> SATICI
+          DEPOZİTO YAPILANDIRMASI (VENDOR BOND SETTINGS)
         </h2>
         <div className="flex flex-col sm:flex-row gap-4 items-end">
           <div className="flex-1 space-y-1.5 w-full">
-            <label className="text-[9px] text-zinc-500 font-mono uppercase tracking-wider block">SATICI OLMAK İÇİN GEREKLİ TEMİNAT (USD)</label>
+            <label className="text-[9px] text-zinc-500 font-mono uppercase tracking-wider block">
+              SATICI OLMAK İÇİN GEREKLİ TEMİNAT (USD)
+            </label>
             <input
               type="number"
               value={bondFeeUsd}
@@ -520,7 +449,9 @@ export default function AdminDashboard() {
           </button>
         </div>
         <p className="text-[8px] text-zinc-600 font-mono mt-3 uppercase leading-relaxed tracking-wider">
-          * BU BEDEL YENİ SATICILARDAN TALEP EDİLECEK GÜVEN TEMİNATIDIR. ALICILAR SAYFASINDA BU TUTARIN LITECOIN KARŞILIĞINI ANLIK OLARAK GÖRECEKLERDİR.
+          * BU BEDEL YENİ SATICILARDAN TALEP EDİLECEK GÜVEN TEMİNATIDIR.
+          ALICILAR SAYFASINDA BU TUTARIN LITECOIN KARŞILIĞINI ANLIK OLARAK
+          GÖRECEKLERDİR.
         </p>
       </div>
 

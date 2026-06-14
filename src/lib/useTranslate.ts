@@ -44,7 +44,9 @@ export function useTranslate(): TranslateResult {
 
       try {
         const langPair =
-          sourceLang === "auto" ? `autodetect|${targetLang}` : `${sourceLang}|${targetLang}`;
+          sourceLang === "auto"
+            ? `autodetect|${targetLang}`
+            : `${sourceLang}|${targetLang}`;
 
         const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${encodeURIComponent(langPair)}`;
 

@@ -21,10 +21,13 @@ Deno.serve(async (req) => {
   const blockcypherToken = Deno.env.get("BLOCKCYPHER_TOKEN");
 
   if (!blockcypherToken) {
-    return new Response(JSON.stringify({ error: "BLOCKCYPHER_TOKEN missing" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: "BLOCKCYPHER_TOKEN missing" }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
 
   const service = createClient(supabaseUrl, serviceRole);
@@ -68,13 +71,16 @@ Deno.serve(async (req) => {
         }
         if (amountSatoshi <= 0) continue;
 
-        const { data: result, error: creditErr } = await service.rpc("credit_confirmed_deposit", {
-          _user_id: row.user_id,
-          _address: row.address,
-          _tx_hash: txHash,
-          _amount_satoshi: amountSatoshi,
-          _confirmations: confirmations,
-        });
+        const { data: result, error: creditErr } = await service.rpc(
+          "credit_confirmed_deposit",
+          {
+            _user_id: row.user_id,
+            _address: row.address,
+            _tx_hash: txHash,
+            _amount_satoshi: amountSatoshi,
+            _confirmations: confirmations,
+          },
+        );
 
         if (!creditErr && (result as { credited?: boolean } | null)?.credited) {
           totalCredited += 1;
@@ -95,7 +101,12 @@ Deno.serve(async (req) => {
   }
 
   return new Response(
-    JSON.stringify({ ok: true, processed, total_credited: totalCredited, errors }),
+    JSON.stringify({
+      ok: true,
+      processed,
+      total_credited: totalCredited,
+      errors,
+    }),
     { headers: { "Content-Type": "application/json" } },
   );
 });

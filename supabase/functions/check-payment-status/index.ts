@@ -2,7 +2,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeadersBase = {
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -18,13 +19,20 @@ function getCorsHeaders(req: Request) {
     if (siteUrl) allowedOrigins.push(siteUrl);
   }
   const allowOrigin =
-    origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0] || "null";
-  return { ...corsHeadersBase, "Access-Control-Allow-Origin": allowOrigin, Vary: "Origin" };
+    origin && allowedOrigins.includes(origin)
+      ? origin
+      : allowedOrigins[0] || "null";
+  return {
+    ...corsHeadersBase,
+    "Access-Control-Allow-Origin": allowOrigin,
+    Vary: "Origin",
+  };
 }
 
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method === "OPTIONS")
+    return new Response(null, { headers: corsHeaders });
 
   try {
     const authHeader = req.headers.get("Authorization");
@@ -37,10 +45,13 @@ Deno.serve(async (req) => {
 
     const token = Deno.env.get("BLOCKCYPHER_TOKEN");
     if (!token) {
-      return new Response(JSON.stringify({ error: "BlockCypher not configured" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "BlockCypher not configured" }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     const { order_id } = await req.json();
@@ -52,9 +63,13 @@ Deno.serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const userClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
-      global: { headers: { Authorization: authHeader } },
-    });
+    const userClient = createClient(
+      supabaseUrl,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      {
+        global: { headers: { Authorization: authHeader } },
+      },
+    );
     const { data: userData, error: userErr } = await userClient.auth.getUser();
     if (userErr || !userData?.user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -64,10 +79,15 @@ Deno.serve(async (req) => {
     }
     const userId = userData.user.id;
 
-    const service = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const service = createClient(
+      supabaseUrl,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
     const { data: order } = await service
       .from("orders")
-      .select("id, buyer_id, vendor_id, payment_address, amount, payment_status, confirmations")
+      .select(
+        "id, buyer_id, vendor_id, payment_address, amount, payment_status, confirmations",
+      )
       .eq("id", order_id)
       .maybeSingle();
     if (!order) {
@@ -83,9 +103,12 @@ Deno.serve(async (req) => {
       });
     }
     if (!order.payment_address) {
-      return new Response(JSON.stringify({ status: "no_address", confirmations: 0 }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ status: "no_address", confirmations: 0 }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     // Query BlockCypher for the address full info
@@ -95,10 +118,13 @@ Deno.serve(async (req) => {
     const bcData = await bcResp.json();
     if (!bcResp.ok) {
       console.error("BC poll err", bcData);
-      return new Response(JSON.stringify({ error: "BlockCypher error", detail: bcData }), {
-        status: 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "BlockCypher error", detail: bcData }),
+        {
+          status: 502,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     // Find the highest confirmation count among incoming txs
@@ -121,13 +147,18 @@ Deno.serve(async (req) => {
     const cap = Math.min(maxConfirmations, 6);
     const requiredSatoshi = Math.ceil(Number(order.amount) * 100000000);
     const hasEnoughConfirmedFunds = confirmedReceived >= requiredSatoshi;
-    const effectiveConfirmations = hasEnoughConfirmedFunds ? cap : Math.min(cap, 2);
+    const effectiveConfirmations = hasEnoughConfirmedFunds
+      ? cap
+      : Math.min(cap, 2);
 
     // Trigger RPC (handles idempotency)
-    const { data: rpcData, error: rpcErr } = await service.rpc("process_payment_confirmation", {
-      _order_id: order_id,
-      _confirmations: effectiveConfirmations,
-    });
+    const { data: rpcData, error: rpcErr } = await service.rpc(
+      "process_payment_confirmation",
+      {
+        _order_id: order_id,
+        _confirmations: effectiveConfirmations,
+      },
+    );
 
     if (rpcErr) console.error("RPC err", rpcErr);
 

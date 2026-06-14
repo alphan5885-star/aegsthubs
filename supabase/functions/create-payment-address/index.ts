@@ -2,7 +2,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeadersBase = {
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -18,13 +19,20 @@ function getCorsHeaders(req: Request) {
     if (siteUrl) allowedOrigins.push(siteUrl);
   }
   const allowOrigin =
-    origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0] || "null";
-  return { ...corsHeadersBase, "Access-Control-Allow-Origin": allowOrigin, Vary: "Origin" };
+    origin && allowedOrigins.includes(origin)
+      ? origin
+      : allowedOrigins[0] || "null";
+  return {
+    ...corsHeadersBase,
+    "Access-Control-Allow-Origin": allowOrigin,
+    Vary: "Origin",
+  };
 }
 
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method === "OPTIONS")
+    return new Response(null, { headers: corsHeaders });
 
   try {
     const authHeader = req.headers.get("Authorization");
@@ -37,10 +45,13 @@ Deno.serve(async (req) => {
 
     const token = Deno.env.get("BLOCKCYPHER_TOKEN");
     if (!token) {
-      return new Response(JSON.stringify({ error: "BlockCypher not configured" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "BlockCypher not configured" }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     const { order_id } = await req.json();
@@ -67,7 +78,10 @@ Deno.serve(async (req) => {
     const userId = userData.user.id;
 
     // Rate limit: 5 address generations per 60 seconds per user
-    const service = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const service = createClient(
+      supabaseUrl,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
     const { data: rl } = await service.rpc("check_rate_limit", {
       _identifier: userId,
       _action: "create_payment_address",
@@ -80,7 +94,10 @@ Deno.serve(async (req) => {
           error: "Rate limit exceeded",
           retry_after: (rl as any).retry_after_seconds,
         }),
-        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       );
     }
 
@@ -105,22 +122,31 @@ Deno.serve(async (req) => {
 
     // If already has an address, return it
     if (order.payment_address) {
-      return new Response(JSON.stringify({ address: order.payment_address, reused: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ address: order.payment_address, reused: true }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     // Generate a new LTC address from BlockCypher
-    const bcResp = await fetch(`https://api.blockcypher.com/v1/ltc/main/addrs?token=${token}`, {
-      method: "POST",
-    });
+    const bcResp = await fetch(
+      `https://api.blockcypher.com/v1/ltc/main/addrs?token=${token}`,
+      {
+        method: "POST",
+      },
+    );
     const bcData = await bcResp.json();
     if (!bcResp.ok || !bcData.address) {
       console.error("BlockCypher error", bcData);
-      return new Response(JSON.stringify({ error: "Address generation failed", detail: bcData }), {
-        status: 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "Address generation failed", detail: bcData }),
+        {
+          status: 502,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     await service

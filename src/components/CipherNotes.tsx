@@ -1,5 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Lock, Unlock, Plus, Trash2, Eye, EyeOff, Save, Key } from "lucide-react";
+import {
+  Lock,
+  Unlock,
+  Plus,
+  Trash2,
+  Eye,
+  EyeOff,
+  Save,
+  Key,
+} from "lucide-react";
 import { toast } from "sonner";
 import { encryptForRecipient, isLikelyPgpPublicKey } from "@/lib/pgp";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,13 +58,15 @@ export default function CipherNotes() {
 
           if (!isMounted.current) return;
           if (error) {
-            if (import.meta.env.DEV) console.error("Error loading pubkey for cipher notes:", error);
+            if (import.meta.env.DEV)
+              console.error("Error loading pubkey for cipher notes:", error);
           } else if (data?.public_key) {
             setUserPubKey(data.public_key);
           }
           loadNotes();
         } catch (e) {
-          if (import.meta.env.DEV) console.error("Catch loading pubkey for cipher notes:", e);
+          if (import.meta.env.DEV)
+            console.error("Catch loading pubkey for cipher notes:", e);
         }
       };
       load();
@@ -108,7 +119,9 @@ export default function CipherNotes() {
       <div className="flex items-center justify-between border-b border-border pb-4">
         <div className="flex items-center gap-2">
           <Lock className="w-5 h-5 text-primary" />
-          <h2 className="text-sm font-mono font-bold text-foreground">Cipher Notes</h2>
+          <h2 className="text-sm font-mono font-bold text-foreground">
+            Cipher Notes
+          </h2>
         </div>
         {!userPubKey && (
           <div className="flex items-center gap-1.5 text-[10px] font-mono text-yellow-500 bg-yellow-500/10 px-2 py-1 rounded border border-yellow-500/20 uppercase">
@@ -180,7 +193,9 @@ export default function CipherNotes() {
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(note.ciphertext);
-                      toast.success("Şifreli metin kopyalandı. PGP Toolkit ile çözebilirsiniz.");
+                      toast.success(
+                        "Şifreli metin kopyalandı. PGP Toolkit ile çözebilirsiniz.",
+                      );
                     }}
                     title="Şifreli metni kopyala"
                     className="p-1.5 text-muted-foreground hover:text-primary hover:bg-secondary rounded transition-colors"
@@ -202,8 +217,8 @@ export default function CipherNotes() {
 
       <div className="bg-destructive/5 border border-destructive/20 rounded p-3">
         <p className="text-[9px] font-mono text-muted-foreground leading-relaxed italic uppercase">
-          ⚠️ Notlar yerel olarak şifrelenmiş (PGP) şekilde saklanır. Sunucuda kayıt tutulmaz.
-          Tarayıcı verilerini silerseniz notlar kaybolur.
+          ⚠️ Notlar yerel olarak şifrelenmiş (PGP) şekilde saklanır. Sunucuda
+          kayıt tutulmaz. Tarayıcı verilerini silerseniz notlar kaybolur.
         </p>
       </div>
     </div>

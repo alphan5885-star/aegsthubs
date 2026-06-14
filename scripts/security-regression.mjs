@@ -31,7 +31,8 @@ function collectFiles(dir, exts = [".ts", ".tsx", ".js", ".mjs"]) {
   const results = [];
   try {
     for (const entry of readdirSync(dir)) {
-      if (entry.startsWith(".") || entry === "node_modules" || entry === "dist") continue;
+      if (entry.startsWith(".") || entry === "node_modules" || entry === "dist")
+        continue;
       const full = join(dir, entry);
       const stat = statSync(full);
       if (stat.isDirectory()) {
@@ -50,10 +51,10 @@ const srcFiles = collectFiles(join(ROOT, "src"));
 
 // ── Check 1: No hardcoded secrets / API keys in source ───────────────────────
 const SECRET_PATTERNS = [
-  /sk_live_[a-zA-Z0-9]{20,}/,           // Stripe live key
-  /AKIA[0-9A-Z]{16}/,                    // AWS access key
-  /-----BEGIN (RSA |EC )?PRIVATE KEY/,   // Private keys
-  /password\s*=\s*["'][^"']{8,}["']/i,  // Hardcoded passwords
+  /sk_live_[a-zA-Z0-9]{20,}/, // Stripe live key
+  /AKIA[0-9A-Z]{16}/, // AWS access key
+  /-----BEGIN (RSA |EC )?PRIVATE KEY/, // Private keys
+  /password\s*=\s*["'][^"']{8,}["']/i, // Hardcoded passwords
 ];
 
 for (const file of srcFiles) {
@@ -72,7 +73,9 @@ for (const file of srcFiles) {
   const rel = file.replace(ROOT, "");
   const content = readFileSync(file, "utf8");
   if (content.includes("simulateWithdrawal")) {
-    fail(`simulateWithdrawal() found in ${rel} — remove simulation fallbacks before build`);
+    fail(
+      `simulateWithdrawal() found in ${rel} — remove simulation fallbacks before build`,
+    );
   }
 }
 ok("No simulateWithdrawal() calls found");
@@ -107,7 +110,11 @@ ok("No obvious sensitive console.log leaks");
 
 // ── Check 5: .env must not be committed ──────────────────────────────────────
 const gitignore = (() => {
-  try { return readFileSync(join(ROOT, ".gitignore"), "utf8"); } catch { return ""; }
+  try {
+    return readFileSync(join(ROOT, ".gitignore"), "utf8");
+  } catch {
+    return "";
+  }
 })();
 if (!gitignore.includes(".env")) {
   fail(".env is not listed in .gitignore — secrets may be committed");
@@ -119,8 +126,10 @@ if (!gitignore.includes(".env")) {
 const clientFile = join(ROOT, "src", "integrations", "supabase", "client.ts");
 try {
   const clientContent = readFileSync(clientFile, "utf8");
-  if (/supabaseUrl\s*=\s*["']https:\/\//.test(clientContent) &&
-      !clientContent.includes("import.meta.env")) {
+  if (
+    /supabaseUrl\s*=\s*["']https:\/\//.test(clientContent) &&
+    !clientContent.includes("import.meta.env")
+  ) {
     warn("Supabase client may have hardcoded URL instead of env var");
   } else {
     ok("Supabase client uses env vars");

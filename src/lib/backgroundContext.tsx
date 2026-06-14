@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 
 interface BackgroundContextType {
   backgroundUrl: string | null;
@@ -18,7 +24,9 @@ export const useBackground = () => useContext(BackgroundContext);
 
 export function BackgroundProvider({ children }: { children: ReactNode }) {
   const [backgroundUrl, setBackgroundUrlState] = useState<string | null>(() =>
-    typeof window === "undefined" ? null : window.localStorage.getItem("app_bg_url"),
+    typeof window === "undefined"
+      ? null
+      : window.localStorage.getItem("app_bg_url"),
   );
   const [backgroundOpacity, setBackgroundOpacityState] = useState<number>(() =>
     typeof window === "undefined"
@@ -39,7 +47,12 @@ export function BackgroundProvider({ children }: { children: ReactNode }) {
 
   return (
     <BackgroundContext.Provider
-      value={{ backgroundUrl, setBackgroundUrl, backgroundOpacity, setBackgroundOpacity }}
+      value={{
+        backgroundUrl,
+        setBackgroundUrl,
+        backgroundOpacity,
+        setBackgroundOpacity,
+      }}
     >
       {children}
     </BackgroundContext.Provider>

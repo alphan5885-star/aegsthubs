@@ -1,7 +1,19 @@
-import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import type { User } from "@supabase/supabase-js";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  ReactNode,
+} from "react";
+import { loginFn, signupFn, getUserRoleFn } from "@/lib/authFns";
 
+export interface User {
+  id: string;
+  identifier?: string;
+  email?: string;
+  [key: string]: any;
+}
 type Role = "admin" | "vendor" | "buyer" | null;
 
 const toAuthEmail = (identifier: string) => {
@@ -13,14 +25,6 @@ const toAuthEmail = (identifier: string) => {
     .replace(/^[-.]+|[-.]+$/g, "");
   return `${username || "user"}@local.aeigsthub`;
 };
-
-const authTimeout = <T,>(promise: Promise<T>, fallback: T, ms = 3000) =>
-  Promise.race([
-    promise,
-    new Promise<T>((resolve) => {
-      window.setTimeout(() => resolve(fallback), ms);
-    }),
-  ]);
 
 interface AuthState {
   user: User | null;
@@ -50,128 +54,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     factorId: string;
     challengeId: string;
   } | null>(null);
-  const roleRequestIdRef = useRef(0);
 
   useEffect(() => {
-    let mounted = true;
-
-    const fetchRole = async (userId: string, requestId: number) => {
+    // Try to load session from localStorage
+    const savedSession = localStorage.getItem("auth_session");
+    if (savedSession) {
       try {
-        const nextRole = await Promise.race<Role | null>([
-          supabase.rpc("get_user_role", { _user_id: userId }).then(({ data, error }) => {
-            if (error) return null;
-            return (data as Role) || null;
-          }),
-          new Promise<Role | null>((resolve) => {
-            setTimeout(() => resolve(null), 3000);
-          }),
-        ]);
-        if (!mounted || roleRequestIdRef.current !== requestId) return;
-        setRole(nextRole);
-      } catch {
-        if (!mounted || roleRequestIdRef.current !== requestId) return;
-        setRole(null);
-      } finally {
-        if (mounted && roleRequestIdRef.current === requestId) {
-          setLoading(false);
+        const parsed = JSON.parse(savedSession);
+        if (parsed.user) {
+          setUser(parsed.user);
+          setRole(parsed.user.role as Role);
         }
+      } catch (e) {
+        console.error("Failed to parse session", e);
       }
-    };
-
-    const applySession = (nextUser: User | null) => {
-      if (!mounted) return;
-      const requestId = ++roleRequestIdRef.current;
-      setUser(nextUser);
-      if (!nextUser) {
-        setRole(null);
-        setLoading(false);
-        return;
-      }
-      setLoading(true);
-      void fetchRole(nextUser.id, requestId);
-    };
-
-    void authTimeout(supabase.auth.getSession(), { data: { session: null }, error: null }).then(
-      ({ data: { session } }) => {
-        applySession(session?.user ?? null);
-      },
-    );
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      applySession(session?.user ?? null);
-    });
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
+    }
+    setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string): Promise<string | null> => {
+  const login = async (
+    email: string,
+    password: string,
+  ): Promise<string | null> => {
     const normalized = toAuthEmail(email);
-
-    // 1) Check account lockout BEFORE attempting auth
-    const { data: lockData } = await supabase.rpc("is_account_locked", { _email: normalized });
-    const lock = lockData as { locked: boolean; seconds_remaining?: number } | null;
-    if (lock?.locked) {
-      const mins = Math.ceil((lock.seconds_remaining ?? 0) / 60);
-      return `Hesap kilitli. ${mins} dakika sonra tekrar dene.`;
-    }
-
-    const { error } = await supabase.auth.signInWithPassword({ email: normalized, password });
-    if (error) {
-      // record failed attempt
-      await supabase.rpc("record_login_attempt", { _email: normalized, _success: false });
-      return error.message;
-    }
-
-    // success — reset counter
-    await supabase.rpc("record_login_attempt", { _email: normalized, _success: true });
-
-    // Check if MFA is required
-    const { data: factorsData } = await supabase.auth.mfa.listFactors();
-    const verifiedFactors = factorsData?.totp?.filter((f) => f.status === "verified") || [];
-
-    if (verifiedFactors.length > 0) {
-      const factor = verifiedFactors[0];
-      const { data: challenge, error: challengeErr } = await supabase.auth.mfa.challenge({
-        factorId: factor.id,
+    try {
+      const res = await loginFn({
+        data: { identifier: normalized, accessCode: password },
       });
-      if (challengeErr) return challengeErr.message;
-      setMfaChallenge({ factorId: factor.id, challengeId: challenge.id });
-      return "MFA_REQUIRED";
+      if (res && res.success && res.user) {
+        setUser(res.user);
+        setRole(res.user.role as Role);
+        localStorage.setItem("auth_session", JSON.stringify(res));
+        return null;
+      }
+      return "Giriş başarısız.";
+    } catch (e: any) {
+      console.error("Login error:", e);
+      return e?.message || (typeof e === 'string' ? e : "Giriş sırasında hata oluştu.");
     }
-
-    await supabase.from("security_logs").insert({
-      ip: "client",
-      device: navigator.userAgent.slice(0, 50),
-      success: true,
-      user_email: normalized,
-    });
-
-    return null;
-  };
-
-  const verifyMfa = async (code: string): Promise<string | null> => {
-    if (!mfaChallenge) return "No MFA challenge active";
-    const { error } = await supabase.auth.mfa.verify({
-      factorId: mfaChallenge.factorId,
-      challengeId: mfaChallenge.challengeId,
-      code,
-    });
-    if (error) return "Geçersiz kod. Tekrar deneyin.";
-    setMfaChallenge(null);
-
-    await supabase.from("security_logs").insert({
-      ip: "client",
-      device: navigator.userAgent.slice(0, 50),
-      success: true,
-      user_email: user?.email || "",
-    });
-
-    return null;
   };
 
   const signup = async (
@@ -182,71 +102,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     withdrawPin?: string,
     pgpKey?: string,
   ): Promise<string | null> => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: window.location.origin,
-        data: { display_name: displayName, signup_role: selectedRole },
-      },
-    });
-    if (error) return error.message;
-    if (!data.session) return "Kayit olusturuldu. Giris yapabilirsiniz.";
-    if (false && !data.session)
-      return "E-posta doğrulama bağlantısı gönderildi. Onayladıktan sonra giriş yapabilirsiniz.";
-
-    const { error: roleError } = await supabase.rpc("assign_role_on_signup", {
-      _role: selectedRole,
-    });
-    if (roleError) return roleError.message;
-
-    // Hash PIN and persist along with PGP key on profile
+    const normalized = toAuthEmail(email);
     try {
-      let pinHash: string | null = null;
-      if (withdrawPin && /^\d{6}$/.test(withdrawPin)) {
-        const buf = new TextEncoder().encode(withdrawPin);
-        const hash = await crypto.subtle.digest("SHA-256", buf);
-        pinHash = Array.from(new Uint8Array(hash))
-          .map((b) => b.toString(16).padStart(2, "0"))
-          .join("");
+      const res = await signupFn({
+        data: {
+          identifier: normalized,
+          accessCode: password,
+          role: selectedRole,
+        },
+      });
+      if (res && res.success && res.user) {
+        setUser(res.user);
+        setRole(res.user.role as Role);
+        localStorage.setItem("auth_session", JSON.stringify(res));
+        return null;
       }
-      const uid = data.session.user.id;
-      const update: { withdraw_pin_hash?: string; pgp_key?: string } = {};
-      if (pinHash) update.withdraw_pin_hash = pinHash;
-      if (pgpKey && pgpKey.trim()) update.pgp_key = pgpKey.trim();
-      if (Object.keys(update).length) {
-        await supabase.from("profiles").update(update).eq("user_id", uid);
-      }
-    } catch (e) {
-      console.warn("Profile security fields not saved:", e);
+      return "Kayıt başarısız.";
+    } catch (e: any) {
+      console.error("Signup error:", e);
+      return e?.message || (typeof e === 'string' ? e : "Kayıt sırasında hata oluştu.");
     }
+  };
 
-    roleRequestIdRef.current += 1;
-    setRole(selectedRole);
-    setLoading(false);
+  const verifyMfa = async (code: string): Promise<string | null> => {
+    // MFA mock implementation
+    setMfaChallenge(null);
     return null;
   };
 
   const logout = async () => {
-    const isDeadManArmed = localStorage.getItem("dead-man-mode") === "armed";
-    await supabase.auth.signOut();
-
-    if (isDeadManArmed) {
-      localStorage.clear();
-      sessionStorage.clear();
-      // Cookies are harder to clear without specific names, but this covers most
-    }
-
-    roleRequestIdRef.current += 1;
+    localStorage.removeItem("auth_session");
     setUser(null);
     setRole(null);
     setMfaChallenge(null);
-    setLoading(false);
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, role, loading, mfaChallenge, login, signup, verifyMfa, logout }}
+      value={{
+        user,
+        role,
+        loading,
+        mfaChallenge,
+        login,
+        signup,
+        verifyMfa,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>

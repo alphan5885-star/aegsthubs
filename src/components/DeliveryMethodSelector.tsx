@@ -9,19 +9,40 @@ interface Props {
   productType: string;
 }
 
-export default function DeliveryMethodSelector({ value, onChange, productType }: Props) {
+export default function DeliveryMethodSelector({
+  value,
+  onChange,
+  productType,
+}: Props) {
   const { t } = useI18n();
   if (productType === "digital") return null;
 
   const methods = [
-    { id: "cargo" as const, label: t("delivery.cargo"), desc: t("carrier.stealthMail"), icon: Truck },
-    { id: "dead_drop" as const, label: t("delivery.deadDrop"), desc: t("orders.deadDropInfo"), icon: MapPin },
-    { id: "mailbox" as const, label: t("delivery.mailbox"), desc: t("carrier.poBox"), icon: Mail },
+    {
+      id: "cargo" as const,
+      label: t("delivery.cargo"),
+      desc: t("carrier.stealthMail"),
+      icon: Truck,
+    },
+    {
+      id: "dead_drop" as const,
+      label: t("delivery.deadDrop"),
+      desc: t("orders.deadDropInfo"),
+      icon: MapPin,
+    },
+    {
+      id: "mailbox" as const,
+      label: t("delivery.mailbox"),
+      desc: t("carrier.poBox"),
+      icon: Mail,
+    },
   ];
 
   return (
     <div className="space-y-2">
-      <label className="text-xs font-mono text-muted-foreground">{t("product.deliveryMethod")}</label>
+      <label className="text-xs font-mono text-muted-foreground">
+        {t("product.deliveryMethod")}
+      </label>
       <div className="grid grid-cols-3 gap-2">
         {methods.map((m) => (
           <button

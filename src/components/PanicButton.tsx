@@ -27,7 +27,9 @@ export default function PanicButton() {
       if (!res?.success) throw new Error(res?.error || "Panic failed");
 
       toast.success(
-        `🔥 ${t("panic.success" as any).replace("{rooms}", String(res.rooms_destroyed ?? 0)).replace("{orders}", String(res.orders_cancelled ?? 0))}`,
+        `🔥 ${t("panic.success" as any)
+          .replace("{rooms}", String(res.rooms_destroyed ?? 0))
+          .replace("{orders}", String(res.orders_cancelled ?? 0))}`,
       );
 
       // Nuke client-side state
@@ -45,7 +47,8 @@ export default function PanicButton() {
       await logout();
       navigate("/", { replace: true });
     } catch (e) {
-      const msg = e instanceof Error ? e.message : t("panic.unknownError" as any);
+      const msg =
+        e instanceof Error ? e.message : t("panic.unknownError" as any);
       toast.error(`${t("panic.failed" as any)}: ${msg}`);
       setWiping(false);
       setArmed(false);
@@ -57,9 +60,14 @@ export default function PanicButton() {
       <div className="flex items-start gap-3 mb-3">
         <Flame className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
         <div>
-          <div className="text-sm font-mono font-bold text-destructive">{t("panic.title" as any)}</div>
+          <div className="text-sm font-mono font-bold text-destructive">
+            {t("panic.title" as any)}
+          </div>
           <div className="text-[11px] text-muted-foreground font-mono leading-relaxed mt-1">
-            {t("panic.desc" as any)} <span className="text-destructive">{t("panic.irreversible" as any)}</span>
+            {t("panic.desc" as any)}{" "}
+            <span className="text-destructive">
+              {t("panic.irreversible" as any)}
+            </span>
           </div>
         </div>
       </div>

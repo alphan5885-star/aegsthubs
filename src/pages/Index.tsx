@@ -12,7 +12,8 @@ export default function Index() {
   }
 
   if (user && role) {
-    const target = role === "admin" ? "/admin" : role === "vendor" ? "/vendor" : "/market";
+    const target =
+      role === "admin" ? "/admin" : role === "vendor" ? "/vendor" : "/market";
     return <Navigate to={target} />;
   }
 

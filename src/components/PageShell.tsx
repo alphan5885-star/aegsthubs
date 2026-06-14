@@ -4,6 +4,7 @@ import KizilyurekAssistant from "./KizilyurekAssistant";
 import CommandPalette from "./CommandPalette";
 import { useCustomization } from "@/lib/customizationContext";
 import { motion } from "framer-motion";
+import ParallaxBackground from "./ParallaxBackground";
 
 const DigitalRain = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -26,14 +27,20 @@ const DigitalRain = () => {
       for (let i = 0; i < drops.length; i++) {
         const text = chars[Math.floor(Math.random() * chars.length)];
         ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975)
+          drops[i] = 0;
         drops[i]++;
       }
     };
     const interval = setInterval(draw, 50);
     return () => clearInterval(interval);
   }, []);
-  return <canvas ref={canvasRef} className="fixed inset-0 opacity-[0.03] pointer-events-none z-0" />;
+  return (
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 opacity-[0.03] pointer-events-none z-0"
+    />
+  );
 };
 
 export default function PageShell({ children }: { children: ReactNode }) {
@@ -44,42 +51,55 @@ export default function PageShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     const handler = () => setAssistantOpen((v) => !v);
     window.addEventListener("kizilyurek:toggle", handler);
-    const timer = setInterval(() => setLatency(Math.floor(Math.random() * 40) + 15), 3000);
-    
+    const timer = setInterval(
+      () => setLatency(Math.floor(Math.random() * 40) + 15),
+      3000,
+    );
+
     // Session Immolation - Logic for Item #26
     const handleUnload = () => {
-       if (localStorage.getItem("dead-man-mode") === "armed") {
-          sessionStorage.clear();
-          localStorage.removeItem("supabase.auth.token");
-       }
+      if (localStorage.getItem("dead-man-mode") === "armed") {
+        sessionStorage.clear();
+        localStorage.removeItem("supabase.auth.token");
+      }
     };
     window.addEventListener("beforeunload", handleUnload);
 
     return () => {
-       window.removeEventListener("kizilyurek:toggle", handler);
-       clearInterval(timer);
-       window.removeEventListener("beforeunload", handleUnload);
+      window.removeEventListener("kizilyurek:toggle", handler);
+      clearInterval(timer);
+      window.removeEventListener("beforeunload", handleUnload);
     };
   }, []);
 
   const collapsed = settings.sidebarCollapsed;
   const isRight = settings.sidebarPosition === "right";
-  const margin = collapsed ? (isRight ? "mr-[80px]" : "ml-[80px]") : isRight ? "mr-[280px]" : "ml-[280px]";
+  const margin = collapsed
+    ? isRight
+      ? "mr-[80px]"
+      : "ml-[80px]"
+    : isRight
+      ? "mr-[280px]"
+      : "ml-[280px]";
 
   useEffect(() => {
-    document.documentElement.style.setProperty("--primary-hue", settings.themeHue.toString());
+    document.documentElement.style.setProperty(
+      "--primary-hue",
+      settings.themeHue.toString(),
+    );
   }, [settings.themeHue]);
 
   return (
     <div className="min-h-screen bg-[#010101] relative selection:bg-red-600 selection:text-white scanline overflow-x-hidden">
       <DigitalRain />
       <div className="fixed inset-0 cyber-grid opacity-[0.05] pointer-events-none z-0" />
-      
-
+      <ParallaxBackground />
       <AppSidebar />
-      
-      <main className={`${margin} relative z-10 transition-all duration-500 ease-in-out`}>
-        <motion.div 
+
+      <main
+        className={`${margin} relative z-10 transition-all duration-500 ease-in-out`}
+      >
+        <motion.div
           initial={{ opacity: 0, scale: 0.99 }}
           animate={{ opacity: 1, scale: 1 }}
           className="p-6 md:p-8 lg:p-12 min-h-screen"
@@ -89,7 +109,11 @@ export default function PageShell({ children }: { children: ReactNode }) {
       </main>
 
       {/* Session Timer is integrated into Left Top Telemetry capsule */}
-      <KizilyurekAssistant open={assistantOpen} onOpenChange={setAssistantOpen} hideFab />
+      <KizilyurekAssistant
+        open={assistantOpen}
+        onOpenChange={setAssistantOpen}
+        hideFab
+      />
       <CommandPalette />
     </div>
   );

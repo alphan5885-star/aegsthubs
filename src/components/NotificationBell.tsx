@@ -1,5 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Bell, Package, MessageSquare, AlertTriangle, X, Check } from "lucide-react";
+import {
+  Bell,
+  Package,
+  MessageSquare,
+  AlertTriangle,
+  X,
+  Check,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -76,7 +83,7 @@ export default function NotificationBell() {
           table: "notifications",
           filter: `user_id=eq.${user.id}`,
         },
-        (payload) => {
+        (payload: any) => {
           const n = payload.new as any;
           setNotifications((prev) => [
             {
@@ -111,8 +118,13 @@ export default function NotificationBell() {
   }, [open]);
 
   const markAsRead = async (id: string) => {
-    await (supabase as any).from("notifications").update({ read: true }).eq("id", id);
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    await (supabase as any)
+      .from("notifications")
+      .update({ read: true })
+      .eq("id", id);
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
+    );
   };
 
   const markAllRead = async () => {
@@ -159,7 +171,9 @@ export default function NotificationBell() {
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-              <span className="text-xs font-mono font-bold text-foreground">Bildirimler</span>
+              <span className="text-xs font-mono font-bold text-foreground">
+                Bildirimler
+              </span>
               {unreadCount > 0 && (
                 <button
                   onClick={markAllRead}
@@ -175,7 +189,9 @@ export default function NotificationBell() {
               {notifications.length === 0 ? (
                 <div className="p-8 text-center">
                   <Bell className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-xs font-mono text-muted-foreground">Bildirim yok</p>
+                  <p className="text-xs font-mono text-muted-foreground">
+                    Bildirim yok
+                  </p>
                 </div>
               ) : (
                 notifications.map((n) => {
@@ -194,7 +210,9 @@ export default function NotificationBell() {
                         !n.read ? "bg-primary/5" : ""
                       }`}
                     >
-                      <div className={`mt-0.5 ${typeColor[n.type] || "text-muted-foreground"}`}>
+                      <div
+                        className={`mt-0.5 ${typeColor[n.type] || "text-muted-foreground"}`}
+                      >
                         <Icon className="w-4 h-4" />
                       </div>
                       <div className="flex-1 min-w-0">

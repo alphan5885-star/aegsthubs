@@ -69,8 +69,16 @@ export default function SecurityTerminal() {
           }
 
           const [pgpRes, profileRes] = await Promise.all([
-            supabase.from("user_pgp_keys").select("id").eq("user_id", user.id).maybeSingle(),
-            supabase.from("profiles").select("id").eq("user_id", user.id).maybeSingle(),
+            supabase
+              .from("user_pgp_keys")
+              .select("id")
+              .eq("user_id", user.id)
+              .maybeSingle(),
+            supabase
+              .from("profiles")
+              .select("id")
+              .eq("user_id", user.id)
+              .maybeSingle(),
           ]);
 
           const hasPgp = !!pgpRes.data;
@@ -87,7 +95,8 @@ export default function SecurityTerminal() {
               .maybeSingle()) as any;
             realHasPin = !!pinData?.withdraw_pin_hash;
           } catch (e) {
-            if (import.meta.env.DEV) console.warn("withdraw_pin_hash column might be missing");
+            if (import.meta.env.DEV)
+              console.warn("withdraw_pin_hash column might be missing");
           }
 
           addLines([
@@ -104,19 +113,31 @@ export default function SecurityTerminal() {
         break;
 
       case "scan":
-        addLines(["Initializing deep scan...", "Analyzing account security vectors..."]);
+        addLines([
+          "Initializing deep scan...",
+          "Analyzing account security vectors...",
+        ]);
 
         setTimeout(async () => {
           if (!user) return;
 
           try {
             const [pgpRes, profileRes] = await Promise.all([
-              supabase.from("user_pgp_keys").select("id").eq("user_id", user.id).maybeSingle(),
-              supabase.from("profiles").select("id").eq("user_id", user.id).maybeSingle(),
+              supabase
+                .from("user_pgp_keys")
+                .select("id")
+                .eq("user_id", user.id)
+                .maybeSingle(),
+              supabase
+                .from("profiles")
+                .select("id")
+                .eq("user_id", user.id)
+                .maybeSingle(),
             ]);
 
             const issues = [];
-            if (!pgpRes.data) issues.push("CRITICAL: PGP Key not found. 2FA is recommended.");
+            if (!pgpRes.data)
+              issues.push("CRITICAL: PGP Key not found. 2FA is recommended.");
 
             // Safe check for withdraw_pin_hash
             try {
@@ -126,14 +147,18 @@ export default function SecurityTerminal() {
                 .eq("user_id", user.id)
                 .maybeSingle()) as any;
               if (!pinData?.withdraw_pin_hash) {
-                issues.push("WARNING: Withdraw PIN not set. Funds are vulnerable.");
+                issues.push(
+                  "WARNING: Withdraw PIN not set. Funds are vulnerable.",
+                );
               }
             } catch (e) {
               issues.push("INFO: Could not verify Withdraw PIN status.");
             }
 
             if (issues.length === 0) {
-              addLines(["Scan complete: No vulnerabilities found. Your account is secure."]);
+              addLines([
+                "Scan complete: No vulnerabilities found. Your account is secure.",
+              ]);
             } else {
               addLines([
                 "Scan complete: Vulnerabilities detected!",
@@ -171,7 +196,7 @@ export default function SecurityTerminal() {
           if (data && data.length > 0) {
             addLines([
               `Retrieved ${data.length} entries:`,
-              ...data.map((l) => {
+              ...data.map((l: any) => {
                 const time = l.created_at
                   ? new Date(l.created_at).toLocaleTimeString()
                   : "??:??:??";
@@ -184,8 +209,11 @@ export default function SecurityTerminal() {
             addLines(["No security logs found for this session."]);
           }
         } catch (err: any) {
-          addLines([`Terminal Error: ${err.message || "Unknown internal error"}`]);
-          if (import.meta.env.DEV) console.error("Catch error in logs command:", err);
+          addLines([
+            `Terminal Error: ${err.message || "Unknown internal error"}`,
+          ]);
+          if (import.meta.env.DEV)
+            console.error("Catch error in logs command:", err);
         }
         break;
 
@@ -215,15 +243,24 @@ export default function SecurityTerminal() {
         </span>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-1 custom-scrollbar">
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto p-3 space-y-1 custom-scrollbar"
+      >
         {lines.map((line, i) => (
-          <div key={i} className={`${line.startsWith(">") ? "text-primary" : "text-green-500/80"}`}>
+          <div
+            key={i}
+            className={`${line.startsWith(">") ? "text-primary" : "text-green-500/80"}`}
+          >
             {line}
           </div>
         ))}
       </div>
 
-      <form onSubmit={handleCommand} className="p-3 border-t border-white/5 flex gap-2">
+      <form
+        onSubmit={handleCommand}
+        className="p-3 border-t border-white/5 flex gap-2"
+      >
         <span className="text-primary font-bold">{">"}</span>
         <input
           value={input}

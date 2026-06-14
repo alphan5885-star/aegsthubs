@@ -8,7 +8,11 @@ type StealthContextType = {
 
 const StealthContext = createContext<StealthContextType | undefined>(undefined);
 
-export const StealthProvider = ({ children }: { children: React.ReactNode }) => {
+export const StealthProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const [isStealth, setStealth] = useState(false);
 
   const toggleStealth = () => setStealth((prev) => !prev);
@@ -28,7 +32,11 @@ export const StealthProvider = ({ children }: { children: React.ReactNode }) => 
 
   return (
     <StealthContext.Provider value={{ isStealth, setStealth, toggleStealth }}>
-      {isStealth ? <StealthCamouflage onExit={() => setStealth(false)} /> : children}
+      {isStealth ? (
+        <StealthCamouflage onExit={() => setStealth(false)} />
+      ) : (
+        children
+      )}
     </StealthContext.Provider>
   );
 };
@@ -67,22 +75,28 @@ const StealthCamouflage = ({ onExit }: { onExit: () => void }) => {
 
         <div className="space-y-6 text-base leading-relaxed">
           <section>
-            <h2 className="text-2xl border-b border-[#a2a9b1] pb-1 mb-3">Introduction</h2>
+            <h2 className="text-2xl border-b border-[#a2a9b1] pb-1 mb-3">
+              Introduction
+            </h2>
             <p>
-              The Advanced Linux Sound Architecture (ALSA) provides audio and MIDI functionality to
-              the Linux operating system. ALSA has some significant features, including efficient
-              support for all types of audio interfaces, from consumer sound cards to professional
-              multichannel audio interfaces, fully modularized sound drivers, and compatibility with
-              the older OSS API.
+              The Advanced Linux Sound Architecture (ALSA) provides audio and
+              MIDI functionality to the Linux operating system. ALSA has some
+              significant features, including efficient support for all types of
+              audio interfaces, from consumer sound cards to professional
+              multichannel audio interfaces, fully modularized sound drivers,
+              and compatibility with the older OSS API.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl border-b border-[#a2a9b1] pb-1 mb-3">Kernel Modules</h2>
+            <h2 className="text-2xl border-b border-[#a2a9b1] pb-1 mb-3">
+              Kernel Modules
+            </h2>
             <p>
-              ALSA is integrated into the Linux kernel and consists of a set of drivers for sound
-              cards and a library for application developers. The kernel modules follow a specific
-              naming convention, usually starting with{" "}
+              ALSA is integrated into the Linux kernel and consists of a set of
+              drivers for sound cards and a library for application developers.
+              The kernel modules follow a specific naming convention, usually
+              starting with{" "}
               <code className="bg-[#f8f9fa] border border-[#eaecf0] px-1 rounded font-mono text-sm">
                 snd-
               </code>
@@ -95,7 +109,9 @@ const StealthCamouflage = ({ onExit }: { onExit: () => void }) => {
           </section>
 
           <section>
-            <h2 className="text-2xl border-b border-[#a2a9b1] pb-1 mb-3">Configuration</h2>
+            <h2 className="text-2xl border-b border-[#a2a9b1] pb-1 mb-3">
+              Configuration
+            </h2>
             <p>
               Configuration is primarily handled through the{" "}
               <code className="bg-[#f8f9fa] border border-[#eaecf0] px-1 rounded font-mono text-sm">
@@ -111,8 +127,8 @@ const StealthCamouflage = ({ onExit }: { onExit: () => void }) => {
         </div>
 
         <footer className="mt-12 pt-4 border-t border-[#a2a9b1] text-xs text-[#72777d]">
-          This page was last edited on 26 April 2026, at 14:22 (UTC). Text is available under the
-          Creative Commons Attribution-ShareAlike License.
+          This page was last edited on 26 April 2026, at 14:22 (UTC). Text is
+          available under the Creative Commons Attribution-ShareAlike License.
         </footer>
       </div>
     </div>

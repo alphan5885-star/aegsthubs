@@ -2,7 +2,14 @@ import { useState, useEffect, useRef } from "react";
 import PageShell from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
-import { Lock, Send, Loader2, KeyRound, AlertTriangle, ShieldCheck } from "lucide-react";
+import {
+  Lock,
+  Send,
+  Loader2,
+  KeyRound,
+  AlertTriangle,
+  ShieldCheck,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { encryptForRecipients } from "@/lib/pgp";
 import { toast } from "sonner";
@@ -25,16 +32,29 @@ interface PgpKeyRow {
 }
 
 // Per-conversation key derivation using PBKDF2 from order ID + user IDs
-async function deriveKey(orderId: string, userId1: string, userId2: string): Promise<CryptoKey> {
+async function deriveKey(
+  orderId: string,
+  userId1: string,
+  userId2: string,
+): Promise<CryptoKey> {
   const enc = new TextEncoder();
   // Sort user IDs to ensure both parties derive the same key
   const sortedIds = [userId1, userId2].sort().join(":");
   const seed = `${orderId}:${sortedIds}`;
-  const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(seed), "PBKDF2", false, [
-    "deriveKey",
-  ]);
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(seed),
+    "PBKDF2",
+    false,
+    ["deriveKey"],
+  );
   return crypto.subtle.deriveKey(
-    { name: "PBKDF2", salt: enc.encode("aeigsthub-e2e-v2"), iterations: 100000, hash: "SHA-256" },
+    {
+      name: "PBKDF2",
+      salt: enc.encode("aeigsthub-e2e-v2"),
+      iterations: 100000,
+      hash: "SHA-256",
+    },
     keyMaterial,
     { name: "AES-GCM", length: 256 },
     false,
@@ -51,7 +71,11 @@ async function encryptMessage(
   const key = await deriveKey(orderId, userId1, userId2);
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const enc = new TextEncoder();
-  const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(text));
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    enc.encode(text),
+  );
   return {
     encrypted: btoa(String.fromCharCode(...new Uint8Array(encrypted))),
     iv: btoa(String.fromCharCode(...iv)),
@@ -69,7 +93,11 @@ async function decryptMessage(
     const key = await deriveKey(orderId, userId1, userId2);
     const encBytes = Uint8Array.from(atob(encrypted), (c) => c.charCodeAt(0));
     const ivBytes = Uint8Array.from(atob(iv), (c) => c.charCodeAt(0));
-    const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: ivBytes }, key, encBytes);
+    const decrypted = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: ivBytes },
+      key,
+      encBytes,
+    );
     return new TextDecoder().decode(decrypted);
   } catch {
     return "[Şifre çözülemedi]";
@@ -104,7 +132,8 @@ export default function EncryptedChat({ orderId, otherUserId }: Props) {
 
         if (!isMounted.current) return;
         if (error) {
-          if (import.meta.env.DEV) console.error("Error loading PGP keys for chat:", error);
+          if (import.meta.env.DEV)
+            console.error("Error loading PGP keys for chat:", error);
           return;
         }
 
@@ -114,7 +143,8 @@ export default function EncryptedChat({ orderId, otherUserId }: Props) {
         });
         setPgpKeys(next);
       } catch (e) {
-        if (import.meta.env.DEV) console.error("Catch loading PGP keys for chat:", e);
+        if (import.meta.env.DEV)
+          console.error("Catch loading PGP keys for chat:", e);
       } finally {
         if (isMounted.current) setKeysLoading(false);
       }
@@ -138,7 +168,8 @@ export default function EncryptedChat({ orderId, otherUserId }: Props) {
 
         if (!isMounted.current) return;
         if (error) {
-          if (import.meta.env.DEV) console.error("Error fetching encrypted messages:", error);
+          if (import.meta.env.DEV)
+            console.error("Error fetching encrypted messages:", error);
           return;
         }
 
@@ -148,13 +179,20 @@ export default function EncryptedChat({ orderId, otherUserId }: Props) {
               ...m,
               decrypted: m.ciphertext?.startsWith("-----BEGIN PGP MESSAGE-----")
                 ? "[PGP ciphertext — özel anahtarla dışarıda çözülür]"
-                : await decryptMessage(m.ciphertext, m.iv, orderId, user?.id || "", otherUserId),
+                : await decryptMessage(
+                    m.ciphertext,
+                    m.iv,
+                    orderId,
+                    user?.id || "",
+                    otherUserId,
+                  ),
             })),
           );
           if (isMounted.current) setMessages(decrypted);
         }
       } catch (e) {
-        if (import.meta.env.DEV) console.error("Catch fetching encrypted messages:", e);
+        if (import.meta.env.DEV)
+          console.error("Catch fetching encrypted messages:", e);
       }
     };
     fetch();
@@ -170,18 +208,27 @@ export default function EncryptedChat({ orderId, otherUserId }: Props) {
           table: "encrypted_messages",
           filter: `order_id=eq.${orderId}`,
         },
-        async (payload) => {
+        async (payload: any) => {
           try {
             const m = payload.new as any;
-            const decrypted = m.ciphertext?.startsWith("-----BEGIN PGP MESSAGE-----")
+            const decrypted = m.ciphertext?.startsWith(
+              "-----BEGIN PGP MESSAGE-----",
+            )
               ? "[PGP ciphertext — özel anahtarla dışarıda çözülür]"
-              : await decryptMessage(m.ciphertext, m.iv, orderId, user?.id || "", otherUserId);
+              : await decryptMessage(
+                  m.ciphertext,
+                  m.iv,
+                  orderId,
+                  user?.id || "",
+                  otherUserId,
+                );
 
             if (isMounted.current) {
               setMessages((prev) => [...prev, { ...m, decrypted }]);
             }
           } catch (e) {
-            if (import.meta.env.DEV) console.error("Error processing realtime message:", e);
+            if (import.meta.env.DEV)
+              console.error("Error processing realtime message:", e);
           }
         },
       )
@@ -194,7 +241,10 @@ export default function EncryptedChat({ orderId, otherUserId }: Props) {
   }, [orderId, otherUserId, user?.id]);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }, [messages]);
 
   const sendMessage = async () => {
@@ -203,13 +253,18 @@ export default function EncryptedChat({ orderId, otherUserId }: Props) {
     const recipientKey = pgpKeys[otherUserId]?.public_key;
 
     if (!senderKey || !recipientKey) {
-      toast.error("Mesaj gönderilemedi: Her iki tarafın da PGP anahtarı yüklü olmalıdır.");
+      toast.error(
+        "Mesaj gönderilemedi: Her iki tarafın da PGP anahtarı yüklü olmalıdır.",
+      );
       return;
     }
 
     setSending(true);
     try {
-      const encrypted = await encryptForRecipients(newMsg.trim(), [senderKey, recipientKey]);
+      const encrypted = await encryptForRecipients(newMsg.trim(), [
+        senderKey,
+        recipientKey,
+      ]);
       const { error } = await supabase.from("encrypted_messages").insert({
         order_id: orderId,
         sender_id: user.id,
@@ -221,7 +276,8 @@ export default function EncryptedChat({ orderId, otherUserId }: Props) {
       if (error) throw error;
       setNewMsg("");
     } catch (err: any) {
-      if (import.meta.env.DEV) console.error("Error sending encrypted message:", err);
+      if (import.meta.env.DEV)
+        console.error("Error sending encrypted message:", err);
       toast.error("Şifreleme hatası: " + err.message);
     } finally {
       if (isMounted.current) setSending(false);
@@ -261,15 +317,18 @@ export default function EncryptedChat({ orderId, otherUserId }: Props) {
           <div className="flex gap-2 text-[10px] font-mono text-yellow-500 leading-relaxed">
             <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
             <span>
-              <strong>DİKKAT:</strong> Mesajlaşma için her iki tarafın da profilinde{" "}
-              <strong>PGP Public Key</strong> tanımlı olmalıdır. Karşı tarafın anahtarı yoksa
-              iletişim kurulamaz.
+              <strong>DİKKAT:</strong> Mesajlaşma için her iki tarafın da
+              profilinde <strong>PGP Public Key</strong> tanımlı olmalıdır.
+              Karşı tarafın anahtarı yoksa iletişim kurulamaz.
             </span>
           </div>
         </div>
       )}
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar"
+      >
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center space-y-2 opacity-40">
             <KeyRound className="w-8 h-8 text-primary" />
@@ -294,11 +353,13 @@ export default function EncryptedChat({ orderId, otherUserId }: Props) {
               >
                 {m.decrypted}
               </div>
-              {m.sender_id !== user?.id && m.decrypted && !m.decrypted.startsWith("[") && (
-                <div className="mt-0.5 ml-1">
-                  <TranslateButton text={m.decrypted} variant="bubble" />
-                </div>
-              )}
+              {m.sender_id !== user?.id &&
+                m.decrypted &&
+                !m.decrypted.startsWith("[") && (
+                  <div className="mt-0.5 ml-1">
+                    <TranslateButton text={m.decrypted} variant="bubble" />
+                  </div>
+                )}
               <span className="text-[9px] font-mono text-muted-foreground mt-1 px-1">
                 {new Date(m.created_at).toLocaleTimeString("tr-TR", {
                   hour: "2-digit",
@@ -322,7 +383,11 @@ export default function EncryptedChat({ orderId, otherUserId }: Props) {
                 sendMessage();
               }
             }}
-            placeholder={hasBothKeys ? "Şifreli mesaj yaz..." : "PGP anahtarı bekleniyor..."}
+            placeholder={
+              hasBothKeys
+                ? "Şifreli mesaj yaz..."
+                : "PGP anahtarı bekleniyor..."
+            }
             className="flex-1 bg-secondary/50 border border-primary/20 rounded p-2 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-primary/50 resize-none h-10 min-h-[40px] disabled:opacity-50 disabled:cursor-not-allowed"
           />
           <button
@@ -330,11 +395,16 @@ export default function EncryptedChat({ orderId, otherUserId }: Props) {
             disabled={!hasBothKeys || !newMsg.trim() || sending}
             className="w-10 h-10 flex items-center justify-center bg-primary text-primary-foreground rounded hover:opacity-90 transition-all disabled:opacity-50 active:scale-95 shadow-[0_0_15px_rgba(var(--primary),0.3)]"
           >
-            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            {sending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Send className="w-4 h-4" />
+            )}
           </button>
         </div>
         <div className="mt-2 flex items-center justify-center gap-1 text-[9px] font-mono text-muted-foreground uppercase tracking-tighter opacity-60">
-          <ShieldCheck className="w-3 h-3" /> Sunucuda sadece PGP ciphertext tutulur
+          <ShieldCheck className="w-3 h-3" /> Sunucuda sadece PGP ciphertext
+          tutulur
         </div>
       </div>
     </div>

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-
 /**
  * Tarayıcı .onion üzerindeyse "TOR" rozeti gösterir.
  * Clearnet'te ise küçük gri "CLEARNET" yazısı.
@@ -16,9 +15,13 @@ export default function TorBadge({ collapsed }: { collapsed?: boolean }) {
   if (collapsed) {
     return (
       <div
-        title={isOnion ? "Tor üzerinden bağlısın" : "Clearweb — anonim mod aktif"}
+        title={
+          isOnion ? "Tor üzerinden bağlısın" : "Clearweb — anonim mod aktif"
+        }
         className={`flex items-center justify-center py-1.5 rounded text-[9px] font-mono ${
-          isOnion ? "bg-primary/10 text-primary border border-primary/40" : "text-muted-foreground animate-pulse"
+          isOnion
+            ? "bg-primary/10 text-primary border border-primary/40"
+            : "text-muted-foreground animate-pulse"
         }`}
       >
         {isOnion ? "🧅" : "🕵️"}
@@ -38,7 +41,9 @@ export default function TorBadge({ collapsed }: { collapsed?: boolean }) {
         {isOnion ? <span>🧅</span> : <span className="animate-pulse">🕵️</span>}
         <span>{isOnion ? "TOR" : "ANONIM"}</span>
       </span>
-      <span className="text-[9px] opacity-60">{isOnion ? "onion" : "clearweb"}</span>
+      <span className="text-[9px] opacity-60">
+        {isOnion ? "onion" : "clearweb"}
+      </span>
     </div>
   );
 }

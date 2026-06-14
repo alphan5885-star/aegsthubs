@@ -15,7 +15,10 @@ const TIME_LIMIT = 15; // seconds per challenge
 const MIN_HUMAN_TIME_MS = 600; // anti-bot: too fast = bot
 const MIN_PATH_VARIANCE = 8; // anti-bot: too straight = bot
 
-export default function MathCaptcha({ onValidChange, label = "Puzzle doğrulama" }: Props) {
+export default function MathCaptcha({
+  onValidChange,
+  label = "Puzzle doğrulama",
+}: Props) {
   const trackRef = useRef<HTMLDivElement>(null);
   const startTimeRef = useRef<number>(0);
   const pathRef = useRef<{ x: number; y: number; t: number }[]>([]);
@@ -99,7 +102,11 @@ export default function MathCaptcha({ onValidChange, label = "Puzzle doğrulama"
     const x = clientX - rect.left;
     const y = clientY - rect.top;
     // must start near current piece
-    if (Math.hypot(x - (pos.x + PIECE_SIZE / 2), y - (pos.y + PIECE_SIZE / 2)) > PIECE_SIZE) return;
+    if (
+      Math.hypot(x - (pos.x + PIECE_SIZE / 2), y - (pos.y + PIECE_SIZE / 2)) >
+      PIECE_SIZE
+    )
+      return;
     setDragging(true);
     startTimeRef.current = Date.now();
     pathRef.current = [{ x, y, t: 0 }];
@@ -128,9 +135,11 @@ export default function MathCaptcha({ onValidChange, label = "Puzzle doğrulama"
     // Anti-bot heuristics
     const path = pathRef.current;
     const yValues = path.map((p) => p.y);
-    const yMean = yValues.reduce((s, v) => s + v, 0) / Math.max(1, yValues.length);
+    const yMean =
+      yValues.reduce((s, v) => s + v, 0) / Math.max(1, yValues.length);
     const yVariance =
-      yValues.reduce((s, v) => s + (v - yMean) ** 2, 0) / Math.max(1, yValues.length);
+      yValues.reduce((s, v) => s + (v - yMean) ** 2, 0) /
+      Math.max(1, yValues.length);
     const tooFast = elapsed < MIN_HUMAN_TIME_MS;
     const tooStraight = yVariance < MIN_PATH_VARIANCE && path.length > 5;
     const tooFewSamples = path.length < 5;
@@ -178,7 +187,11 @@ export default function MathCaptcha({ onValidChange, label = "Puzzle doğrulama"
   const dots = Array.from({ length: 24 }).map((_, i) => {
     const r = ((seed * 7 + i * 13) % 100) / 100;
     const g = ((seed * 11 + i * 17) % 100) / 100;
-    return { left: `${r * 100}%`, top: `${g * 100}%`, size: 3 + ((i + seed) % 4) };
+    return {
+      left: `${r * 100}%`,
+      top: `${g * 100}%`,
+      size: 3 + ((i + seed) % 4),
+    };
   });
 
   return (
@@ -189,7 +202,8 @@ export default function MathCaptcha({ onValidChange, label = "Puzzle doğrulama"
         </span>
         {!locked && !valid && (
           <span className="flex items-center gap-1 text-primary">
-            <Timer className="w-3 h-3" /> {secondsLeft}s · {MAX_ATTEMPTS - attempts} hak
+            <Timer className="w-3 h-3" /> {secondsLeft}s ·{" "}
+            {MAX_ATTEMPTS - attempts} hak
           </span>
         )}
       </label>
@@ -219,7 +233,12 @@ export default function MathCaptcha({ onValidChange, label = "Puzzle doğrulama"
               <span
                 key={i}
                 className="absolute rounded-full bg-primary/15"
-                style={{ left: d.left, top: d.top, width: d.size, height: d.size }}
+                style={{
+                  left: d.left,
+                  top: d.top,
+                  width: d.size,
+                  height: d.size,
+                }}
               />
             ))}
 
@@ -228,14 +247,24 @@ export default function MathCaptcha({ onValidChange, label = "Puzzle doğrulama"
               <div
                 key={i}
                 className="absolute rounded border border-dashed border-muted-foreground/30"
-                style={{ left: d.x, top: d.y, width: PIECE_SIZE, height: PIECE_SIZE }}
+                style={{
+                  left: d.x,
+                  top: d.y,
+                  width: PIECE_SIZE,
+                  height: PIECE_SIZE,
+                }}
               />
             ))}
 
             {/* Real target */}
             <div
               className="absolute rounded border-2 border-dashed border-primary bg-background/60"
-              style={{ left: target.x, top: target.y, width: PIECE_SIZE, height: PIECE_SIZE }}
+              style={{
+                left: target.x,
+                top: target.y,
+                width: PIECE_SIZE,
+                height: PIECE_SIZE,
+              }}
             >
               <span className="absolute inset-0 flex items-center justify-center text-[9px] font-mono text-primary/70">
                 BURAYA
@@ -254,7 +283,8 @@ export default function MathCaptcha({ onValidChange, label = "Puzzle doğrulama"
                 startDrag(e.clientX, e.clientY);
               }}
               onTouchStart={(e) => {
-                if (e.touches[0]) startDrag(e.touches[0].clientX, e.touches[0].clientY);
+                if (e.touches[0])
+                  startDrag(e.touches[0].clientX, e.touches[0].clientY);
               }}
               className={`absolute rounded shadow-lg cursor-grab active:cursor-grabbing select-none flex items-center justify-center font-mono text-xs ${
                 dragging ? "scale-110 z-10" : ""
@@ -272,7 +302,8 @@ export default function MathCaptcha({ onValidChange, label = "Puzzle doğrulama"
           </div>
 
           <p className="text-[10px] text-muted-foreground font-mono">
-            Parçayı doğru hedefe (kalın çerçeve) sürükle. Çok düz veya çok hızlı hareket = bot.
+            Parçayı doğru hedefe (kalın çerçeve) sürükle. Çok düz veya çok hızlı
+            hareket = bot.
           </p>
         </div>
       )}

@@ -1,14 +1,7 @@
 # TODO
 
-## Completed ✅
-- Hızlı Araçlar paneli sidebar'a "Araçlar" bölümü olarak taşındı (Alt+Q ile aç/kapa).
-- UpdatesModal entegrasyonu sidebar üzerinden yapılıyor.
-- Mirrors / .onion / XMR artıkları temizlendi.
-- Versiyon rozeti v3.5'e güncellendi.
+## Planned
 
-## Sıradakiler (öneri)
-- Bildirim merkezi sayfası (full liste)
-- 2FA / TOTP kurulumu
-- Vendor onboarding sihirbazı
-- Help / SSS sayfası
-- Yasal sayfalar (kullanım şartları / gizlilik)
+- [ ] PageShell'e paralaks efektini entegre etmek için ParallaxBackground import + render ekle.
+- [ ] (Opsiyonel) MouseParallax'i belirli bir kart/komponent wrapper'ı olarak bağla.
+- [ ] Dev serverda görünürlük kontrolü yap (canvas z-index/opacity ve render olma).

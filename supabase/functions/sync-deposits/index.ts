@@ -1,7 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeadersBase = {
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -17,13 +18,20 @@ function getCorsHeaders(req: Request) {
     if (siteUrl) allowedOrigins.push(siteUrl);
   }
   const allowOrigin =
-    origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0] || "null";
-  return { ...corsHeadersBase, "Access-Control-Allow-Origin": allowOrigin, Vary: "Origin" };
+    origin && allowedOrigins.includes(origin)
+      ? origin
+      : allowedOrigins[0] || "null";
+  return {
+    ...corsHeadersBase,
+    "Access-Control-Allow-Origin": allowOrigin,
+    Vary: "Origin",
+  };
 }
 
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method === "OPTIONS")
+    return new Response(null, { headers: corsHeaders });
 
   try {
     const authHeader = req.headers.get("Authorization");
@@ -39,10 +47,13 @@ Deno.serve(async (req) => {
     const serviceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const blockcypherToken = Deno.env.get("BLOCKCYPHER_TOKEN");
     if (!blockcypherToken) {
-      return new Response(JSON.stringify({ error: "BLOCKCYPHER_TOKEN missing" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "BLOCKCYPHER_TOKEN missing" }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     const userClient = createClient(supabaseUrl, anonKey, {
@@ -65,9 +76,12 @@ Deno.serve(async (req) => {
       .eq("network", "LTC")
       .maybeSingle();
     if (!depositAddress?.address) {
-      return new Response(JSON.stringify({ credited: 0, address_found: false }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ credited: 0, address_found: false }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     const bcResp = await fetch(
@@ -75,10 +89,13 @@ Deno.serve(async (req) => {
     );
     const bcData = await bcResp.json();
     if (!bcResp.ok) {
-      return new Response(JSON.stringify({ error: "BlockCypher error", detail: bcData }), {
-        status: 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "BlockCypher error", detail: bcData }),
+        {
+          status: 502,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     let creditedCount = 0;
@@ -106,7 +123,10 @@ Deno.serve(async (req) => {
           _confirmations: confirmations,
         },
       );
-      if (!creditErr && (creditResult as { credited?: boolean } | null)?.credited) {
+      if (
+        !creditErr &&
+        (creditResult as { credited?: boolean } | null)?.credited
+      ) {
         creditedCount += 1;
       }
     }
@@ -128,9 +148,12 @@ Deno.serve(async (req) => {
       },
     );
   } catch (e) {
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : String(e) }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: e instanceof Error ? e.message : String(e) }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   }
 });

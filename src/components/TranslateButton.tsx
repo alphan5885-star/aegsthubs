@@ -18,7 +18,11 @@ const LANG_LABELS: Record<string, string> = {
   ru: "RU",
 };
 
-export default function TranslateButton({ text, sourceLang = "auto", variant = "bubble" }: Props) {
+export default function TranslateButton({
+  text,
+  sourceLang = "auto",
+  variant = "bubble",
+}: Props) {
   const { language } = useI18n();
   const { translatedText, isLoading, error, translate, reset } = useTranslate();
   const [open, setOpen] = useState(false);
@@ -112,7 +116,10 @@ export default function TranslateButton({ text, sourceLang = "auto", variant = "
             className="relative max-w-[85%] px-2.5 py-1.5 rounded text-[11px] font-mono bg-primary/10 border border-primary/20 text-primary/80 italic"
           >
             <button
-              onClick={() => { setOpen(false); reset(); }}
+              onClick={() => {
+                setOpen(false);
+                reset();
+              }}
               className="absolute top-1 right-1 text-muted-foreground hover:text-foreground"
             >
               <X className="w-2.5 h-2.5" />

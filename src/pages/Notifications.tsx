@@ -1,6 +1,14 @@
 ﻿import { useState } from "react";
 import PageShell from "@/components/PageShell";
-import { Bell, ShieldCheck, ShoppingBag, Info, X, Trash2, CheckSquare } from "lucide-react";
+import {
+  Bell,
+  ShieldCheck,
+  ShoppingBag,
+  Info,
+  X,
+  Trash2,
+  CheckSquare,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n";
@@ -21,7 +29,7 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     title: "2FA DOĞRULAMA AKTİF EDİLDİ",
     body: "Hesabınız için iki aşamalı doğrulama (TOTP) protokolü başarıyla devreye alındı. Acil durum kodlarınızı güvenli bir yere saklamayı unutmayın.",
     time: "10 Dk Önce",
-    read: false
+    read: false,
   },
   {
     id: "n2",
@@ -29,7 +37,7 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     title: "SİPARİŞ #AEIGS-ORD-3819 KARGOYA VERİLDİ",
     body: "Sipariş ettiğiniz ürün satıcı tarafından kargoya verildi. Canlı teslimat akışını siparişlerim sayfasından takip edebilirsiniz.",
     time: "2 Saat Önce",
-    read: false
+    read: false,
   },
   {
     id: "n3",
@@ -37,7 +45,7 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     title: "GÜVENLİK GÜNCELLEMESİ V2.4",
     body: "Sistem alt yapısı en son oltalama koruma filtreleriyle güçlendirilmiştir. Profil ayarlarından anti-phishing kodunuzu teyit edin.",
     time: "1 Gün Önce",
-    read: true
+    read: true,
   },
   {
     id: "n4",
@@ -45,19 +53,25 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     title: "YENİ CİHAZ GİRİŞ TESPİTİ",
     body: "Hesabınıza yeni bir IP adresinden başarılı giriş yapıldı. Bu işlem size ait değilse acilen dead-man modunu kurun.",
     time: "3 Gün Önce",
-    read: true
-  }
+    read: true,
+  },
 ];
 
 export default function Notifications() {
   const { t } = useI18n();
-  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
-  const [activeFilter, setActiveFilter] = useState<"all" | "order" | "security" | "system">("all");
+  const [notifications, setNotifications] = useState<NotificationItem[]>(
+    INITIAL_NOTIFICATIONS,
+  );
+  const [activeFilter, setActiveFilter] = useState<
+    "all" | "order" | "security" | "system"
+  >("all");
 
-  const filtered = notifications.filter(n => activeFilter === "all" || n.type === activeFilter);
+  const filtered = notifications.filter(
+    (n) => activeFilter === "all" || n.type === activeFilter,
+  );
 
   const handleMarkAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     toast.success(t("notif.allMarkedRead" as any));
   };
 
@@ -69,12 +83,14 @@ export default function Notifications() {
   };
 
   const handleToggleRead = (id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: !n.read } : n));
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: !n.read } : n)),
+    );
   };
 
   const handleDelete = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
     toast.success(t("notif.deleted" as any));
   };
 
@@ -92,17 +108,18 @@ export default function Notifications() {
   return (
     <PageShell>
       <div className="max-w-3xl mx-auto space-y-6 font-mono pb-12 select-none">
-        
         {/* Header HUD */}
         <div className="glass-card rounded-3xl p-6 border border-white/5 bg-gradient-to-r from-[#030303] to-[#010101] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative overflow-hidden shadow-2xl">
           <div className="absolute top-0 left-0 w-2 h-full bg-red-600 animate-pulse" />
-          
+
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-red-600/10 border border-red-600/20 flex items-center justify-center text-red-500 shrink-0">
               <Bell className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <h1 className="text-sm font-black text-white uppercase tracking-[0.2em]">{t("notif.center" as any)}</h1>
+              <h1 className="text-sm font-black text-white uppercase tracking-[0.2em]">
+                {t("notif.center" as any)}
+              </h1>
               <p className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">
                 {t("notif.subtitle" as any)}
               </p>
@@ -114,7 +131,8 @@ export default function Notifications() {
               onClick={handleMarkAllRead}
               className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-white/[0.02] border border-white/5 hover:border-red-600/30 text-zinc-400 hover:text-white rounded-xl text-[8px] font-black uppercase tracking-wider transition-all cursor-pointer"
             >
-              <CheckSquare className="w-3 h-3 text-red-500" /> {t("notif.markAllReadBtn" as any)}
+              <CheckSquare className="w-3 h-3 text-red-500" />{" "}
+              {t("notif.markAllReadBtn" as any)}
             </button>
             <button
               onClick={handleClearAll}
@@ -131,7 +149,7 @@ export default function Notifications() {
             { id: "all", label: t("notif.filterAll" as any) },
             { id: "order", label: t("notif.filterOrders" as any) },
             { id: "security", label: t("notif.filterSecurity" as any) },
-            { id: "system", label: t("notif.filterSystem" as any) }
+            { id: "system", label: t("notif.filterSystem" as any) },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -171,16 +189,22 @@ export default function Notifications() {
                   )}
 
                   {/* Icon Container */}
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border ${
-                    item.read ? "bg-white/[0.01] border-white/5" : "bg-red-600/5 border-red-600/20"
-                  }`}>
+                  <div
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border ${
+                      item.read
+                        ? "bg-white/[0.01] border-white/5"
+                        : "bg-red-600/5 border-red-600/20"
+                    }`}
+                  >
                     {getIcon(item.type)}
                   </div>
 
                   {/* Body Content */}
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center justify-between gap-3 flex-wrap">
-                      <span className={`text-[10px] font-black uppercase tracking-wide ${item.read ? "text-zinc-400" : "text-white"}`}>
+                      <span
+                        className={`text-[10px] font-black uppercase tracking-wide ${item.read ? "text-zinc-400" : "text-white"}`}
+                      >
                         {item.title}
                       </span>
                       <span className="text-[7.5px] text-zinc-600 font-bold uppercase tracking-wider">
@@ -199,7 +223,6 @@ export default function Notifications() {
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
-
                 </motion.div>
               ))
             ) : (
@@ -212,7 +235,6 @@ export default function Notifications() {
             )}
           </AnimatePresence>
         </div>
-
       </div>
     </PageShell>
   );

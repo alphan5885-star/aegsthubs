@@ -1,4 +1,9 @@
-import { Outlet, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import {
+  Outlet,
+  createRootRoute,
+  HeadContent,
+  Scripts,
+} from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 
@@ -20,7 +25,8 @@ import CartIcon from "@/components/CartIcon";
 
 import NotFound from "@/pages/NotFound";
 
-const lightDev = import.meta.env.DEV && import.meta.env.VITE_LIGHT_DEV === "true";
+const lightDev =
+  import.meta.env.DEV && import.meta.env.VITE_LIGHT_DEV === "true";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -28,7 +34,10 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "AEIGSTHUB" },
-      { name: "description", content: "AEIGSTHUB — Secure & Premium Digital Exchange" },
+      {
+        name: "description",
+        content: "AEIGSTHUB — Secure & Premium Digital Exchange",
+      },
       { name: "robots", content: "noindex, nofollow, noarchive, nosnippet" },
       { name: "referrer", content: "no-referrer" },
       {
@@ -44,12 +53,26 @@ export const Route = createRootRoute({
       },
       { property: "og:title", content: "AEIGSTHUB" },
       { name: "twitter:title", content: "AEIGSTHUB" },
-      { property: "og:description", content: "AEIGSTHUB — Secure & Premium Digital Exchange" },
-      { name: "twitter:description", content: "AEIGSTHUB — Secure & Premium Digital Exchange" },
+      {
+        property: "og:description",
+        content: "AEIGSTHUB — Secure & Premium Digital Exchange",
+      },
+      {
+        name: "twitter:description",
+        content: "AEIGSTHUB — Secure & Premium Digital Exchange",
+      },
       { name: "twitter:card", content: "summary" },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/970580a7-4a13-4203-855d-d50d1b3b480b/id-preview-3eed7cfb--23f3e47d-ec59-41ea-9cee-92e52c817735.lovable.app-1777477846218.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/970580a7-4a13-4203-855d-d50d1b3b480b/id-preview-3eed7cfb--23f3e47d-ec59-41ea-9cee-92e52c817735.lovable.app-1777477846218.png" },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/970580a7-4a13-4203-855d-d50d1b3b480b/id-preview-3eed7cfb--23f3e47d-ec59-41ea-9cee-92e52c817735.lovable.app-1777477846218.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/970580a7-4a13-4203-855d-d50d1b3b480b/id-preview-3eed7cfb--23f3e47d-ec59-41ea-9cee-92e52c817735.lovable.app-1777477846218.png",
+      },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),
@@ -64,6 +87,10 @@ function RootShell({ children }: { children: ReactNode }) {
       <head>
         <HeadContent />
         <style>{`
+          @media (prefers-reduced-motion: reduce) {
+            .scanline::after { animation: none !important; }
+          }
+
           ::-webkit-scrollbar {
             display: none !important;
             width: 0 !important;
@@ -120,7 +147,11 @@ function RootShell({ children }: { children: ReactNode }) {
             `,
           }}
         />
-        <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" />
+        {/** Google Translate: performans için sadece çeviri butonu/isteği olduğunda yüklenebilir.
+         * Şimdilik page load maliyetini azaltmak için dev dışı ortamda yüklemeyi kapatıyoruz. */}
+        {import.meta.env.DEV ? (
+          <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" />
+        ) : null}
       </head>
       <body>
         <div id="google_translate_element"></div>
@@ -138,7 +169,9 @@ function AuthGuard({ children }: { children: ReactNode }) {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="glass-card neon-border rounded-lg p-6 w-full max-w-md text-center space-y-4">
           <div>
-            <h1 className="text-2xl font-mono font-bold text-foreground drop-shadow-md">Nova<span className="text-primary neon-text">Market</span></h1>
+            <h1 className="text-2xl font-mono font-bold text-foreground drop-shadow-md">
+              Nova<span className="text-primary neon-text">Market</span>
+            </h1>
             <p className="text-xs font-mono text-muted-foreground mt-2">
               Hesap yetkisi yüklenemedi.
             </p>

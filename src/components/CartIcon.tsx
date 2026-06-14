@@ -5,7 +5,16 @@ import { useI18n } from "@/lib/i18n";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function CartIconButton() {
-  const { items, removeItem, updateQuantity, clearCart, totalPrice, itemCount, isOpen, setIsOpen } = useCart();
+  const {
+    items,
+    removeItem,
+    updateQuantity,
+    clearCart,
+    totalPrice,
+    itemCount,
+    isOpen,
+    setIsOpen,
+  } = useCart();
   const { t } = useI18n();
   const navigate = useNavigate();
 
@@ -75,24 +84,34 @@ export default function CartIconButton() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <span className="text-2xl">{item.imageEmoji || "📦"}</span>
+                        <span className="text-2xl">
+                          {item.imageEmoji || "📦"}
+                        </span>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium truncate">{item.name}</div>
+                      <div className="text-sm font-medium truncate">
+                        {item.name}
+                      </div>
                       <div className="text-xs font-mono text-primary">
                         {item.price.toFixed(4)} LTC
                       </div>
                       <div className="flex items-center gap-2 mt-1">
                         <button
-                          onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                          onClick={() =>
+                            updateQuantity(item.productId, item.quantity - 1)
+                          }
                           className="p-1 bg-background rounded hover:bg-secondary"
                         >
                           <Minus className="w-3 h-3" />
                         </button>
-                        <span className="text-xs font-mono">{item.quantity}</span>
+                        <span className="text-xs font-mono">
+                          {item.quantity}
+                        </span>
                         <button
-                          onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                          onClick={() =>
+                            updateQuantity(item.productId, item.quantity + 1)
+                          }
                           className="p-1 bg-background rounded hover:bg-secondary"
                         >
                           <Plus className="w-3 h-3" />

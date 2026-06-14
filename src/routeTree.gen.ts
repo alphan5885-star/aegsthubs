@@ -29,9 +29,12 @@ import { Route as VendorWalletRouteImport } from './routes/vendor.wallet'
 import { Route as VendorBondRouteImport } from './routes/vendor.bond'
 import { Route as VendorVendorIdRouteImport } from './routes/vendor.$vendorId'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
+import { Route as PaymentOrderIdRouteImport } from './routes/payment.$orderId'
 import { Route as AdminStoreRouteImport } from './routes/admin.store'
 import { Route as AdminSecurityLogsRouteImport } from './routes/admin.security-logs'
 import { Route as AdminDisputesRouteImport } from './routes/admin.disputes'
+import { Route as ApiAuthSignupRouteImport } from './routes/api/auth/signup'
+import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
 
 const WatchlistRoute = WatchlistRouteImport.update({
   id: '/watchlist',
@@ -133,6 +136,11 @@ const ProductIdRoute = ProductIdRouteImport.update({
   path: '/product/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PaymentOrderIdRoute = PaymentOrderIdRouteImport.update({
+  id: '/payment/$orderId',
+  path: '/payment/$orderId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminStoreRoute = AdminStoreRouteImport.update({
   id: '/store',
   path: '/store',
@@ -147,6 +155,16 @@ const AdminDisputesRoute = AdminDisputesRouteImport.update({
   id: '/disputes',
   path: '/disputes',
   getParentRoute: () => AdminRoute,
+} as any)
+const ApiAuthSignupRoute = ApiAuthSignupRouteImport.update({
+  id: '/api/auth/signup',
+  path: '/api/auth/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthLoginRoute = ApiAuthLoginRouteImport.update({
+  id: '/api/auth/login',
+  path: '/api/auth/login',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -169,10 +187,13 @@ export interface FileRoutesByFullPath {
   '/admin/disputes': typeof AdminDisputesRoute
   '/admin/security-logs': typeof AdminSecurityLogsRoute
   '/admin/store': typeof AdminStoreRoute
+  '/payment/$orderId': typeof PaymentOrderIdRoute
   '/product/$id': typeof ProductIdRoute
   '/vendor/$vendorId': typeof VendorVendorIdRoute
   '/vendor/bond': typeof VendorBondRoute
   '/vendor/wallet': typeof VendorWalletRoute
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/signup': typeof ApiAuthSignupRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -194,10 +215,13 @@ export interface FileRoutesByTo {
   '/admin/disputes': typeof AdminDisputesRoute
   '/admin/security-logs': typeof AdminSecurityLogsRoute
   '/admin/store': typeof AdminStoreRoute
+  '/payment/$orderId': typeof PaymentOrderIdRoute
   '/product/$id': typeof ProductIdRoute
   '/vendor/$vendorId': typeof VendorVendorIdRoute
   '/vendor/bond': typeof VendorBondRoute
   '/vendor/wallet': typeof VendorWalletRoute
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/signup': typeof ApiAuthSignupRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -220,10 +244,13 @@ export interface FileRoutesById {
   '/admin/disputes': typeof AdminDisputesRoute
   '/admin/security-logs': typeof AdminSecurityLogsRoute
   '/admin/store': typeof AdminStoreRoute
+  '/payment/$orderId': typeof PaymentOrderIdRoute
   '/product/$id': typeof ProductIdRoute
   '/vendor/$vendorId': typeof VendorVendorIdRoute
   '/vendor/bond': typeof VendorBondRoute
   '/vendor/wallet': typeof VendorWalletRoute
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/signup': typeof ApiAuthSignupRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -247,10 +274,13 @@ export interface FileRouteTypes {
     | '/admin/disputes'
     | '/admin/security-logs'
     | '/admin/store'
+    | '/payment/$orderId'
     | '/product/$id'
     | '/vendor/$vendorId'
     | '/vendor/bond'
     | '/vendor/wallet'
+    | '/api/auth/login'
+    | '/api/auth/signup'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -272,10 +302,13 @@ export interface FileRouteTypes {
     | '/admin/disputes'
     | '/admin/security-logs'
     | '/admin/store'
+    | '/payment/$orderId'
     | '/product/$id'
     | '/vendor/$vendorId'
     | '/vendor/bond'
     | '/vendor/wallet'
+    | '/api/auth/login'
+    | '/api/auth/signup'
   id:
     | '__root__'
     | '/'
@@ -297,10 +330,13 @@ export interface FileRouteTypes {
     | '/admin/disputes'
     | '/admin/security-logs'
     | '/admin/store'
+    | '/payment/$orderId'
     | '/product/$id'
     | '/vendor/$vendorId'
     | '/vendor/bond'
     | '/vendor/wallet'
+    | '/api/auth/login'
+    | '/api/auth/signup'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -320,7 +356,10 @@ export interface RootRouteChildren {
   VendorRoute: typeof VendorRouteWithChildren
   WalletRoute: typeof WalletRoute
   WatchlistRoute: typeof WatchlistRoute
+  PaymentOrderIdRoute: typeof PaymentOrderIdRoute
   ProductIdRoute: typeof ProductIdRoute
+  ApiAuthLoginRoute: typeof ApiAuthLoginRoute
+  ApiAuthSignupRoute: typeof ApiAuthSignupRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -465,6 +504,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/payment/$orderId': {
+      id: '/payment/$orderId'
+      path: '/payment/$orderId'
+      fullPath: '/payment/$orderId'
+      preLoaderRoute: typeof PaymentOrderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/store': {
       id: '/admin/store'
       path: '/store'
@@ -485,6 +531,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/disputes'
       preLoaderRoute: typeof AdminDisputesRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/api/auth/signup': {
+      id: '/api/auth/signup'
+      path: '/api/auth/signup'
+      fullPath: '/api/auth/signup'
+      preLoaderRoute: typeof ApiAuthSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/login': {
+      id: '/api/auth/login'
+      path: '/api/auth/login'
+      fullPath: '/api/auth/login'
+      preLoaderRoute: typeof ApiAuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -535,7 +595,10 @@ const rootRouteChildren: RootRouteChildren = {
   VendorRoute: VendorRouteWithChildren,
   WalletRoute: WalletRoute,
   WatchlistRoute: WatchlistRoute,
+  PaymentOrderIdRoute: PaymentOrderIdRoute,
   ProductIdRoute: ProductIdRoute,
+  ApiAuthLoginRoute: ApiAuthLoginRoute,
+  ApiAuthSignupRoute: ApiAuthSignupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

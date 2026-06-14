@@ -2,7 +2,16 @@ import { useState, useEffect } from "react";
 import { useSecurity } from "@/lib/securityContext";
 import { useStealth } from "@/lib/stealthContext";
 import { checkConnectionStatus } from "@/lib/canvasNoise";
-import { Shield, ShieldAlert, ShieldCheck, X, EyeOff, Wifi, WifiOff, Signal } from "lucide-react";
+import {
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
+  X,
+  EyeOff,
+  Wifi,
+  WifiOff,
+  Signal,
+} from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 export default function SecurityHud() {
@@ -10,16 +19,28 @@ export default function SecurityHud() {
   const { isStealth } = useStealth();
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
-  const [connection, setConnection] = useState({ online: true, type: "unknown", downlink: 0, rtt: 0 });
+  const [connection, setConnection] = useState({
+    online: true,
+    type: "unknown",
+    downlink: 0,
+    rtt: 0,
+  });
 
   useEffect(() => {
     setConnection(checkConnectionStatus());
-    const interval = setInterval(() => setConnection(checkConnectionStatus()), 5000);
+    const interval = setInterval(
+      () => setConnection(checkConnectionStatus()),
+      5000,
+    );
     return () => clearInterval(interval);
   }, []);
 
   const Icon =
-    threatLevel === "danger" ? ShieldAlert : threatLevel === "warn" ? Shield : ShieldCheck;
+    threatLevel === "danger"
+      ? ShieldAlert
+      : threatLevel === "warn"
+        ? Shield
+        : ShieldCheck;
   const color =
     threatLevel === "danger"
       ? "text-destructive border-destructive/50"
@@ -33,7 +54,9 @@ export default function SecurityHud() {
         <div className="fixed inset-0 bg-background/90 backdrop-blur z-[100] flex items-center justify-center p-4">
           <div className="glass-card neon-border rounded-lg p-6 max-w-sm text-center space-y-3">
             <ShieldAlert className="w-12 h-12 text-destructive mx-auto" />
-            <h2 className="font-mono font-bold text-destructive">{t("hud.suspiciousActivity" as any)}</h2>
+            <h2 className="font-mono font-bold text-destructive">
+              {t("hud.suspiciousActivity" as any)}
+            </h2>
             <p className="text-xs font-mono text-muted-foreground">
               {t("hud.botDetected" as any)}
             </p>
@@ -64,7 +87,7 @@ export default function SecurityHud() {
             className="glass-card neon-border rounded-lg p-5 w-full max-w-md max-h-[80vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-{/* Connection Status */}
+            {/* Connection Status */}
             <div className="flex items-center justify-between gap-2 mb-3 p-2 rounded bg-secondary/30 border border-border">
               <div className="flex items-center gap-1.5">
                 {connection.online ? (
@@ -73,7 +96,9 @@ export default function SecurityHud() {
                   <WifiOff className="w-3 h-3 text-destructive" />
                 )}
                 <span className="text-[10px] font-mono">
-                  {connection.online ? `${connection.type.toUpperCase()}` : "OFFLINE"}
+                  {connection.online
+                    ? `${connection.type.toUpperCase()}`
+                    : "OFFLINE"}
                 </span>
               </div>
               <div className="flex items-center gap-1">
